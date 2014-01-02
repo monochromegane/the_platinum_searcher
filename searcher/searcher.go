@@ -3,13 +3,14 @@ package pt
 import (
 	"bufio"
 	"fmt"
+	"github.com/monochromegane/the_platinum_searcher/util"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-type Searcher struct{
-        Root, Pattern string
+type Searcher struct {
+	Root, Pattern string
 }
 
 func (self *Searcher) Search() {
@@ -27,6 +28,10 @@ func (self *Searcher) find(root string, grep chan string) {
 		if info.IsDir() {
 			return nil
 		}
+                fileType := pt.IdentifyFileType(path)
+                if fileType == pt.BINARY {
+                        return nil
+                }
 		grep <- path
 		return nil
 	})
