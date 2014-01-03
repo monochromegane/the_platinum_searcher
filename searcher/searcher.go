@@ -18,7 +18,9 @@ type GrepArgument struct {
 }
 
 type PrintArgument struct {
-        Match string
+	Path    string
+	LineNum int
+	Match   string
 }
 
 func (self *Searcher) Search() {
@@ -60,6 +62,7 @@ func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
 		}
 		buf := make([]byte, 1024)
 
+		var lineNum = 1
 		for {
 			buf, _, err = f.ReadLine()
 			if err != nil {
@@ -68,8 +71,9 @@ func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
 
 			s := string(buf)
 			if strings.Contains(s, arg.Pattern) {
-				match <- &PrintArgument{s}
+				match <- &PrintArgument{arg.Path, lineNum, s}
 			}
+			lineNum++
 		}
 		fh.Close()
 
@@ -79,11 +83,11 @@ func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
 
 func (self *Searcher) print(match chan *PrintArgument, done chan bool) {
 	for {
-		matched := <-match
-		if matched == nil {
+		arg := <-match
+		if arg == nil {
 			break
 		}
-		fmt.Printf("matched: %s\n", matched.Match)
+                fmt.Printf("%s:%d:%s\n", arg.Path, arg.LineNum, arg.Match)
 	}
 	done <- true
 }
