@@ -13,39 +13,47 @@ type Searcher struct {
 	Root, Pattern string
 }
 
+type GrepArgument struct {
+	Path, Pattern string
+}
+
+type PrintArgument struct {
+        Match string
+}
+
 func (self *Searcher) Search() {
-	grep := make(chan string, 2)
-	match := make(chan string, 2)
+	grep := make(chan *GrepArgument, 2)
+	match := make(chan *PrintArgument, 2)
 	done := make(chan bool)
-	go self.find(self.Root, grep)
-	go self.grep(self.Pattern, grep, match)
+	go self.find(grep)
+	go self.grep(grep, match)
 	go self.print(match, done)
 	<-done
 }
 
-func (self *Searcher) find(root string, grep chan string) {
-	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+func (self *Searcher) find(grep chan *GrepArgument) {
+	filepath.Walk(self.Root, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
-                fileType := pt.IdentifyFileType(path)
-                if fileType == pt.BINARY {
-                        return nil
-                }
-		grep <- path
+		fileType := pt.IdentifyFileType(path)
+		if fileType == pt.BINARY {
+			return nil
+		}
+		grep <- &GrepArgument{path, self.Pattern}
 		return nil
 	})
-	grep <- "end"
+	grep <- nil
 }
 
-func (self *Searcher) grep(pattern string, grep chan string, match chan string) {
+func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
 	for {
-		path := <-grep
-		if path == "end" {
+		arg := <-grep
+		if arg == nil {
 			break
 		}
 
-		fh, err := os.Open(path)
+		fh, err := os.Open(arg.Path)
 		f := bufio.NewReader(fh)
 		if err != nil {
 			panic(err)
@@ -59,23 +67,23 @@ func (self *Searcher) grep(pattern string, grep chan string, match chan string) 
 			}
 
 			s := string(buf)
-			if strings.Contains(s, pattern) {
-				match <- s
+			if strings.Contains(s, arg.Pattern) {
+				match <- &PrintArgument{s}
 			}
 		}
-                fh.Close()
+		fh.Close()
 
 	}
-	match <- "end"
+	match <- nil
 }
 
-func (self *Searcher) print(match chan string, done chan bool) {
+func (self *Searcher) print(match chan *PrintArgument, done chan bool) {
 	for {
 		matched := <-match
-		if matched == "end" {
+		if matched == nil {
 			break
 		}
-		fmt.Printf("matched: %s\n", matched)
+		fmt.Printf("matched: %s\n", matched.Match)
 	}
 	done <- true
 }
