@@ -3,7 +3,12 @@ package main
 import (
 	"github.com/monochromegane/the_platinum_searcher/searcher"
 	"os"
+	"runtime"
 )
+
+func init() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+}
 
 func main() {
 
