@@ -18,6 +18,7 @@ type GrepArgument struct {
 }
 
 type PrintArgument struct {
+        Pattern string
 	Path    string
 	LineNum int
 	Match   string
@@ -71,7 +72,7 @@ func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
 
 			s := string(buf)
 			if strings.Contains(s, arg.Pattern) {
-				match <- &PrintArgument{arg.Path, lineNum, s}
+				match <- &PrintArgument{arg.Pattern, arg.Path, lineNum, s}
 			}
 			lineNum++
 		}
@@ -87,7 +88,10 @@ func (self *Searcher) print(match chan *PrintArgument, done chan bool) {
 		if arg == nil {
 			break
 		}
-                fmt.Printf("%s:%d:%s\n", arg.Path, arg.LineNum, arg.Match)
+		pt.PrintPath(arg.Path)
+		pt.PrintLineNumber(arg.LineNum)
+		pt.PrintMatch(arg.Pattern, arg.Match)
+                fmt.Printf("\n")
 	}
 	done <- true
 }

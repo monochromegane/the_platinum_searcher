@@ -1,7 +1,9 @@
 package pt
 
 import (
+	"fmt"
 	"os"
+	"strings"
 )
 
 const (
@@ -123,4 +125,21 @@ func IdentifyFileType(path string) (fileType string) {
 
 	return ASCII
 
+}
+
+const (
+	ColorReset      = "\x1b[0m\x1b[K"
+	ColorLineNumber = "\x1b[1;33m"  /* yellow with black background */
+	ColorPath       = "\x1b[1;32m"  /* bold green */
+	ColorMatch      = "\x1b[30;43m" /* black with yellow background */
+)
+
+func PrintPath(path string) {
+	fmt.Printf("%s%s%s:", ColorPath, path, ColorReset)
+}
+func PrintLineNumber(lineNum int) {
+	fmt.Printf("%s%d%s:", ColorLineNumber, lineNum, ColorReset)
+}
+func PrintMatch(pattern, match string) {
+	fmt.Printf("%s", strings.Replace(match, pattern, ColorMatch + pattern + ColorReset, -1))
 }
