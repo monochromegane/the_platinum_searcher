@@ -2,6 +2,7 @@ package pt
 
 import (
 	"bufio"
+	"code.google.com/p/mahonia"
 	"fmt"
 	"github.com/monochromegane/the_platinum_searcher/util"
 	"os"
@@ -14,7 +15,7 @@ type Searcher struct {
 }
 
 type GrepArgument struct {
-	Path, Pattern string
+	Path, Pattern, Encode string
 }
 
 type Match struct {
@@ -50,7 +51,7 @@ func (self *Searcher) find(grep chan *GrepArgument) {
 		if fileType == pt.BINARY {
 			return nil
 		}
-		grep <- &GrepArgument{path, self.Pattern}
+		grep <- &GrepArgument{path, self.Pattern, fileType}
 		return nil
 	})
 	grep <- nil
@@ -69,6 +70,7 @@ func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
 			panic(err)
 		}
 		buf := make([]byte, 1024)
+		decoder := mahonia.NewDecoder(arg.Encode)
 
 		m := make([]*Match, 0)
 
@@ -80,6 +82,9 @@ func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
 			}
 
 			s := string(buf)
+			if decoder != nil && arg.Encode != pt.UTF8 && arg.Encode != pt.ASCII {
+				s = decoder.ConvertString(s)
+			}
 			if strings.Contains(s, arg.Pattern) {
 				m = append(m, &Match{lineNum, s})
 			}

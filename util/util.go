@@ -8,10 +8,10 @@ import (
 
 const (
 	BINARY   = "Binary"
-	ASCII    = "ascii"
+	ASCII    = "ASCII"
 	UTF8     = "UTF-8"
 	EUCJP    = "EUC-JP"
-	SHIFTJIS = "SHIFT-JIS"
+	SHIFTJIS = "Shift_JIS"
 )
 
 func IdentifyFileType(path string) (fileType string) {
