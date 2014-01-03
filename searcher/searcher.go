@@ -50,7 +50,6 @@ func (self *Searcher) grep(pattern string, grep chan string, match chan string) 
 		if err != nil {
 			panic(err)
 		}
-		defer fh.Close()
 		buf := make([]byte, 1024)
 
 		for {
@@ -64,6 +63,7 @@ func (self *Searcher) grep(pattern string, grep chan string, match chan string) 
 				match <- s
 			}
 		}
+                fh.Close()
 
 	}
 	match <- "end"
