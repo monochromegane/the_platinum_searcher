@@ -47,11 +47,12 @@ func (self *Searcher) Search() {
 
 func (self *Searcher) find(grep chan *GrepArgument) {
 	filepath.Walk(self.Root, func(path string, info os.FileInfo, err error) error {
-		if len(info.Name()) > 1 && strings.Index(info.Name(), ".") == 0 {
-			return filepath.SkipDir
-		}
 		if info.IsDir() {
-			return nil
+			if len(info.Name()) > 1 && strings.Index(info.Name(), ".") == 0 {
+				return filepath.SkipDir
+			} else {
+				return nil
+			}
 		}
 		fileType := pt.IdentifyFileType(path)
 		if fileType == pt.BINARY {

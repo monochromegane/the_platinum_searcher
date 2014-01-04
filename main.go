@@ -15,7 +15,7 @@ func init() {
 
 func main() {
 
-        args, _ := flags.Parse(&opts)
+	args, _ := flags.Parse(&opts)
 
 	var root = "."
 
