@@ -134,12 +134,24 @@ const (
 	ColorMatch      = "\x1b[30;43m" /* black with yellow background */
 )
 
-func PrintPath(path string) {
-	fmt.Printf("%s%s%s:", ColorPath, path, ColorReset)
+func PrintPath(path string, noColor bool) {
+	if noColor {
+		fmt.Printf("%s:", path)
+	} else {
+		fmt.Printf("%s%s%s:", ColorPath, path, ColorReset)
+	}
 }
-func PrintLineNumber(lineNum int) {
-	fmt.Printf("%s%d%s:", ColorLineNumber, lineNum, ColorReset)
+func PrintLineNumber(lineNum int, noColor bool) {
+	if noColor {
+		fmt.Printf("%d:", lineNum)
+	} else {
+		fmt.Printf("%s%d%s:", ColorLineNumber, lineNum, ColorReset)
+	}
 }
-func PrintMatch(pattern, match string) {
-	fmt.Printf("%s", strings.Replace(match, pattern, ColorMatch + pattern + ColorReset, -1))
+func PrintMatch(pattern, match string, noColor bool) {
+	if noColor {
+		fmt.Printf("%s", match)
+	} else {
+		fmt.Printf("%s", strings.Replace(match, pattern, ColorMatch+pattern+ColorReset, -1))
+	}
 }

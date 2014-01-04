@@ -114,7 +114,7 @@ func (self *Searcher) print(match chan *PrintArgument, done chan bool) {
 		}
 
 		if !self.Option.NoGroup {
-			pt.PrintPath(arg.Path)
+			pt.PrintPath(arg.Path, self.Option.NoColor)
 			fmt.Printf("\n")
 		}
 		for _, v := range arg.Matches {
@@ -122,10 +122,10 @@ func (self *Searcher) print(match chan *PrintArgument, done chan bool) {
 				continue
 			}
 			if self.Option.NoGroup {
-				pt.PrintPath(arg.Path)
+				pt.PrintPath(arg.Path, self.Option.NoColor)
 			}
-			pt.PrintLineNumber(v.LineNum)
-			pt.PrintMatch(arg.Pattern, v.Match)
+			pt.PrintLineNumber(v.LineNum, self.Option.NoColor)
+			pt.PrintMatch(arg.Pattern, v.Match, self.Option.NoColor)
 			fmt.Printf("\n")
 		}
 		if !self.Option.NoGroup {
