@@ -112,17 +112,25 @@ func (self *Searcher) print(match chan *PrintArgument, done chan bool) {
 		if len(arg.Matches) == 0 {
 			continue
 		}
-		pt.PrintPath(arg.Path)
-		fmt.Printf("\n")
+
+		if !self.Option.NoGroup {
+			pt.PrintPath(arg.Path)
+			fmt.Printf("\n")
+		}
 		for _, v := range arg.Matches {
 			if v == nil {
 				continue
+			}
+			if self.Option.NoGroup {
+				pt.PrintPath(arg.Path)
 			}
 			pt.PrintLineNumber(v.LineNum)
 			pt.PrintMatch(arg.Pattern, v.Match)
 			fmt.Printf("\n")
 		}
-		fmt.Printf("\n")
+		if !self.Option.NoGroup {
+			fmt.Printf("\n")
+		}
 	}
 	done <- true
 }
