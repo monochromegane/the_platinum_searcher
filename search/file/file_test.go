@@ -4,16 +4,16 @@ import (
 	"testing"
 )
 
-type FileType struct {
+type Assert struct {
 	path, fileType string
 }
 
-var Asserts = []FileType{
-	FileType{"ascii.txt", ASCII},
-	FileType{"binary/binary.bin", BINARY},
-	FileType{"ja/euc-jp.txt", EUCJP},
-	FileType{"ja/shift_jis.txt", SHIFTJIS},
-	FileType{"ja/utf8.txt", UTF8},
+var Asserts = []Assert{
+	Assert{"ascii.txt", ASCII},
+	Assert{"binary/binary.bin", BINARY},
+	Assert{"ja/euc-jp.txt", EUCJP},
+	Assert{"ja/shift_jis.txt", SHIFTJIS},
+	Assert{"ja/utf8.txt", UTF8},
 }
 
 func TestIdentifyType(t *testing.T) {
