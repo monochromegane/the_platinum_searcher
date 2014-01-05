@@ -61,15 +61,11 @@ func (self *Searcher) find(grep chan *GrepArgument) {
 		grep <- &GrepArgument{path, self.Pattern, fileType}
 		return nil
 	})
-	grep <- nil
+	close(grep)
 }
 
 func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
-	for {
-		arg := <-grep
-		if arg == nil {
-			break
-		}
+	for arg := range grep {
 
 		fh, err := os.Open(arg.Path)
 		f := bufio.NewReader(fh)
@@ -101,15 +97,12 @@ func (self *Searcher) grep(grep chan *GrepArgument, match chan *PrintArgument) {
 		fh.Close()
 
 	}
-	match <- nil
+	close(match)
 }
 
 func (self *Searcher) print(match chan *PrintArgument, done chan bool) {
-	for {
-		arg := <-match
-		if arg == nil {
-			break
-		}
+	for arg := range match {
+
 		if len(arg.Matches) == 0 {
 			continue
 		}
