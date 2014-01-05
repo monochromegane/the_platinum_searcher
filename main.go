@@ -2,12 +2,13 @@ package main
 
 import (
 	flags "github.com/jessevdk/go-flags"
-	"github.com/monochromegane/the_platinum_searcher/searcher"
+	"github.com/monochromegane/the_platinum_searcher/search"
+	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"os"
 	"runtime"
 )
 
-var opts pt.SearchOption
+var opts option.Option
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -26,6 +27,6 @@ func main() {
 		root = args[1]
 	}
 
-	searcher := pt.Searcher{root, args[0], &opts}
+	searcher := search.Searcher{root, args[0], &opts}
 	searcher.Search()
 }
