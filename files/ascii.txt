@@ -1,0 +1,2 @@
+ascii.txt
+go test
