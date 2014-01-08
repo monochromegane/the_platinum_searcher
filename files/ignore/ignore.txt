@@ -1,0 +1,4 @@
+# comment
+
+pattern1
+ pattern2 
