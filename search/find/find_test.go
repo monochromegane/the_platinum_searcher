@@ -19,5 +19,24 @@ func TestFind(t *testing.T) {
 			t.Errorf("It should be text file.")
 		}
 	}
+}
 
+var Ignores = []string{
+        "match/ignore.txt",
+        "ignore/ignore.txt",
+        "absolute/ignore.txt",
+}
+
+func TestFindWithIgnore(t *testing.T) {
+	out := make(chan *grep.Params)
+        finder := Finder{out, &option.Option{VcsIgnore: []string{".vcsignore"}}}
+	go finder.Find("../../files/vcs", "go")
+
+	for o := range out {
+                for _, ignore := range Ignores {
+                        if o.Path == "../../files/vcs/" + ignore {
+			        t.Errorf("It should not contains file.")
+                        }
+                }
+	}
 }
