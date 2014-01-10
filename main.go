@@ -1,6 +1,7 @@
 package main
 
 import (
+	"code.google.com/p/go.crypto/ssh/terminal"
 	flags "github.com/jessevdk/go-flags"
 	"github.com/monochromegane/the_platinum_searcher/search"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
@@ -17,6 +18,11 @@ func init() {
 func main() {
 
 	args, _ := flags.Parse(&opts)
+
+	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+		opts.NoColor = true
+		opts.NoGroup = true
+	}
 
 	var root = "."
 
