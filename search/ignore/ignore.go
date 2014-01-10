@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+type Ignore struct {
+	Patterns, Matches []string
+}
+
 func IgnorePatterns(path string, ignores []string) []string {
 	var patterns []string
 	for _, ignore := range ignores {
@@ -30,5 +34,5 @@ func IgnorePatterns(path string, ignores []string) []string {
 		}
 		file.Close()
 	}
-        return patterns
+	return patterns
 }
