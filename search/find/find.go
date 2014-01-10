@@ -17,7 +17,7 @@ type Finder struct {
 }
 
 func (self *Finder) Find(root, pattern string) {
-	Walk(root, func(path string, info os.FileInfo, ig ignore.Ignore, err error) (error, ignore.Ignore) {
+	Walk(root, self.Option.Ignore, func(path string, info os.FileInfo, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
 			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, self.Option.VcsIgnores())...)
 			// fmt.Printf("pattern -> %s = %s\n", path, ig.Patterns)
@@ -54,13 +54,13 @@ func (self *Finder) Find(root, pattern string) {
 
 type WalkFunc func(path string, info os.FileInfo, ig ignore.Ignore, err error) (error, ignore.Ignore)
 
-func Walk(root string, walkFn WalkFunc) error {
+func Walk(root string, ignorePatterns []string, walkFn WalkFunc) error {
 	info, err := os.Lstat(root)
 	if err != nil {
 		walkError, _ := walkFn(root, nil, ignore.Ignore{}, err)
 		return walkError
 	}
-	return walk(root, info, ignore.Ignore{}, walkFn)
+	return walk(root, info, ignore.Ignore{Patterns: ignorePatterns}, walkFn)
 }
 
 func walk(path string, info os.FileInfo, parentIgnore ignore.Ignore, walkFn WalkFunc) error {
