@@ -8,7 +8,7 @@ import (
 
 func TestFind(t *testing.T) {
 	out := make(chan *grep.Params)
-	finder := Finder{out, &option.Option{false, false}}
+	finder := Finder{out, &option.Option{}}
 	go finder.Find("../../files", "go")
 
 	for o := range out {

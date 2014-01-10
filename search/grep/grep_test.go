@@ -23,7 +23,7 @@ func TestGrep(t *testing.T) {
 	for _, g := range Asserts {
                 in := make(chan *Params)
                 out := make(chan *print.Params)
-                grepper := Grepper{in, out, &option.Option{false, false}}
+                grepper := Grepper{in, out, &option.Option{}}
 
 		go grepper.Grep()
 		go receive(in, &Params{"../../files/" + g.path, g.pattern, g.fileType})
