@@ -1,10 +1,10 @@
 package main
 
 import (
-	"code.google.com/p/go.crypto/ssh/terminal"
 	flags "github.com/jessevdk/go-flags"
 	"github.com/monochromegane/the_platinum_searcher/search"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
+	terminal "github.com/pebbe/util"
 	"os"
 	"runtime"
 )
@@ -19,7 +19,7 @@ func main() {
 
 	args, _ := flags.Parse(&opts)
 
-	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+	if !terminal.IsTerminal(os.Stdout) {
 		opts.NoColor = true
 		opts.NoGroup = true
 	}
