@@ -17,18 +17,26 @@ func init() {
 
 func main() {
 
-	args, _ := flags.Parse(&opts)
+	parser := flags.NewParser(&opts, flags.Default)
+	args, err := parser.Parse()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	parser.Name = "pt"
+	parser.Usage = "[OPTIONS] PATTERN [PATH]"
 
 	if !terminal.IsTerminal(os.Stdout) {
 		opts.NoColor = true
 		opts.NoGroup = true
 	}
 
-	var root = "."
-
 	if len(args) == 0 {
+		parser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
+
+	var root = "."
 	if len(args) == 2 {
 		root = args[1]
 	}
