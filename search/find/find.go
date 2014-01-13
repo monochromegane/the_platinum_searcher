@@ -60,10 +60,15 @@ func Walk(root string, ignorePatterns []string, walkFn WalkFunc) error {
 		walkError, _ := walkFn(root, nil, ignore.Ignore{}, err)
 		return walkError
 	}
-	return walk(root, info, ignore.Ignore{Patterns: ignorePatterns}, walkFn)
+	return walk(root, info, false, ignore.Ignore{Patterns: ignorePatterns}, walkFn)
 }
 
-func walk(path string, info os.FileInfo, parentIgnore ignore.Ignore, walkFn WalkFunc) error {
+func walkOnGoRoutine(path string, info os.FileInfo, notify chan int, went bool, parentIgnore ignore.Ignore, walkFn WalkFunc) {
+	walk(path, info, went, parentIgnore, walkFn)
+	notify <- 0
+}
+
+func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, walkFn WalkFunc) error {
 	err, ig := walkFn(path, info, parentIgnore, nil)
 	if err != nil {
 		if info.IsDir() && err == filepath.SkipDir {
@@ -82,12 +87,18 @@ func walk(path string, info os.FileInfo, parentIgnore ignore.Ignore, walkFn Walk
 		return walkError
 	}
 
+	notify := make(chan int, len(list))
 	for _, fileInfo := range list {
-		err = walk(filepath.Join(path, fileInfo.Name()), fileInfo, ig, walkFn)
-		if err != nil {
-			if !fileInfo.IsDir() || err != filepath.SkipDir {
-				return err
-			}
+		if !went {
+			go walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, notify, !went, ig, walkFn)
+
+		} else {
+			walk(filepath.Join(path, fileInfo.Name()), fileInfo, went, ig, walkFn)
+		}
+	}
+	if !went {
+		for i := 0; i < cap(notify); i++ {
+			<-notify
 		}
 	}
 	return nil
