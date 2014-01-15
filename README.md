@@ -1,13 +1,22 @@
 # The Platinum Searcher
 
-A code search tool similar to `ack` and `the_silver_searcher(ag)`. It supports multi platform and multi encoding.
+A code search tool similar to `ack` and `the_silver_searcher(ag)`. It supports multi platforms and multi encodings.
 
 ## Features
 
 - It searches code about 3–5× faster than `ack`.
+- It searches code as fast as `the_silver_searcher(ag)`.
 - It ignores file patterns from your `.gitignore` and `.hgignore`.
 - It searches `UTF-8`, `EUC-JP` and `Shift_JIS` files.
 - It provides binaries for multi platform (Mac OS X, Windows, Linux).
+
+### Benchmarks
+
+```
+ack go  6.24s user 1.06s system 99%  cpu 7.304 total
+ag go   0.88s user 1.39s system 221% cpu 1.027 total
+pt go   1.05s user 1.03s system 195% cpu 1.066 total
+```
 
 ## Installation
 
