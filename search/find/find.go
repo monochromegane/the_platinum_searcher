@@ -38,6 +38,9 @@ func (self *Finder) Find(root, pattern string) {
 			}
 		}
 
+		if isHidden(info.Name()) {
+			return nil, ig
+		}
 		if contains(path, &ig.Matches) {
 			// fmt.Printf("ignore  -> %s\n", path)
 			return nil, ig
