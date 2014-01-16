@@ -1,10 +1,11 @@
 package option
 
 type Option struct {
-	NoColor   bool     `long:"nocolor" description:"Don't print color codes in results (Disabled by default)"`
-	NoGroup   bool     `long:"nogroup" description:"Don't print file name at header (Disabled by default)"`
-	VcsIgnore []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore)"`
-        Ignore    []string `long:"ignore" description:"Ignore files/directories matching pattern"`
+	NoColor          bool     `long:"nocolor" description:"Don't print color codes in results (Disabled by default)"`
+	NoGroup          bool     `long:"nogroup" description:"Don't print file name at header (Disabled by default)"`
+	FilesWithMatches bool     `short:"l" long:"files-with-matches" description:"Only print filenames that don't contain matches"`
+	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore)"`
+	Ignore           []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 }
 
 func (self *Option) VcsIgnores() []string {

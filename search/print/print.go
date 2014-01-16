@@ -48,11 +48,13 @@ func (self *Printer) Print() {
 			if self.Option.NoGroup {
 				self.printPath(arg.Path)
 			}
-			self.printLineNumber(v.LineNum)
-			self.printMatch(arg.Pattern, v.Match)
-			fmt.Printf("\n")
+			if !self.Option.FilesWithMatches {
+				self.printLineNumber(v.LineNum)
+				self.printMatch(arg.Pattern, v.Match)
+				fmt.Printf("\n")
+			}
 		}
-		if !self.Option.NoGroup {
+		if !self.Option.NoGroup && !self.Option.FilesWithMatches {
 			fmt.Printf("\n")
 		}
 	}
@@ -61,9 +63,12 @@ func (self *Printer) Print() {
 
 func (self *Printer) printPath(path string) {
 	if self.Option.NoColor {
-		fmt.Printf("%s:", path)
+		fmt.Printf("%s", path)
 	} else {
-		fmt.Printf("%s%s%s:", ColorPath, path, ColorReset)
+		fmt.Printf("%s%s%s", ColorPath, path, ColorReset)
+	}
+	if !self.Option.FilesWithMatches {
+		fmt.Printf(":")
 	}
 }
 func (self *Printer) printLineNumber(lineNum int) {
