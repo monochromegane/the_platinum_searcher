@@ -108,10 +108,7 @@ func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, 
 }
 
 func isHidden(name string) bool {
-	if len(name) > 1 && strings.Index(name, ".") == 0 {
-		return true
-	}
-	return false
+	return strings.HasPrefix(name, ".")
 }
 
 func contains(path string, patterns *[]string) bool {
