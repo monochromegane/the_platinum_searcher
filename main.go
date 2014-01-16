@@ -2,9 +2,9 @@ package main
 
 import (
 	flags "github.com/jessevdk/go-flags"
+	"github.com/monochromegane/terminal"
 	"github.com/monochromegane/the_platinum_searcher/search"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
-	terminal "github.com/pebbe/util"
 	"os"
 	"runtime"
 )
