@@ -24,7 +24,7 @@ pt go   1.05s user 1.03s system 195% cpu 1.066 total
 
 ```sh
 $ go get github.com/monochromegane/the_platinum_searcher
-$ cd $GOPATH/github.com/monochromegane/the_platinum_searcher
+$ cd $GOPATH/src/github.com/monochromegane/the_platinum_searcher
 $ go build -o ../../../../bin/pt
 ```
 
