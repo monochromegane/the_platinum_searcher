@@ -17,7 +17,7 @@ type Finder struct {
 }
 
 func (self *Finder) Find(root, pattern string) {
-	Walk(root, self.Option.Ignore, func(path string, info os.FileInfo, ig ignore.Ignore, err error) (error, ignore.Ignore) {
+	Walk(root, self.Option.Ignore, func(path string, info os.FileInfo, ig ignore.Ignore, onset bool, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
 			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, self.Option.VcsIgnores())...)
 			// fmt.Printf("pattern -> %s = %s\n", path, ig.Patterns)
@@ -28,7 +28,7 @@ func (self *Finder) Find(root, pattern string) {
 					ig.Matches = append(ig.Matches, files...)
 				}
 			}
-			if isHidden(info.Name()) {
+			if !onset && isHidden(info.Name()) {
 				return filepath.SkipDir, ig
 			} else if contains(path, &ig.Matches) {
 				// fmt.Printf("ignore  -> %s\n", path)
@@ -38,7 +38,7 @@ func (self *Finder) Find(root, pattern string) {
 			}
 		}
 
-		if isHidden(info.Name()) {
+		if !onset && isHidden(info.Name()) {
 			return nil, ig
 		}
 		if contains(path, &ig.Matches) {
@@ -55,24 +55,24 @@ func (self *Finder) Find(root, pattern string) {
 	close(self.Out)
 }
 
-type WalkFunc func(path string, info os.FileInfo, ig ignore.Ignore, err error) (error, ignore.Ignore)
+type WalkFunc func(path string, info os.FileInfo, ig ignore.Ignore, onset bool, err error) (error, ignore.Ignore)
 
 func Walk(root string, ignorePatterns []string, walkFn WalkFunc) error {
 	info, err := os.Lstat(root)
 	if err != nil {
-		walkError, _ := walkFn(root, nil, ignore.Ignore{}, err)
+		walkError, _ := walkFn(root, nil, ignore.Ignore{}, true, err)
 		return walkError
 	}
-	return walk(root, info, false, ignore.Ignore{Patterns: ignorePatterns}, walkFn)
+	return walk(root, info, false, ignore.Ignore{Patterns: ignorePatterns}, true, walkFn)
 }
 
 func walkOnGoRoutine(path string, info os.FileInfo, notify chan int, went bool, parentIgnore ignore.Ignore, walkFn WalkFunc) {
-	walk(path, info, went, parentIgnore, walkFn)
+	walk(path, info, went, parentIgnore, false, walkFn)
 	notify <- 0
 }
 
-func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, walkFn WalkFunc) error {
-	err, ig := walkFn(path, info, parentIgnore, nil)
+func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, onset bool, walkFn WalkFunc) error {
+	err, ig := walkFn(path, info, parentIgnore, onset, nil)
 	if err != nil {
 		if info.IsDir() && err == filepath.SkipDir {
 			return nil
@@ -86,7 +86,7 @@ func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, 
 
 	list, err := ioutil.ReadDir(path)
 	if err != nil {
-		walkError, _ := walkFn(path, info, ig, err)
+		walkError, _ := walkFn(path, info, ig, onset, err)
 		return walkError
 	}
 
@@ -96,7 +96,7 @@ func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, 
 			go walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, notify, !went, ig, walkFn)
 
 		} else {
-			walk(filepath.Join(path, fileInfo.Name()), fileInfo, went, ig, walkFn)
+			walk(filepath.Join(path, fileInfo.Name()), fileInfo, went, ig, false, walkFn)
 		}
 	}
 	if !went {
@@ -108,7 +108,7 @@ func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, 
 }
 
 func isHidden(name string) bool {
-	return strings.HasPrefix(name, ".")
+	return strings.HasPrefix(name, ".") && len(name) > 1
 }
 
 func contains(path string, patterns *[]string) bool {
