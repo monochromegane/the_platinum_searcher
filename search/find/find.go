@@ -17,7 +17,7 @@ type Finder struct {
 }
 
 func (self *Finder) Find(root, pattern string) {
-	Walk(root, self.Option.Ignore, func(path string, info os.FileInfo, ig ignore.Ignore, onset bool, err error) (error, ignore.Ignore) {
+	Walk(root, self.Option.Ignore, func(path string, info os.FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
 			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, self.Option.VcsIgnores())...)
 			// fmt.Printf("pattern -> %s = %s\n", path, ig.Patterns)
@@ -28,7 +28,7 @@ func (self *Finder) Find(root, pattern string) {
 					ig.Matches = append(ig.Matches, files...)
 				}
 			}
-			if !onset && isHidden(info.Name()) {
+			if !isRoot(depth) && isHidden(info.Name()) {
 				return filepath.SkipDir, ig
 			} else if contains(path, &ig.Matches) {
 				// fmt.Printf("ignore  -> %s\n", path)
@@ -38,7 +38,7 @@ func (self *Finder) Find(root, pattern string) {
 			}
 		}
 
-		if !onset && isHidden(info.Name()) {
+		if !isRoot(depth) && isHidden(info.Name()) {
 			return nil, ig
 		}
 		if contains(path, &ig.Matches) {
@@ -55,24 +55,24 @@ func (self *Finder) Find(root, pattern string) {
 	close(self.Out)
 }
 
-type WalkFunc func(path string, info os.FileInfo, ig ignore.Ignore, onset bool, err error) (error, ignore.Ignore)
+type WalkFunc func(path string, info os.FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore)
 
 func Walk(root string, ignorePatterns []string, walkFn WalkFunc) error {
 	info, err := os.Lstat(root)
 	if err != nil {
-		walkError, _ := walkFn(root, nil, ignore.Ignore{}, true, err)
+		walkError, _ := walkFn(root, nil, 1, ignore.Ignore{}, err)
 		return walkError
 	}
-	return walk(root, info, false, ignore.Ignore{Patterns: ignorePatterns}, true, walkFn)
+	return walk(root, info, 1, ignore.Ignore{Patterns: ignorePatterns}, walkFn)
 }
 
-func walkOnGoRoutine(path string, info os.FileInfo, notify chan int, went bool, parentIgnore ignore.Ignore, walkFn WalkFunc) {
-	walk(path, info, went, parentIgnore, false, walkFn)
+func walkOnGoRoutine(path string, info os.FileInfo, notify chan int, depth int, parentIgnore ignore.Ignore, walkFn WalkFunc) {
+	walk(path, info, depth, parentIgnore, walkFn)
 	notify <- 0
 }
 
-func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, onset bool, walkFn WalkFunc) error {
-	err, ig := walkFn(path, info, parentIgnore, onset, nil)
+func walk(path string, info os.FileInfo, depth int, parentIgnore ignore.Ignore, walkFn WalkFunc) error {
+	err, ig := walkFn(path, info, depth, parentIgnore, nil)
 	if err != nil {
 		if info.IsDir() && err == filepath.SkipDir {
 			return nil
@@ -86,25 +86,34 @@ func walk(path string, info os.FileInfo, went bool, parentIgnore ignore.Ignore, 
 
 	list, err := ioutil.ReadDir(path)
 	if err != nil {
-		walkError, _ := walkFn(path, info, ig, onset, err)
+		walkError, _ := walkFn(path, info, depth, ig, err)
 		return walkError
 	}
 
+	depth++
 	notify := make(chan int, len(list))
 	for _, fileInfo := range list {
-		if !went {
-			go walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, notify, !went, ig, walkFn)
+		if isDirectRoot(depth) {
+			go walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, notify, depth, ig, walkFn)
 
 		} else {
-			walk(filepath.Join(path, fileInfo.Name()), fileInfo, went, ig, false, walkFn)
+			walk(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn)
 		}
 	}
-	if !went {
+	if isDirectRoot(depth) {
 		for i := 0; i < cap(notify); i++ {
 			<-notify
 		}
 	}
 	return nil
+}
+
+func isRoot(depth int) bool {
+	return depth == 1
+}
+
+func isDirectRoot(depth int) bool {
+	return depth == 2
 }
 
 func isHidden(name string) bool {
