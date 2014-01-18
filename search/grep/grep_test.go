@@ -21,14 +21,15 @@ var Asserts = []Assert{
 func TestGrep(t *testing.T) {
 
 	for _, g := range Asserts {
-                in := make(chan *Params)
-                out := make(chan *print.Params)
-                grepper := Grepper{in, out, &option.Option{}}
+		in := make(chan *Params)
+		out := make(chan *print.Params)
+		grepper := Grepper{in, out, &option.Option{Proc: 1}}
 
-		go grepper.Grep()
-		go receive(in, &Params{"../../files/" + g.path, g.pattern, g.fileType})
+                sem := make(chan bool, 1)
+                sem <- true
+		go grepper.Grep("../../files/" + g.path, g.fileType, g.pattern, sem)
 		o := <-out
-		if o.Path != "../../files/" + g.path {
+		if o.Path != "../../files/"+g.path {
 			t.Errorf("It should be equal ../../files/%s.", g.path)
 		}
 		if o.Matches[0].Match != g.match {

@@ -29,7 +29,7 @@ func (self *Searcher) find(out chan *grep.Params) {
 
 func (self *Searcher) grep(in chan *grep.Params, out chan *print.Params) {
 	grepper := grep.Grepper{in, out, self.Option}
-	grepper.Grep()
+	grepper.ConcurrentGrep()
 }
 
 func (self *Searcher) print(in chan *print.Params, done chan bool) {
