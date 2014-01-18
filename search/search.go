@@ -13,8 +13,8 @@ type Searcher struct {
 }
 
 func (self *Searcher) Search() {
-	grep := make(chan *grep.Params, 2)
-	match := make(chan *print.Params, 2)
+	grep := make(chan *grep.Params, self.Option.Proc)
+	match := make(chan *print.Params, self.Option.Proc)
 	done := make(chan bool)
 	go self.find(grep)
 	go self.grep(grep, match)

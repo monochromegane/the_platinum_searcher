@@ -7,6 +7,7 @@ type Option struct {
 	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore)"`
 	Ignore           []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 	Depth            int      `long:"depth" description:"Search up to NUM derectories deep (Default: 25)"`
+        Proc             int      // Number of goroutine. Not user option.
 }
 
 func (self *Option) VcsIgnores() []string {

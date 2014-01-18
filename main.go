@@ -26,6 +26,8 @@ func main() {
 	parser.Name = "pt"
 	parser.Usage = "[OPTIONS] PATTERN [PATH]"
 
+	opts.Proc = runtime.NumCPU()
+
 	if !terminal.IsTerminal(os.Stdout) {
 		opts.NoColor = true
 		opts.NoGroup = true
