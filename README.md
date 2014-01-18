@@ -12,10 +12,10 @@ A code search tool similar to `ack` and `the_silver_searcher(ag)`. It supports m
 
 ### Benchmarks
 
-```
-ack go  6.24s user 1.06s system 99%  cpu 7.304 total
-ag go   0.88s user 1.39s system 221% cpu 1.027 total
-pt go   1.05s user 1.03s system 195% cpu 1.066 total
+```sh
+ack go  6.24s user 1.06s system 99%  cpu 7.304 total # ack:
+ag go   0.88s user 1.39s system 221% cpu 1.027 total # ag:  It's faster than ack
+pt go   1.09s user 1.01s system 235% cpu 0.892 total # pt:  It's faster than ag!!
 ```
 
 ## Installation
