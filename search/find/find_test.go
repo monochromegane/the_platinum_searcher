@@ -41,19 +41,30 @@ func TestFindWithIgnore(t *testing.T) {
 	}
 }
 
-func TestFindWhenSpecifiedHiddenDir(t *testing.T) {
-	out := make(chan *grep.Params)
-	finder := Finder{out, &option.Option{}}
-	go finder.Find("../../files/.hidden", "go")
+type Hidden struct {
+	Root, Expect string
+}
 
-	found := false
-	for o := range out {
-		if o.Path == "../../files/.hidden"+"/hidden.txt" {
-			found = true
-			break
+var Hiddens = []Hidden{
+	Hidden{".hidden", ".hidden/hidden.txt"},
+	Hidden{".hidden/.hidden.txt", ".hidden/.hidden.txt"},
+}
+
+func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
+	for _, hidden := range Hiddens {
+		out := make(chan *grep.Params)
+		finder := Finder{out, &option.Option{}}
+		go finder.Find("../../files/"+hidden.Root, "go")
+
+		found := false
+		for o := range out {
+			if o.Path == "../../files/"+hidden.Expect {
+				found = true
+				break
+			}
 		}
-	}
-	if !found {
-		t.Errorf("It should find hidden dir when specified hidden dir.")
+		if !found {
+			t.Errorf("It should find hidden dir or file when specified hidden one.")
+		}
 	}
 }
