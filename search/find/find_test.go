@@ -68,3 +68,15 @@ func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 		}
 	}
 }
+
+func TestFindWithDepth(t *testing.T) {
+	out := make(chan *grep.Params)
+	finder := Finder{out, &option.Option{Depth: 1}}
+	go finder.Find("../../files/depth", "go")
+
+	for o := range out {
+		if o.Path == "../../files/depth/dir_1/dir_2/file_3.txt" {
+			t.Errorf("It should not find from over max depth.")
+		}
+	}
+}

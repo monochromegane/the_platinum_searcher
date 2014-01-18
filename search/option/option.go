@@ -6,6 +6,7 @@ type Option struct {
 	FilesWithMatches bool     `short:"l" long:"files-with-matches" description:"Only print filenames that don't contain matches"`
 	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore)"`
 	Ignore           []string `long:"ignore" description:"Ignore files/directories matching pattern"`
+	Depth            int      `long:"depth" description:"Search up to NUM derectories deep (Default: 25)"`
 }
 
 func (self *Option) VcsIgnores() []string {
@@ -13,4 +14,11 @@ func (self *Option) VcsIgnores() []string {
 		self.VcsIgnore = []string{".gitignore", ".hgignore"}
 	}
 	return self.VcsIgnore
+}
+
+func (self *Option) MaxDepth() int {
+	if self.Depth == 0 {
+		return 25
+	}
+	return self.Depth
 }
