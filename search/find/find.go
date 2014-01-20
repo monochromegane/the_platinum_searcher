@@ -19,7 +19,7 @@ type Finder struct {
 func (self *Finder) Find(root, pattern string) {
 	Walk(root, self.Option.Ignore, func(path string, info os.FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
-			if depth > self.Option.MaxDepth()+1 {
+			if depth > self.Option.Depth+1 {
 				return filepath.SkipDir, ig
 			}
 			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, self.Option.VcsIgnores())...)
