@@ -16,6 +16,9 @@ var Asserts = []Assert{
 	Assert{"ja/euc-jp.txt", "go", file.EUCJP, "go テスト"},
 	Assert{"ja/shift_jis.txt", "go", file.SHIFTJIS, "go テスト"},
 	Assert{"ja/utf8.txt", "go", file.UTF8, "go テスト"},
+	Assert{"ja/broken_euc-jp.txt", "go", file.EUCJP, "go テスト"},
+	Assert{"ja/broken_shift_jis.txt", "go", file.SHIFTJIS, "go テスト"},
+	Assert{"ja/broken_utf8.txt", "go", file.UTF8, "go テスト"},
 }
 
 func TestGrep(t *testing.T) {
@@ -33,7 +36,7 @@ func TestGrep(t *testing.T) {
 			t.Errorf("It should be equal ../../files/%s.", g.path)
 		}
 		if o.Matches[0].Match != g.match {
-			t.Errorf("It should be equal %s", g.match)
+			t.Errorf("%s should be equal %s", g.path, g.match)
 		}
 	}
 }
