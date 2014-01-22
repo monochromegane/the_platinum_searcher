@@ -2,7 +2,8 @@ package grep
 
 import (
 	"bufio"
-	"code.google.com/p/mahonia"
+	"code.google.com/p/go.text/encoding/japanese"
+	"code.google.com/p/go.text/transform"
 	"github.com/monochromegane/the_platinum_searcher/search/file"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
@@ -34,18 +35,31 @@ func (self *Grepper) ConcurrentGrep() {
 	close(self.Out)
 }
 
-func (self *Grepper) Grep(path, encode, pattern string, finish chan bool) {
+func getDecoder(encode string) transform.Transformer {
+	switch encode {
+	case file.EUCJP:
+		return japanese.EUCJP.NewDecoder()
+	case file.SHIFTJIS:
+		return japanese.ShiftJIS.NewDecoder()
+	}
+	return nil
+}
 
+func (self *Grepper) Grep(path, encode, pattern string, finish chan bool) {
 	fh, err := os.Open(path)
-	f := bufio.NewReader(fh)
 	if err != nil {
 		panic(err)
 	}
-	buf := make([]byte, 1024)
-	decoder := mahonia.NewDecoder(encode)
 
+	var f *bufio.Reader
+	if dec := getDecoder(encode); dec != nil {
+		f = bufio.NewReader(transform.NewReader(fh, dec))
+	} else {
+		f = bufio.NewReader(fh)
+	}
+
+	var buf []byte
 	m := make([]*print.Match, 0)
-
 	var lineNum = 1
 	for {
 		buf, _, err = f.ReadLine()
@@ -54,9 +68,6 @@ func (self *Grepper) Grep(path, encode, pattern string, finish chan bool) {
 		}
 
 		s := string(buf)
-		if decoder != nil && encode != file.UTF8 && encode != file.ASCII {
-			s = decoder.ConvertString(s)
-		}
 		if strings.Contains(s, pattern) {
 			m = append(m, &print.Match{lineNum, s})
 		}
