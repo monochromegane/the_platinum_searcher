@@ -18,13 +18,13 @@ func init() {
 func main() {
 
 	parser := flags.NewParser(&opts, flags.Default)
+	parser.Name = "pt"
+	parser.Usage = "[OPTIONS] PATTERN [PATH]"
+
 	args, err := parser.Parse()
 	if err != nil {
 		os.Exit(1)
 	}
-
-	parser.Name = "pt"
-	parser.Usage = "[OPTIONS] PATTERN [PATH]"
 
 	opts.Proc = runtime.NumCPU()
 

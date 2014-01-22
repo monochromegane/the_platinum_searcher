@@ -25,9 +25,9 @@ func (self *Finder) Find(root, pattern string) {
 			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, self.Option.VcsIgnores())...)
 			// fmt.Printf("pattern -> %s = %s\n", path, ig.Patterns)
 			for _, p := range ig.Patterns {
-				files, _ := filepath.Glob(path + string(os.PathSeparator) + p)
+				files, _ := filepath.Glob(filepath.Join(path, p))
 				if files != nil {
-					// fmt.Printf("matches -> %s = %s\n", path+string(os.PathSeparator)+p, files)
+					// fmt.Printf("matches -> %s = %s\n", filepath.Join(path, p), files)
 					ig.Matches = append(ig.Matches, files...)
 				}
 			}
