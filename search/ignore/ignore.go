@@ -3,6 +3,7 @@ package ignore
 import (
 	"bufio"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -13,7 +14,7 @@ type Ignore struct {
 func IgnorePatterns(path string, ignores []string) []string {
 	var patterns []string
 	for _, ignore := range ignores {
-		file, err := os.Open(path + string(os.PathSeparator) + ignore)
+		file, err := os.Open(filepath.Join(path, ignore))
 		if err != nil {
 			continue
 		}
