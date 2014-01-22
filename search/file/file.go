@@ -71,13 +71,13 @@ func IdentifyType(path string) string {
 			}
 
 			/* EUC-JP detection */
-			if bs[i] == 142 {
+			if bs[i] == 142 && i+1 < total {
 				i++
 				if bs[i] > 160 && bs[i] < 224 {
 					likelyEucjp++
 					continue
 				}
-			} else if bs[i] > 160 && bs[i] < 255 {
+			} else if bs[i] > 160 && bs[i] < 255 && i+1 < total {
 				i++
 				if bs[i] > 160 && bs[i] < 255 {
 					likelyEucjp++
@@ -89,7 +89,7 @@ func IdentifyType(path string) string {
 			if bs[i] > 160 && bs[i] < 224 {
 				likelyShiftjis++
 				continue
-			} else if (bs[i] > 128 && bs[i] < 160) || (bs[i] > 223 && bs[i] < 240) {
+			} else if ((bs[i] > 128 && bs[i] < 160) || (bs[i] > 223 && bs[i] < 240)) && i+1 < total {
 				i++
 				if (bs[i] > 63 && bs[i] < 127) || (bs[i] > 127 && bs[i] < 253) {
 					likelyShiftjis++
