@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	flags "github.com/jessevdk/go-flags"
 	"github.com/monochromegane/terminal"
 	"github.com/monochromegane/the_platinum_searcher/search"
@@ -41,6 +42,11 @@ func main() {
 	var root = "."
 	if len(args) == 2 {
 		root = args[1]
+		_, err := os.Lstat(root)
+		if os.IsNotExist(err) {
+			fmt.Printf("%s\n", err)
+			os.Exit(1)
+		}
 	}
 
 	searcher := search.Searcher{root, args[0], &opts}
