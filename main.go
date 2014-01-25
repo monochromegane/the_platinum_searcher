@@ -8,6 +8,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"os"
 	"runtime"
+	"strings"
 )
 
 var opts option.Option
@@ -41,7 +42,7 @@ func main() {
 
 	var root = "."
 	if len(args) == 2 {
-		root = args[1]
+		root = strings.TrimRight(args[1], string(os.PathSeparator))
 		_, err := os.Lstat(root)
 		if err != nil {
 			fmt.Printf("%s\n", err)
