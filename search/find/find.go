@@ -49,7 +49,7 @@ func (self *Finder) Find(root, pattern string) {
 			return nil, ig
 		}
 		fileType := file.IdentifyType(path)
-		if fileType == file.BINARY {
+		if fileType == file.ERROR || fileType == file.BINARY {
 			return nil, ig
 		}
 		self.Out <- &grep.Params{path, pattern, fileType}
