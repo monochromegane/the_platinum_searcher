@@ -43,7 +43,7 @@ func main() {
 	if len(args) == 2 {
 		root = args[1]
 		_, err := os.Lstat(root)
-		if os.IsNotExist(err) {
+		if err != nil {
 			fmt.Printf("%s\n", err)
 			os.Exit(1)
 		}
