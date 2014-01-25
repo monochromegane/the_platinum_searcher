@@ -37,9 +37,14 @@ func (self *Printer) Print() {
 			continue
 		}
 
+		if self.Option.FilesWithMatches {
+			self.printPath(arg.Path)
+			fmt.Println()
+			continue
+		}
 		if !self.Option.NoGroup {
 			self.printPath(arg.Path)
-			fmt.Printf("\n")
+			fmt.Println()
 		}
 		for _, v := range arg.Matches {
 			if v == nil {
@@ -48,14 +53,12 @@ func (self *Printer) Print() {
 			if self.Option.NoGroup {
 				self.printPath(arg.Path)
 			}
-			if !self.Option.FilesWithMatches {
-				self.printLineNumber(v.LineNum)
-				self.printMatch(arg.Pattern, v.Match)
-				fmt.Printf("\n")
-			}
+			self.printLineNumber(v.LineNum)
+			self.printMatch(arg.Pattern, v.Match)
+			fmt.Println()
 		}
-		if !self.Option.NoGroup && !self.Option.FilesWithMatches {
-			fmt.Printf("\n")
+		if !self.Option.NoGroup {
+			fmt.Println()
 		}
 	}
 	self.Done <- true
