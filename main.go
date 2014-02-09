@@ -14,7 +14,11 @@ import (
 var opts option.Option
 
 func init() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
+        if cpu := runtime.NumCPU(); cpu == 1 {
+	        runtime.GOMAXPROCS(2)
+        } else {
+	        runtime.GOMAXPROCS(cpu)
+        }
 }
 
 func main() {
