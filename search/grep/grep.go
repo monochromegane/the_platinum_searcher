@@ -9,6 +9,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/print"
 	"os"
 	"strings"
+	"sync"
 )
 
 type Params struct {
@@ -22,16 +23,15 @@ type Grepper struct {
 }
 
 func (self *Grepper) ConcurrentGrep() {
-	sem := make(chan bool, self.Option.Proc)
+	var wg sync.WaitGroup
 	for arg := range self.In {
-		sem <- true
-		go self.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
+		wg.Add(1)
+		go func(self *Grepper, arg *Params) {
+			defer wg.Done()
+			self.Grep(arg.Path, arg.Encode, arg.Pattern)
+		}(self, arg)
 	}
-	for {
-		if len(sem) == 0 {
-			break
-		}
-	}
+	wg.Wait()
 	close(self.Out)
 }
 
@@ -45,7 +45,7 @@ func getDecoder(encode string) transform.Transformer {
 	return nil
 }
 
-func (self *Grepper) Grep(path, encode, pattern string, finish chan bool) {
+func (self *Grepper) Grep(path, encode, pattern string) {
 	fh, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -75,5 +75,4 @@ func (self *Grepper) Grep(path, encode, pattern string, finish chan bool) {
 	}
 	self.Out <- &print.Params{pattern, path, m}
 	fh.Close()
-	<-finish
 }
