@@ -24,12 +24,14 @@ type Grepper struct {
 
 func (self *Grepper) ConcurrentGrep() {
 	var wg sync.WaitGroup
+        sem := make(chan bool, self.Option.Proc)
 	for arg := range self.In {
+                sem <- true
 		wg.Add(1)
-		go func(self *Grepper, arg *Params) {
+		go func(self *Grepper, arg *Params, sem chan bool) {
 			defer wg.Done()
-			self.Grep(arg.Path, arg.Encode, arg.Pattern)
-		}(self, arg)
+			self.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
+		}(self, arg, sem)
 	}
 	wg.Wait()
 	close(self.Out)
@@ -45,7 +47,7 @@ func getDecoder(encode string) transform.Transformer {
 	return nil
 }
 
-func (self *Grepper) Grep(path, encode, pattern string) {
+func (self *Grepper) Grep(path, encode, pattern string, sem chan bool) {
 	fh, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -75,4 +77,5 @@ func (self *Grepper) Grep(path, encode, pattern string) {
 	}
 	self.Out <- &print.Params{pattern, path, m}
 	fh.Close()
+        <-sem
 }

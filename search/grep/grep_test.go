@@ -28,7 +28,9 @@ func TestGrep(t *testing.T) {
 		out := make(chan *print.Params)
 		grepper := Grepper{in, out, &option.Option{Proc: 1}}
 
-		go grepper.Grep("../../files/"+g.path, g.fileType, g.pattern)
+		sem := make(chan bool, 1)
+		sem <- true
+		go grepper.Grep("../../files/"+g.path, g.fileType, g.pattern, sem)
 		o := <-out
 		if o.Path != "../../files/"+g.path {
 			t.Errorf("It should be equal ../../files/%s.", g.path)
