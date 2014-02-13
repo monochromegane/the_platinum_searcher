@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+        "regexp"
 )
 
 type Params struct {
@@ -63,6 +64,10 @@ func (self *Grepper) Grep(path, encode, pattern string, sem chan bool) {
 	var buf []byte
 	m := make([]*print.Match, 0)
 	var lineNum = 1
+        var reg *regexp.Regexp
+        if self.Option.IgnoreCase {
+                reg = regexp.MustCompile(`(?i)` + pattern)
+        }
 	for {
 		buf, _, err = f.ReadLine()
 		if err != nil {
@@ -70,7 +75,11 @@ func (self *Grepper) Grep(path, encode, pattern string, sem chan bool) {
 		}
 
 		s := string(buf)
-		if strings.Contains(s, pattern) {
+                if self.Option.IgnoreCase {
+                        if reg.MatchString(s) {
+			        m = append(m, &print.Match{lineNum, s})
+                        }
+                } else if strings.Contains(s, pattern) {
 			m = append(m, &print.Match{lineNum, s})
 		}
 		lineNum++

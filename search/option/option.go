@@ -6,6 +6,7 @@ type Option struct {
 	FilesWithMatches bool     `short:"l" long:"files-with-matches" description:"Only print filenames that don't contain matches"`
 	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore)"`
 	Ignore           []string `long:"ignore" description:"Ignore files/directories matching pattern"`
+	IgnoreCase       bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
 	Depth            int      `long:"depth" default:"25" default-mask:"-" description:"Search up to NUM derectories deep (Default: 25)"`
 	Proc             int      // Number of goroutine. Not user option.
 }

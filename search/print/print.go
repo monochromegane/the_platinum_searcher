@@ -3,6 +3,7 @@ package print
 import (
 	"fmt"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
+	"regexp"
 	"strings"
 )
 
@@ -84,6 +85,9 @@ func (self *Printer) printLineNumber(lineNum int) {
 func (self *Printer) printMatch(pattern, match string) {
 	if self.Option.NoColor {
 		fmt.Printf("%s", match)
+	} else if self.Option.IgnoreCase {
+                reg := regexp.MustCompile(`(?i)(` + pattern + `)`)
+		fmt.Printf("%s", reg.ReplaceAllString(match, ColorMatch+"${1}"+ColorReset))
 	} else {
 		fmt.Printf("%s", strings.Replace(match, pattern, ColorMatch+pattern+ColorReset, -1))
 	}
