@@ -23,6 +23,7 @@ type Params struct {
 	Pattern string
 	Path    string
 	Matches []*Match
+        Regexp  *regexp.Regexp
 }
 
 type Printer struct {
@@ -55,7 +56,7 @@ func (self *Printer) Print() {
 				self.printPath(arg.Path)
 			}
 			self.printLineNumber(v.LineNum)
-			self.printMatch(arg.Pattern, v.Match)
+			self.printMatch(arg.Pattern, v.Match, arg.Regexp)
 			fmt.Println()
 		}
 		if !self.Option.NoGroup {
@@ -82,12 +83,11 @@ func (self *Printer) printLineNumber(lineNum int) {
 		fmt.Printf("%s%d%s:", ColorLineNumber, lineNum, ColorReset)
 	}
 }
-func (self *Printer) printMatch(pattern, match string) {
+func (self *Printer) printMatch(pattern, match string, regexp *regexp.Regexp) {
 	if self.Option.NoColor {
 		fmt.Printf("%s", match)
 	} else if self.Option.IgnoreCase {
-                reg := regexp.MustCompile(`(?i)(` + pattern + `)`)
-		fmt.Printf("%s", reg.ReplaceAllString(match, ColorMatch+"${1}"+ColorReset))
+		fmt.Printf("%s", regexp.ReplaceAllString(match, ColorMatch+"${1}"+ColorReset))
 	} else {
 		fmt.Printf("%s", strings.Replace(match, pattern, ColorMatch+pattern+ColorReset, -1))
 	}

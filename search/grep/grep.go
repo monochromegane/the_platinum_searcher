@@ -15,6 +15,7 @@ import (
 
 type Params struct {
 	Path, Pattern, Encode string
+        Regexp *regexp.Regexp
 }
 
 type Grepper struct {
@@ -31,7 +32,7 @@ func (self *Grepper) ConcurrentGrep() {
 		wg.Add(1)
 		go func(self *Grepper, arg *Params, sem chan bool) {
 			defer wg.Done()
-			self.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
+			self.Grep(arg.Path, arg.Encode, arg.Pattern, arg.Regexp, sem)
 		}(self, arg, sem)
 	}
 	wg.Wait()
@@ -48,7 +49,7 @@ func getDecoder(encode string) transform.Transformer {
 	return nil
 }
 
-func (self *Grepper) Grep(path, encode, pattern string, sem chan bool) {
+func (self *Grepper) Grep(path, encode, pattern string, regexp *regexp.Regexp, sem chan bool) {
 	fh, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -64,10 +65,6 @@ func (self *Grepper) Grep(path, encode, pattern string, sem chan bool) {
 	var buf []byte
 	m := make([]*print.Match, 0)
 	var lineNum = 1
-        var reg *regexp.Regexp
-        if self.Option.IgnoreCase {
-                reg = regexp.MustCompile(`(?i)` + pattern)
-        }
 	for {
 		buf, _, err = f.ReadLine()
 		if err != nil {
@@ -76,7 +73,7 @@ func (self *Grepper) Grep(path, encode, pattern string, sem chan bool) {
 
 		s := string(buf)
                 if self.Option.IgnoreCase {
-                        if reg.MatchString(s) {
+                        if regexp.MatchString(s) {
 			        m = append(m, &print.Match{lineNum, s})
                         }
                 } else if strings.Contains(s, pattern) {
@@ -84,7 +81,7 @@ func (self *Grepper) Grep(path, encode, pattern string, sem chan bool) {
 		}
 		lineNum++
 	}
-	self.Out <- &print.Params{pattern, path, m}
+	self.Out <- &print.Params{pattern, path, m, regexp}
 	fh.Close()
         <-sem
 }
