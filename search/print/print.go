@@ -3,7 +3,7 @@ package print
 import (
 	"fmt"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
-	"regexp"
+	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"strings"
 )
 
@@ -20,10 +20,9 @@ type Match struct {
 }
 
 type Params struct {
-	Pattern string
+	Pattern *pattern.Pattern
 	Path    string
 	Matches []*Match
-        Regexp  *regexp.Regexp
 }
 
 type Printer struct {
@@ -56,7 +55,7 @@ func (self *Printer) Print() {
 				self.printPath(arg.Path)
 			}
 			self.printLineNumber(v.LineNum)
-			self.printMatch(arg.Pattern, v.Match, arg.Regexp)
+			self.printMatch(arg.Pattern, v.Match)
 			fmt.Println()
 		}
 		if !self.Option.NoGroup {
@@ -83,12 +82,12 @@ func (self *Printer) printLineNumber(lineNum int) {
 		fmt.Printf("%s%d%s:", ColorLineNumber, lineNum, ColorReset)
 	}
 }
-func (self *Printer) printMatch(pattern, match string, regexp *regexp.Regexp) {
+func (self *Printer) printMatch(pattern *pattern.Pattern, match string) {
 	if self.Option.NoColor {
 		fmt.Printf("%s", match)
-	} else if self.Option.IgnoreCase {
-		fmt.Printf("%s", regexp.ReplaceAllString(match, ColorMatch+"${1}"+ColorReset))
+	} else if pattern.IgnoreCase {
+		fmt.Printf("%s", pattern.Regexp.ReplaceAllString(match, ColorMatch+"${1}"+ColorReset))
 	} else {
-		fmt.Printf("%s", strings.Replace(match, pattern, ColorMatch+pattern+ColorReset, -1))
+		fmt.Printf("%s", strings.Replace(match, pattern.Pattern, ColorMatch+pattern.Pattern+ColorReset, -1))
 	}
 }

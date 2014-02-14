@@ -5,11 +5,11 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/ignore"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
+	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-        "regexp"
 )
 
 type Finder struct {
@@ -17,8 +17,7 @@ type Finder struct {
 	Option *option.Option
 }
 
-func (self *Finder) Find(root, pattern string) {
-        regexp := regexp.MustCompile(`(?i)(` + pattern + `)`)
+func (self *Finder) Find(root string, pattern *pattern.Pattern) {
 	Walk(root, self.Option.Ignore, func(path string, info os.FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
 			if depth > self.Option.Depth+1 {
@@ -54,7 +53,7 @@ func (self *Finder) Find(root, pattern string) {
 		if fileType == file.ERROR || fileType == file.BINARY {
 			return nil, ig
 		}
-		self.Out <- &grep.Params{path, pattern, fileType, regexp}
+		self.Out <- &grep.Params{path, fileType, pattern}
 		return nil, ig
 	})
 	close(self.Out)

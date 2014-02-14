@@ -6,16 +6,16 @@ import (
 	"code.google.com/p/go.text/transform"
 	"github.com/monochromegane/the_platinum_searcher/search/file"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
+	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
 	"os"
 	"strings"
 	"sync"
-        "regexp"
 )
 
 type Params struct {
-	Path, Pattern, Encode string
-        Regexp *regexp.Regexp
+	Path, Encode string
+	Pattern      *pattern.Pattern
 }
 
 type Grepper struct {
@@ -26,13 +26,13 @@ type Grepper struct {
 
 func (self *Grepper) ConcurrentGrep() {
 	var wg sync.WaitGroup
-        sem := make(chan bool, self.Option.Proc)
+	sem := make(chan bool, self.Option.Proc)
 	for arg := range self.In {
-                sem <- true
+		sem <- true
 		wg.Add(1)
 		go func(self *Grepper, arg *Params, sem chan bool) {
 			defer wg.Done()
-			self.Grep(arg.Path, arg.Encode, arg.Pattern, arg.Regexp, sem)
+			self.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
 		}(self, arg, sem)
 	}
 	wg.Wait()
@@ -49,7 +49,7 @@ func getDecoder(encode string) transform.Transformer {
 	return nil
 }
 
-func (self *Grepper) Grep(path, encode, pattern string, regexp *regexp.Regexp, sem chan bool) {
+func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan bool) {
 	fh, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -72,16 +72,16 @@ func (self *Grepper) Grep(path, encode, pattern string, regexp *regexp.Regexp, s
 		}
 
 		s := string(buf)
-                if self.Option.IgnoreCase {
-                        if regexp.MatchString(s) {
-			        m = append(m, &print.Match{lineNum, s})
-                        }
-                } else if strings.Contains(s, pattern) {
+		if pattern.IgnoreCase {
+			if pattern.Regexp.MatchString(s) {
+				m = append(m, &print.Match{lineNum, s})
+			}
+		} else if strings.Contains(s, pattern.Pattern) {
 			m = append(m, &print.Match{lineNum, s})
 		}
 		lineNum++
 	}
-	self.Out <- &print.Params{pattern, path, m, regexp}
+	self.Out <- &print.Params{pattern, path, m}
 	fh.Close()
-        <-sem
+	<-sem
 }
