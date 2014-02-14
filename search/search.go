@@ -5,6 +5,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
+	"regexp"
 )
 
 type Searcher struct {
@@ -13,6 +14,15 @@ type Searcher struct {
 }
 
 func (self *Searcher) Search() {
+
+	if self.Option.SmartCase {
+		if regexp.MustCompile(`[[:upper:]]`).MatchString(self.Pattern) {
+			self.Option.IgnoreCase = false
+		} else {
+			self.Option.IgnoreCase = true
+		}
+	}
+
 	grep := make(chan *grep.Params, self.Option.Proc)
 	match := make(chan *print.Params, self.Option.Proc)
 	done := make(chan bool)
