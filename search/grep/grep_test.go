@@ -3,9 +3,9 @@ package grep
 import (
 	"github.com/monochromegane/the_platinum_searcher/search/file"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
+	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
 	"testing"
-        "regexp"
 )
 
 type Assert struct {
@@ -29,10 +29,10 @@ func TestGrep(t *testing.T) {
 		out := make(chan *print.Params)
 		grepper := Grepper{in, out, &option.Option{Proc: 1}}
 
-                regexp := regexp.MustCompile(`(?i)(` + g.pattern + `)`)
+		pattern := pattern.NewPattern(g.pattern, false, false)
 		sem := make(chan bool, 1)
 		sem <- true
-		go grepper.Grep("../../files/"+g.path, g.fileType, g.pattern, regexp, sem)
+		go grepper.Grep("../../files/"+g.path, g.fileType, pattern, sem)
 		o := <-out
 		if o.Path != "../../files/"+g.path {
 			t.Errorf("It should be equal ../../files/%s.", g.path)
