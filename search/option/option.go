@@ -7,7 +7,7 @@ type Option struct {
 	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore)"`
 	Ignore           []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 	IgnoreCase       bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
-	SmartCase        bool     `short:"S" long:"smart-case" description:"atch case insensitively unless PATTERN contains uppercase characters"`
+	SmartCase        bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
 	Depth            int      `long:"depth" default:"25" default-mask:"-" description:"Search up to NUM derectories deep (Default: 25)"`
 	Proc             int      // Number of goroutine. Not user option.
 }
