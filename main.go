@@ -49,15 +49,15 @@ func main() {
 		root = strings.TrimRight(args[1], "\"")
 		_, err := os.Lstat(root)
 		if err != nil {
-			fmt.Printf("%s\n", err)
+			fmt.Fprintf(os.Stderr, "%s\n", err)
 			os.Exit(1)
 		}
 	}
 
 	searcher := search.Searcher{root, args[0], &opts}
-        err = searcher.Search()
-        if err != nil {
-                fmt.Printf("%s\n", err)
-                os.Exit(1)
-        }
+	err = searcher.Search()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
 }
