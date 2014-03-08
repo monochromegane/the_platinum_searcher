@@ -13,19 +13,27 @@ type Searcher struct {
 	Option        *option.Option
 }
 
-func (self *Searcher) Search() {
+func (self *Searcher) Search() error {
+	var pattern *pattern.Pattern
+	if pattern = self.pattern(); pattern.Error != nil {
+		return pattern.Error
+	}
 	grep := make(chan *grep.Params, self.Option.Proc)
 	match := make(chan *print.Params, self.Option.Proc)
 	done := make(chan bool)
-	go self.find(grep)
+	go self.find(grep, pattern)
 	go self.grep(grep, match)
 	go self.print(match, done)
 	<-done
+	return nil
 }
 
-func (self *Searcher) find(out chan *grep.Params) {
+func (self *Searcher) pattern() *pattern.Pattern {
+	return pattern.NewPattern(self.Pattern, self.Option.SmartCase, self.Option.IgnoreCase)
+}
+
+func (self *Searcher) find(out chan *grep.Params, pattern *pattern.Pattern) {
 	finder := find.Finder{out, self.Option}
-	pattern := pattern.NewPattern(self.Pattern, self.Option.SmartCase, self.Option.IgnoreCase)
 	finder.Find(self.Root, pattern)
 }
 

@@ -55,5 +55,9 @@ func main() {
 	}
 
 	searcher := search.Searcher{root, args[0], &opts}
-	searcher.Search()
+        err = searcher.Search()
+        if err != nil {
+                fmt.Printf("%s\n", err)
+                os.Exit(1)
+        }
 }

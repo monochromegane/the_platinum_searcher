@@ -6,6 +6,7 @@ import (
 
 type Pattern struct {
 	Pattern    string
+	Error      error
 	Regexp     *regexp.Regexp
 	IgnoreCase bool
 }
@@ -20,9 +21,16 @@ func NewPattern(pattern string, smartCase, ignoreCase bool) *Pattern {
 		}
 	}
 
+	var regIgnoreCase *regexp.Regexp
+	var err error
+	if ignoreCase {
+		regIgnoreCase, err = regexp.Compile(`(?i)(` + pattern + `)`)
+	}
+
 	return &Pattern{
 		Pattern:    pattern,
-		Regexp:     regexp.MustCompile(`(?i)(` + pattern + `)`),
+		Error:      err,
+		Regexp:     regIgnoreCase,
 		IgnoreCase: ignoreCase,
 	}
 
