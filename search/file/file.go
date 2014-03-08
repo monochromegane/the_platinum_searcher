@@ -5,7 +5,7 @@ import (
 )
 
 const (
-        ERROR    = "Error"
+	ERROR    = "Error"
 	BINARY   = "Binary"
 	ASCII    = "ASCII"
 	UTF8     = "UTF-8"
@@ -23,9 +23,9 @@ func IdentifyType(path string) string {
 	)
 
 	file, err := os.Open(path)
-        if err != nil {
-                return ERROR
-        }
+	if err != nil {
+		return ERROR
+	}
 	defer file.Close()
 
 	stat, _ := file.Stat()

@@ -25,7 +25,7 @@ func (self *Searcher) Search() {
 
 func (self *Searcher) find(out chan *grep.Params) {
 	finder := find.Finder{out, self.Option}
-        pattern := pattern.NewPattern(self.Pattern, self.Option.SmartCase, self.Option.IgnoreCase)
+	pattern := pattern.NewPattern(self.Pattern, self.Option.SmartCase, self.Option.IgnoreCase)
 	finder.Find(self.Root, pattern)
 }
 
