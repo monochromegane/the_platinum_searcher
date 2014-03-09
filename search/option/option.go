@@ -10,6 +10,7 @@ type Option struct {
 	SmartCase        bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
 	Depth            int      `long:"depth" default:"25" default-mask:"-" description:"Search up to NUM derectories deep (Default: 25)"`
 	Proc             int      // Number of goroutine. Not user option.
+        Version          bool     `long:"version" description:"Show version"`
 }
 
 func (self *Option) VcsIgnores() []string {

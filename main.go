@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const version = "1.0.0"
+
 var opts option.Option
 
 func init() {
@@ -30,6 +32,11 @@ func main() {
 	args, err := parser.Parse()
 	if err != nil {
 		os.Exit(1)
+	}
+
+	if opts.Version {
+		fmt.Printf("%s\n", version)
+		os.Exit(0)
 	}
 
 	opts.Proc = runtime.NumCPU()
