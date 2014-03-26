@@ -29,7 +29,12 @@ func (self *Searcher) Search() error {
 }
 
 func (self *Searcher) pattern() *pattern.Pattern {
-	return pattern.NewPattern(self.Pattern, self.Option.SmartCase, self.Option.IgnoreCase)
+	return pattern.NewPattern(
+		self.Pattern,
+		self.Option.FileSearchRegexp,
+		self.Option.SmartCase,
+		self.Option.IgnoreCase,
+	)
 }
 
 func (self *Searcher) find(out chan *grep.Params, pattern *pattern.Pattern) {

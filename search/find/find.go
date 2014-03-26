@@ -49,6 +49,9 @@ func (self *Finder) Find(root string, pattern *pattern.Pattern) {
 			// fmt.Printf("ignore  -> %s\n", path)
 			return nil, ig
 		}
+		if pattern.FileRegexp != nil && !pattern.FileRegexp.MatchString(path) {
+			return nil, ig
+		}
 		fileType := file.IdentifyType(path)
 		if fileType == file.ERROR || fileType == file.BINARY {
 			return nil, ig
