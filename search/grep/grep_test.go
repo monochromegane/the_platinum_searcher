@@ -29,7 +29,7 @@ func TestGrep(t *testing.T) {
 		out := make(chan *print.Params)
 		grepper := Grepper{in, out, &option.Option{Proc: 1}}
 
-		pattern := pattern.NewPattern(g.pattern, false, false)
+		pattern := pattern.NewPattern(g.pattern, "", false, false)
 		sem := make(chan bool, 1)
 		sem <- true
 		go grepper.Grep("../../files/"+g.path, g.fileType, pattern, sem)
