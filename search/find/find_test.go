@@ -85,7 +85,8 @@ func TestFindWithDepth(t *testing.T) {
 func TestFindWithFileSearchPattern(t *testing.T) {
 	out := make(chan *grep.Params)
 	finder := Finder{out, &option.Option{}}
-	go finder.Find("../../files/vcs/match", pattern.NewPattern("go", "match.txt", true, true))
+	pattern, _ := pattern.NewPattern("go", "match.txt", true, true)
+	go finder.Find("../../files/vcs/match", pattern)
 
 	for o := range out {
 		if o.Path == "../../files/vcs/match/ignore.txt" {

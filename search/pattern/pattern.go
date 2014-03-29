@@ -6,13 +6,12 @@ import (
 
 type Pattern struct {
 	Pattern    string
-	Error      error
 	Regexp     *regexp.Regexp
 	FileRegexp *regexp.Regexp
 	IgnoreCase bool
 }
 
-func NewPattern(pattern, filePattern string, smartCase, ignoreCase bool) *Pattern {
+func NewPattern(pattern, filePattern string, smartCase, ignoreCase bool) (*Pattern, error) {
 
 	if smartCase {
 		if regexp.MustCompile(`[[:upper:]]`).MatchString(pattern) {
@@ -46,10 +45,9 @@ func NewPattern(pattern, filePattern string, smartCase, ignoreCase bool) *Patter
 
 	return &Pattern{
 		Pattern:    pattern,
-		Error:      err,
 		Regexp:     regIgnoreCase,
 		FileRegexp: regFile,
 		IgnoreCase: ignoreCase,
-	}
+	}, err
 
 }

@@ -17,7 +17,8 @@ func TestIgnoreCaseWithSmartCase(t *testing.T) {
 	}
 
 	for _, assert := range asserts {
-		if NewPattern(assert.Pattern, "", true, true).IgnoreCase != assert.Expect {
+		pattern, _ := NewPattern(assert.Pattern, "", true, true)
+		if pattern.IgnoreCase != assert.Expect {
 			t.Errorf("When pattern is %s, ignore case should be %t.", assert.Pattern, assert.Expect)
 		}
 	}

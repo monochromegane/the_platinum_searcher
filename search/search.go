@@ -14,9 +14,9 @@ type Searcher struct {
 }
 
 func (self *Searcher) Search() error {
-	var pattern *pattern.Pattern
-	if pattern = self.pattern(); pattern.Error != nil {
-		return pattern.Error
+	pattern, err:= self.pattern()
+	if err != nil {
+		return err
 	}
 	grep := make(chan *grep.Params, self.Option.Proc)
 	match := make(chan *print.Params, self.Option.Proc)
@@ -28,7 +28,7 @@ func (self *Searcher) Search() error {
 	return nil
 }
 
-func (self *Searcher) pattern() *pattern.Pattern {
+func (self *Searcher) pattern() (*pattern.Pattern, error) {
 	return pattern.NewPattern(
 		self.Pattern,
 		self.Option.FileSearchRegexp,
