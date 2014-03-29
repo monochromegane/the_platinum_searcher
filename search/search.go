@@ -14,7 +14,7 @@ type Searcher struct {
 }
 
 func (self *Searcher) Search() error {
-	pattern, err:= self.pattern()
+	pattern, err := self.pattern()
 	if err != nil {
 		return err
 	}
