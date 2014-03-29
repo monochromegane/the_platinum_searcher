@@ -34,21 +34,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	if opts.Version {
-		fmt.Printf("%s\n", version)
-		os.Exit(0)
-	}
-
-	opts.Proc = runtime.NumCPU()
-
-	if !terminal.IsTerminal(os.Stdout) {
-		opts.NoColor = true
-		opts.NoGroup = true
-	}
-
 	if len(args) == 0 {
 		parser.WriteHelp(os.Stdout)
 		os.Exit(1)
+	}
+
+	if opts.Version {
+		fmt.Printf("%s\n", version)
+		os.Exit(0)
 	}
 
 	var root = "."
@@ -59,6 +52,13 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 			os.Exit(1)
 		}
+	}
+
+	opts.Proc = runtime.NumCPU()
+
+	if !terminal.IsTerminal(os.Stdout) {
+		opts.NoColor = true
+		opts.NoGroup = true
 	}
 
 	searcher := search.Searcher{root, args[0], &opts}
