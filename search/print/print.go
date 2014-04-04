@@ -2,6 +2,7 @@ package print
 
 import (
 	"fmt"
+	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"strings"
@@ -14,15 +15,10 @@ const (
 	ColorMatch      = "\x1b[30;43m" /* black with yellow background */
 )
 
-type Match struct {
-	LineNum int
-	Match   string
-}
-
 type Params struct {
 	Pattern *pattern.Pattern
 	Path    string
-	Matches []*Match
+	Matches []*match.Match
 }
 
 type Printer struct {
@@ -54,8 +50,8 @@ func (self *Printer) Print() {
 			if self.Option.NoGroup {
 				self.printPath(arg.Path)
 			}
-			self.printLineNumber(v.LineNum)
-			self.printMatch(arg.Pattern, v.Match)
+			self.printLineNumber(v.LineNum())
+			self.printMatch(arg.Pattern, v.Match())
 			fmt.Println()
 		}
 		if !self.Option.NoGroup {

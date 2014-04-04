@@ -8,6 +8,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
+	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"os"
 	"strings"
 	"sync"
@@ -63,7 +64,7 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 	}
 
 	var buf []byte
-	m := make([]*print.Match, 0)
+	m := make([]*match.Match, 0)
 	var lineNum = 1
 	for {
 		buf, _, err = f.ReadLine()
@@ -74,10 +75,10 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 		s := string(buf)
 		if pattern.IgnoreCase {
 			if pattern.Regexp.MatchString(s) {
-				m = append(m, &print.Match{lineNum, s})
+				m = append(m, match.NewMatch(lineNum, s))
 			}
 		} else if strings.Contains(s, pattern.Pattern) {
-			m = append(m, &print.Match{lineNum, s})
+			m = append(m, match.NewMatch(lineNum, s))
 		}
 		lineNum++
 	}

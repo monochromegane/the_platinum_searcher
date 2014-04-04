@@ -37,7 +37,7 @@ func TestGrep(t *testing.T) {
 		if o.Path != "../../files/"+g.path {
 			t.Errorf("It should be equal ../../files/%s.", g.path)
 		}
-		if o.Matches[0].Match != g.match {
+		if o.Matches[0].Match() != g.match {
 			t.Errorf("%s should be equal %s", g.path, g.match)
 		}
 	}
