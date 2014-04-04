@@ -5,12 +5,11 @@ import (
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
 	"github.com/monochromegane/the_platinum_searcher/search/file"
+	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
-	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"os"
-	"strings"
 	"sync"
 )
 
@@ -72,13 +71,8 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 			break
 		}
 
-		s := string(buf)
-		if pattern.IgnoreCase {
-			if pattern.Regexp.MatchString(s) {
-				m = append(m, match.NewMatch(lineNum, s))
-			}
-		} else if strings.Contains(s, pattern.Pattern) {
-			m = append(m, match.NewMatch(lineNum, s))
+		if match, ok := match.IsMatch(pattern, lineNum, string(buf)); ok {
+			m = append(m, match)
 		}
 		lineNum++
 	}
