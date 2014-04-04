@@ -11,6 +11,9 @@ type Option struct {
 	FileSearchRegexp string   `short:"G" long:"file-search-regexp" description:"PATTERN Limit search to filenames matching PATTERN"`
 	Depth            int      `long:"depth" default:"25" default-mask:"-" description:"Search up to NUM derectories deep (Default: 25)"`
 	Follow           bool     `short:"f" long:"follow" description:"Follow symlinks"`
+	After            int      `short:"A" long:"after" description:"Print lines after match"`
+	Before           int      `short:"B" long:"before" description:"Print lines before match"`
+	Context          int      `short:"C" long:"context" description:"Print lines before and after match"`
 	Proc             int      // Number of goroutine. Not user option.
 	Version          bool     `long:"version" description:"Show version"`
 }
