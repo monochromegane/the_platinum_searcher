@@ -63,20 +63,21 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 	}
 
 	var buf []byte
-	m := make([]*match.Match, 0)
+	matches := make([]*match.Match, 0)
+	m := &match.Match{Line: &match.Line{}}
 	var lineNum = 1
 	for {
 		buf, _, err = f.ReadLine()
 		if err != nil {
 			break
 		}
-
-		if match, ok := match.IsMatch(pattern, lineNum, string(buf)); ok {
-			m = append(m, match)
+		if m.IsMatch(pattern, lineNum, string(buf)) {
+			matches = append(matches, m)
+			m = &match.Match{Line: &match.Line{}}
 		}
 		lineNum++
 	}
-	self.Out <- &print.Params{pattern, path, m}
+	self.Out <- &print.Params{pattern, path, matches}
 	fh.Close()
 	<-sem
 }
