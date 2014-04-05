@@ -64,7 +64,7 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 
 	var buf []byte
 	matches := make([]*match.Match, 0)
-	m := &match.Match{Line: &match.Line{}}
+	m := match.NewMatch(self.Option.Before, self.Option.After)
 	var lineNum = 1
 	for {
 		buf, _, err = f.ReadLine()
@@ -73,7 +73,7 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 		}
 		if m.IsMatch(pattern, lineNum, string(buf)) {
 			matches = append(matches, m)
-			m = &match.Match{Line: &match.Line{}}
+			m = match.NewMatch(self.Option.Before, self.Option.After)
 		}
 		lineNum++
 	}
