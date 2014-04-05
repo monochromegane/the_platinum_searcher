@@ -6,11 +6,12 @@ import (
 )
 
 type Match struct {
-	matched bool
+	Matched bool
 	*Line
 	beforeNum int
 	afterNum  int
 	Befores   []*Line
+	Afters    []*Line
 }
 
 type Line struct {
@@ -26,6 +27,14 @@ func NewMatch(before, after int) *Match {
 	}
 }
 
+func (self *Match) newMatch() *Match {
+	return &Match{
+		beforeNum: self.beforeNum,
+		afterNum:  self.afterNum,
+		Line:      &Line{},
+	}
+}
+
 func (self *Match) LineNum() int {
 	return self.Line.Num
 }
@@ -37,6 +46,7 @@ func (self *Match) Match() string {
 func (self *Match) setMatch(num int, s string) {
 	self.Line.Num = num
 	self.Line.Str = s
+	self.Matched = true
 }
 
 func (self *Match) setBefore(num int, s string) {
@@ -47,18 +57,45 @@ func (self *Match) setBefore(num int, s string) {
 	self.Befores = append(befores, &Line{num, s})
 }
 
-func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) bool {
+func (self *Match) setAfter(num int, s string) bool {
+	if len(self.Afters) >= self.afterNum {
+		return false
+	}
+	self.Afters = append(self.Afters, &Line{num, s})
+	return true
+}
+
+func (self *Match) setUpNewMatch(num int, s string) (*Match, bool) {
+	// already match
+	if self.Matched {
+		newMatch := self.newMatch()
+		newMatch.setMatch(num, s)
+		return newMatch, true
+	}
+	self.setMatch(num, s)
+	if self.afterNum == 0 {
+		return self.newMatch(), true
+	} else {
+		// set after line
+		return nil, false
+	}
+}
+
+func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match, bool) {
 	if pattern.IgnoreCase {
 		if pattern.Regexp.MatchString(s) {
-			self.setMatch(num, s)
-			return true
+			return self.setUpNewMatch(num, s)
 		}
 	} else if strings.Contains(s, pattern.Pattern) {
-		self.setMatch(num, s)
-		return true
+		return self.setUpNewMatch(num, s)
 	}
-	if self.beforeNum > 0 {
+	if !self.Matched && self.beforeNum > 0 {
 		self.setBefore(num, s)
 	}
-	return false
+	if self.Matched && self.afterNum > 0 {
+		if !self.setAfter(num, s) {
+			return self.newMatch(), true
+		}
+	}
+	return nil, false
 }

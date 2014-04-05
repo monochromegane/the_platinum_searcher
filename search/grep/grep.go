@@ -71,11 +71,14 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 		if err != nil {
 			break
 		}
-		if m.IsMatch(pattern, lineNum, string(buf)) {
+		if newMatch, ok := m.IsMatch(pattern, lineNum, string(buf)); ok {
 			matches = append(matches, m)
-			m = match.NewMatch(self.Option.Before, self.Option.After)
+			m = newMatch
 		}
 		lineNum++
+	}
+	if m.Matched {
+		matches = append(matches, m)
 	}
 	self.Out <- &print.Params{pattern, path, matches}
 	fh.Close()
