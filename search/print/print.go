@@ -50,9 +50,10 @@ func (self *Printer) Print() {
 			if self.Option.NoGroup {
 				self.printPath(arg.Path)
 			}
-			self.printLineNumber(v.LineNum())
-			self.printMatch(arg.Pattern, v.Match())
+			self.printContext(v.Befores)
+			self.printMatch(arg.Pattern, v.Line)
 			fmt.Println()
+			self.printContext(v.Afters)
 		}
 		if !self.Option.NoGroup {
 			fmt.Println()
@@ -71,19 +72,28 @@ func (self *Printer) printPath(path string) {
 		fmt.Printf(":")
 	}
 }
-func (self *Printer) printLineNumber(lineNum int) {
+func (self *Printer) printLineNumber(lineNum int, sep string) {
 	if self.Option.NoColor {
-		fmt.Printf("%d:", lineNum)
+		fmt.Printf("%d%s", lineNum, sep)
 	} else {
-		fmt.Printf("%s%d%s:", ColorLineNumber, lineNum, ColorReset)
+		fmt.Printf("%s%d%s%s", ColorLineNumber, lineNum, ColorReset, sep)
 	}
 }
-func (self *Printer) printMatch(pattern *pattern.Pattern, match string) {
+func (self *Printer) printMatch(pattern *pattern.Pattern, line *match.Line) {
+	self.printLineNumber(line.Num, ":")
 	if self.Option.NoColor {
-		fmt.Printf("%s", match)
+		fmt.Printf("%s", line.Str)
 	} else if pattern.IgnoreCase {
-		fmt.Printf("%s", pattern.Regexp.ReplaceAllString(match, ColorMatch+"${1}"+ColorReset))
+		fmt.Printf("%s", pattern.Regexp.ReplaceAllString(line.Str, ColorMatch+"${1}"+ColorReset))
 	} else {
-		fmt.Printf("%s", strings.Replace(match, pattern.Pattern, ColorMatch+pattern.Pattern+ColorReset, -1))
+		fmt.Printf("%s", strings.Replace(line.Str, pattern.Pattern, ColorMatch+pattern.Pattern+ColorReset, -1))
+	}
+}
+
+func (self *Printer) printContext(lines []*match.Line) {
+	for _, line := range lines {
+		self.printLineNumber(line.Num, "-")
+		fmt.Printf("%s", line.Str)
+		fmt.Println()
 	}
 }
