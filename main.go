@@ -61,6 +61,11 @@ func main() {
 		opts.NoGroup = true
 	}
 
+	if opts.Context > 0 {
+		opts.Before = opts.Context
+		opts.After = opts.Context
+	}
+
 	searcher := search.Searcher{root, args[0], &opts}
 	err = searcher.Search()
 	if err != nil {
