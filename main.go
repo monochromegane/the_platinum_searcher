@@ -34,14 +34,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(args) == 0 {
-		parser.WriteHelp(os.Stdout)
-		os.Exit(1)
-	}
-
 	if opts.Version {
 		fmt.Printf("%s\n", version)
 		os.Exit(0)
+	}
+
+	if len(args) == 0 {
+		parser.WriteHelp(os.Stdout)
+		os.Exit(1)
 	}
 
 	var root = "."
