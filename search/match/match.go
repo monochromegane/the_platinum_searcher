@@ -94,7 +94,11 @@ func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match,
 	}
 	if self.Matched && self.afterNum > 0 {
 		if !self.setAfter(num, s) {
-			return self.newMatch(), true
+			newMatch := self.newMatch()
+			if self.beforeNum > 0 {
+				newMatch.setBefore(num, s)
+			}
+			return newMatch, true
 		}
 	}
 	return nil, false
