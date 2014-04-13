@@ -30,6 +30,12 @@ type Printer struct {
 func (self *Printer) Print() {
 	for arg := range self.In {
 
+		if self.Option.FilesWithRegexp != "" {
+			self.printPath(arg.Path)
+			fmt.Println()
+			continue
+		}
+
 		if len(arg.Matches) == 0 {
 			continue
 		}

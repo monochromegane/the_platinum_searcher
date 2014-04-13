@@ -29,9 +29,13 @@ func (self *Searcher) Search() error {
 }
 
 func (self *Searcher) pattern() (*pattern.Pattern, error) {
+	fileRegexp := self.Option.FileSearchRegexp
+	if self.Option.FilesWithRegexp != "" {
+		fileRegexp = self.Option.FilesWithRegexp
+	}
 	return pattern.NewPattern(
 		self.Pattern,
-		self.Option.FileSearchRegexp,
+		fileRegexp,
 		self.Option.SmartCase,
 		self.Option.IgnoreCase,
 	)

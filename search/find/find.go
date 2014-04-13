@@ -54,9 +54,12 @@ func (self *Finder) Find(root string, pattern *pattern.Pattern) {
 		if pattern.FileRegexp != nil && !pattern.FileRegexp.MatchString(path) {
 			return nil, ig
 		}
-		fileType := file.IdentifyType(path)
-		if fileType == file.ERROR || fileType == file.BINARY {
-			return nil, ig
+		fileType := ""
+		if self.Option.FilesWithRegexp == "" {
+			fileType = file.IdentifyType(path)
+			if fileType == file.ERROR || fileType == file.BINARY {
+				return nil, ig
+			}
 		}
 		self.Out <- &grep.Params{path, fileType, pattern}
 		return nil, ig

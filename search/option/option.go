@@ -8,6 +8,7 @@ type Option struct {
 	Ignore           []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 	IgnoreCase       bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
 	SmartCase        bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
+	FilesWithRegexp  string   `short:"g" description:"Print filenames matching PATTERN"`
 	FileSearchRegexp string   `short:"G" long:"file-search-regexp" description:"PATTERN Limit search to filenames matching PATTERN"`
 	Depth            int      `long:"depth" default:"25" default-mask:"-" description:"Search up to NUM derectories deep (Default: 25)"`
 	Follow           bool     `short:"f" long:"follow" description:"Follow symlinks"`

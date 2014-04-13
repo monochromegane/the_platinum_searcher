@@ -50,6 +50,12 @@ func getDecoder(encode string) transform.Transformer {
 }
 
 func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan bool) {
+	if self.Option.FilesWithRegexp != ""  {
+		self.Out <- &print.Params{pattern, path, nil}
+		<-sem
+		return
+	}
+
 	fh, err := os.Open(path)
 	if err != nil {
 		panic(err)
