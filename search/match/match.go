@@ -103,3 +103,19 @@ func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match,
 	}
 	return nil, false
 }
+
+func (self *Match) FirstLineNum() int {
+	if len(self.Befores) == 0 {
+		return self.Line.Num
+	} else {
+		return self.Befores[0].Num
+	}
+}
+
+func (self *Match) LastLineNum() int {
+	if len(self.Afters) == 0 {
+		return self.Line.Num
+	} else {
+		return self.Afters[len(self.Afters)-1].Num
+	}
+}

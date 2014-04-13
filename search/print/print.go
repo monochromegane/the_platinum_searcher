@@ -43,9 +43,17 @@ func (self *Printer) Print() {
 			self.printPath(arg.Path)
 			fmt.Println()
 		}
+		lastLineNum := 0
+		enableContext := self.Option.Before > 0 || self.Option.After > 0
 		for _, v := range arg.Matches {
 			if v == nil {
 				continue
+			}
+			if enableContext {
+				if lastLineNum > 0 && lastLineNum+1 != v.FirstLineNum() {
+					fmt.Println("--")
+				}
+				lastLineNum = v.LastLineNum()
 			}
 			if self.Option.NoGroup {
 				self.printPath(arg.Path)
