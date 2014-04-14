@@ -39,7 +39,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(args) == 0 {
+	if len(args) == 0 && opts.FilesWithRegexp == "" {
 		parser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
@@ -66,7 +66,11 @@ func main() {
 		opts.After = opts.Context
 	}
 
-	searcher := search.Searcher{root, args[0], &opts}
+	pattern := ""
+	if len(args) > 0 {
+		pattern = args[0]
+	}
+	searcher := search.Searcher{root, pattern, &opts}
 	err = searcher.Search()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
