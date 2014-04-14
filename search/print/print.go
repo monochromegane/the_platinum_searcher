@@ -82,7 +82,7 @@ func (self *Printer) printPath(path string) {
 	} else {
 		fmt.Printf("%s%s%s", ColorPath, path, ColorReset)
 	}
-	if !self.Option.FilesWithMatches {
+	if !self.Option.FilesWithMatches && self.Option.FilesWithRegexp == "" {
 		fmt.Printf(":")
 	}
 }
