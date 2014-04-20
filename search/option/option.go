@@ -15,6 +15,7 @@ type Option struct {
 	After            int      `short:"A" long:"after" description:"Print lines after match"`
 	Before           int      `short:"B" long:"before" description:"Print lines before match"`
 	Context          int      `short:"C" long:"context" description:"Print lines before and after match"`
+	SearchStream     bool     // Input from pipe. Not user option.
 	Proc             int      // Number of goroutine. Not user option.
 	Version          bool     `long:"version" description:"Show version"`
 }

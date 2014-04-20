@@ -44,6 +44,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	opts.SearchStream = false
+	if len(args) == 1 {
+		if !terminal.IsTerminal(os.Stdin) {
+			opts.SearchStream = true
+			opts.NoGroup = true
+		}
+	}
+
 	var root = "."
 	if len(args) == 2 {
 		root = strings.TrimRight(args[1], "\"")

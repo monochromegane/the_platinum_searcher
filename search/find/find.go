@@ -18,6 +18,20 @@ type Finder struct {
 }
 
 func (self *Finder) Find(root string, pattern *pattern.Pattern) {
+	if self.Option.SearchStream {
+		self.findStream(pattern)
+	} else {
+		self.findFile(root, pattern)
+	}
+}
+
+func (self *Finder) findStream(pattern *pattern.Pattern) {
+	// TODO: File type is fixed in ASCII because it can not determine the character code.
+	self.Out <- &grep.Params{"", file.ASCII, pattern}
+	close(self.Out)
+}
+
+func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 	Walk(root, self.Option.Ignore, self.Option.Follow, func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
 			if depth > self.Option.Depth+1 {
