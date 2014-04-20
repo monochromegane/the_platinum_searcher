@@ -94,3 +94,15 @@ func TestFindWithFileSearchPattern(t *testing.T) {
 		}
 	}
 }
+
+func TestFindWithStream(t *testing.T) {
+	out := make(chan *grep.Params)
+	finder := Finder{out, &option.Option{SearchStream: true}}
+	go finder.Find(".", &pattern.Pattern{Pattern: "go"})
+
+	for o := range out {
+		if o.Path != "" {
+			t.Errorf("It should not contains file. %s", o.Path)
+		}
+	}
+}
