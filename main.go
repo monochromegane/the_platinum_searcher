@@ -49,14 +49,6 @@ func main() {
 		if !terminal.IsTerminal(os.Stdin) {
 			opts.SearchStream = true
 			opts.NoGroup = true
-		} else {
-			fi, err := os.Stdin.Stat()
-			if err == nil {
-				if fi.Mode()&os.ModeNamedPipe != 0 {
-					opts.SearchStream = true
-					opts.NoGroup = true
-				}
-			}
 		}
 	}
 
