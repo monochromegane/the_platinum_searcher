@@ -52,6 +52,6 @@ func (self *Searcher) grep(in chan *grep.Params, out chan *print.Params) {
 }
 
 func (self *Searcher) print(in chan *print.Params, done chan bool) {
-	printer := print.Printer{in, done, self.Option}
+	printer := print.NewPrinter(in, done, self.Option)
 	printer.Print()
 }
