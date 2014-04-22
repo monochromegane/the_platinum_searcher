@@ -1,9 +1,9 @@
 package print
 
 import (
-	"fmt"
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
+	"fmt"
 	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
@@ -121,19 +121,15 @@ func (self *Printer) printContext(lines []*match.Line) {
 	}
 }
 
-func createWriter(option *option.Option) (io.Writer) {
-	if len(option.OutputEncode) > 0 {
-		switch option.OutputEncode[0] {
-		case "sjis":
-			return transform.NewWriter(os.Stdout, japanese.ShiftJIS.NewEncoder())
-		case "euc":
-			return transform.NewWriter(os.Stdout, japanese.EUCJP.NewEncoder())
-		case "jis":
-			return transform.NewWriter(os.Stdout, japanese.ISO2022JP.NewEncoder())
-		default:
-			return os.Stdout
-		}
-	} else {
+func createWriter(option *option.Option) io.Writer {
+	switch option.OutputEncode {
+	case "sjis":
+		return transform.NewWriter(os.Stdout, japanese.ShiftJIS.NewEncoder())
+	case "euc":
+		return transform.NewWriter(os.Stdout, japanese.EUCJP.NewEncoder())
+	case "jis":
+		return transform.NewWriter(os.Stdout, japanese.ISO2022JP.NewEncoder())
+	default:
 		return os.Stdout
 	}
 }
