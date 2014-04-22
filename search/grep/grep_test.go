@@ -5,6 +5,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
+	"os"
 	"testing"
 )
 
@@ -40,6 +41,32 @@ func TestGrep(t *testing.T) {
 		if o.Matches[0].Match() != g.match {
 			t.Errorf("%s should be equal %s", g.path, g.match)
 		}
+	}
+}
+
+func TestGrepWithStream(t *testing.T) {
+	fh, err := os.Open("../../files/ascii.txt")
+	if err != nil {
+		panic(err)
+	}
+	tempStdin := os.Stdin
+	os.Stdin = fh
+	defer func() { os.Stdin = tempStdin }()
+	g := Assert{"", "go", file.ASCII, "go test"}
+	in := make(chan *Params)
+	out := make(chan *print.Params)
+	grepper := Grepper{in, out, &option.Option{Proc: 1, SearchStream: true}}
+
+	pattern, _ := pattern.NewPattern(g.pattern, "", false, false)
+	sem := make(chan bool, 1)
+	sem <- true
+	go grepper.Grep(g.path, g.fileType, pattern, sem)
+	o := <-out
+	if o.Path != g.path {
+		t.Errorf("It should be equal %s.", g.path)
+	}
+	if o.Matches[0].Match() != g.match {
+		t.Errorf("%s should be equal %s", g.path, g.match)
 	}
 }
 

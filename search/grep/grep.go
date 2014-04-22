@@ -49,6 +49,14 @@ func getDecoder(encode string) transform.Transformer {
 	return nil
 }
 
+func getFileHandler(path string, opt *option.Option) (*os.File, error) {
+	if opt.SearchStream {
+		return os.Stdin, nil
+	} else {
+		return os.Open(path)
+	}
+}
+
 func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan bool) {
 	if self.Option.FilesWithRegexp != "" {
 		self.Out <- &print.Params{pattern, path, nil}
@@ -56,7 +64,7 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 		return
 	}
 
-	fh, err := os.Open(path)
+	fh, err := getFileHandler(path, self.Option)
 	if err != nil {
 		panic(err)
 	}
