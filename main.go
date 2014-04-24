@@ -27,7 +27,11 @@ func main() {
 
 	opts.Color = opts.SetEnableColor
 	opts.NoColor = opts.SetDisableColor
-	opts.EnableColor = true
+	if runtime.GOOS == "windows" && os.Getenv("ANSICON") == "" {
+		opts.EnableColor = false
+	} else {
+		opts.EnableColor = true
+	}
 
 	parser := flags.NewParser(&opts, flags.Default)
 	parser.Name = "pt"
