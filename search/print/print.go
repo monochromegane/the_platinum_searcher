@@ -86,25 +86,25 @@ func (self *Printer) Print() {
 }
 
 func (self *Printer) printPath(path string) {
-	if self.Option.NoColor {
-		fmt.Fprintf(self.writer, "%s", path)
-	} else {
+	if self.Option.EnableColor {
 		fmt.Fprintf(self.writer, "%s%s%s", ColorPath, path, ColorReset)
+	} else {
+		fmt.Fprintf(self.writer, "%s", path)
 	}
 	if !self.Option.FilesWithMatches && self.Option.FilesWithRegexp == "" {
 		fmt.Fprintf(self.writer, ":")
 	}
 }
 func (self *Printer) printLineNumber(lineNum int, sep string) {
-	if self.Option.NoColor {
-		fmt.Fprintf(self.writer, "%d%s", lineNum, sep)
-	} else {
+	if self.Option.EnableColor {
 		fmt.Fprintf(self.writer, "%s%d%s%s", ColorLineNumber, lineNum, ColorReset, sep)
+	} else {
+		fmt.Fprintf(self.writer, "%d%s", lineNum, sep)
 	}
 }
 func (self *Printer) printMatch(pattern *pattern.Pattern, line *match.Line) {
 	self.printLineNumber(line.Num, ":")
-	if self.Option.NoColor {
+	if !self.Option.EnableColor {
 		fmt.Fprintf(self.writer, "%s", line.Str)
 	} else if pattern.IgnoreCase {
 		fmt.Fprintf(self.writer, "%s", pattern.Regexp.ReplaceAllString(line.Str, ColorMatch+"${1}"+ColorReset))

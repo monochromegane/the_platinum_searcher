@@ -25,6 +25,10 @@ func init() {
 
 func main() {
 
+	opts.Color = opts.SetEnableColor
+	opts.NoColor = opts.SetDisableColor
+	opts.EnableColor = true
+
 	parser := flags.NewParser(&opts, flags.Default)
 	parser.Name = "pt"
 	parser.Usage = "[OPTIONS] PATTERN [PATH]"
@@ -65,7 +69,7 @@ func main() {
 	opts.Proc = runtime.NumCPU()
 
 	if !terminal.IsTerminal(os.Stdout) {
-		opts.NoColor = true
+		opts.EnableColor = false
 		opts.NoGroup = true
 	}
 

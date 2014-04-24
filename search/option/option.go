@@ -1,7 +1,9 @@
 package option
 
 type Option struct {
-	NoColor          bool     `long:"nocolor" description:"Don't print color codes in results (Disabled by default)"`
+	Color            func()   `long:"color" description:"Print color codes in results (Enabled by default)"`
+	NoColor          func()   `long:"nocolor" description:"Don't print color codes in results (Disabled by default)"`
+	EnableColor      bool     // Enable color. Not user option.
 	NoGroup          bool     `long:"nogroup" description:"Don't print file name at header (Disabled by default)"`
 	FilesWithMatches bool     `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
 	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore)"`
@@ -26,4 +28,12 @@ func (self *Option) VcsIgnores() []string {
 		self.VcsIgnore = []string{".gitignore", ".hgignore"}
 	}
 	return self.VcsIgnore
+}
+
+func (self *Option) SetEnableColor() {
+	self.EnableColor = true
+}
+
+func (self *Option) SetDisableColor() {
+	self.EnableColor = false
 }
