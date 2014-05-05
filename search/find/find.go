@@ -8,6 +8,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 )
@@ -32,6 +33,13 @@ func (self *Finder) findStream(pattern *pattern.Pattern) {
 }
 
 func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
+	if self.Option.NoPtIgnore == false {
+		usr, err := user.Current()
+		if err != nil {
+			return
+		}
+		self.Option.Ignore = append(self.Option.Ignore, ignore.IgnorePatterns(usr.HomeDir, []string{".ptignore"})...)
+	}
 	Walk(root, self.Option.Ignore, self.Option.Follow, func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
 			if depth > self.Option.Depth+1 {

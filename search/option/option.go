@@ -6,7 +6,8 @@ type Option struct {
 	EnableColor      bool     // Enable color. Not user option.
 	NoGroup          bool     `long:"nogroup" description:"Don't print file name at header (Disabled by default)"`
 	FilesWithMatches bool     `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
-	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore)"`
+	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore, .ptignore)"`
+	NoPtIgnore       bool     `long:"noptignore" description:"Don't use default ($Home/.ptignore) file for ignore patterns"`
 	Ignore           []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 	IgnoreCase       bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
 	SmartCase        bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
@@ -25,7 +26,7 @@ type Option struct {
 
 func (self *Option) VcsIgnores() []string {
 	if len(self.VcsIgnore) == 0 {
-		self.VcsIgnore = []string{".gitignore", ".hgignore"}
+		self.VcsIgnore = []string{".gitignore", ".hgignore", ".ptignore"}
 	}
 	return self.VcsIgnore
 }
