@@ -6,7 +6,7 @@ import (
 
 func TestVcsIgnores(t *testing.T) {
 	// When "VcsIgnore" is not specified
-	expected := []string{".gitignore", ".hgignore"}
+	expected := []string{".gitignore", ".hgignore", ".ptignore"}
 	option := Option{}
 	result := option.VcsIgnores()
 	if !sliceEqual(expected, result) || !sliceEqual(expected, option.VcsIgnore) {
