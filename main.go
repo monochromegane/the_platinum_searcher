@@ -27,7 +27,6 @@ func main() {
 
 	opts.Color = opts.SetEnableColor
 	opts.NoColor = opts.SetDisableColor
-	opts.NoPtIgnore = false
 	if runtime.GOOS == "windows" && os.Getenv("ANSICON") == "" {
 		opts.EnableColor = false
 	} else {
@@ -46,10 +45,6 @@ func main() {
 	if opts.Version {
 		fmt.Printf("%s\n", version)
 		os.Exit(0)
-	}
-
-	if opts.NoPtIgnore {
-		opts.NoPtIgnore = true
 	}
 
 	if len(args) == 0 && opts.FilesWithRegexp == "" {
