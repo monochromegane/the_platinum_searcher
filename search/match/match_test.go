@@ -7,7 +7,7 @@ import (
 
 func TestMatch(t *testing.T) {
 
-	pattern, _ := pattern.NewPattern("go", "", false, false)
+	pattern, _ := pattern.NewPattern("go", "", false, false, false)
 	match := NewMatch(1, 1)
 
 	lines := []string{
@@ -34,7 +34,7 @@ func TestMatch(t *testing.T) {
 
 func TestMatchWhenContextAndMatchDuplicate(t *testing.T) {
 
-	pattern, _ := pattern.NewPattern("go", "", false, false)
+	pattern, _ := pattern.NewPattern("go", "", false, false, false)
 	match := NewMatch(1, 1)
 
 	lines := []string{
