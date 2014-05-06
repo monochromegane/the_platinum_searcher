@@ -37,11 +37,15 @@ func NewPrinter(in chan *Params, done chan bool, option *option.Option) *Printer
 }
 
 func (self *Printer) Print() {
+	var fileMatchCount, matchCount uint
+	fileMatchCount = 0
+	matchCount     = 0
 	for arg := range self.In {
 
 		if self.Option.FilesWithRegexp != "" {
 			self.printPath(arg.Path)
 			fmt.Println()
+			fileMatchCount++
 			continue
 		}
 
@@ -52,11 +56,13 @@ func (self *Printer) Print() {
 		if self.Option.FilesWithMatches {
 			self.printPath(arg.Path)
 			fmt.Println()
+			fileMatchCount++
 			continue
 		}
 		if !self.Option.NoGroup {
 			self.printPath(arg.Path)
 			fmt.Println()
+			fileMatchCount++
 		}
 		lastLineNum := 0
 		enableContext := self.Option.Before > 0 || self.Option.After > 0
@@ -75,12 +81,17 @@ func (self *Printer) Print() {
 			}
 			self.printContext(v.Befores)
 			self.printMatch(arg.Pattern, v.Line)
+			matchCount++
 			fmt.Println()
 			self.printContext(v.Afters)
 		}
 		if !self.Option.NoGroup {
 			fmt.Println()
 		}
+	}
+	if self.Option.Stats {
+		fmt.Printf("%d Files Matched\n", fileMatchCount)
+		fmt.Printf("%d Total Text Matches\n", matchCount)
 	}
 	self.Done <- true
 }

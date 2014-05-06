@@ -9,6 +9,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 )
 
 const version = "1.5.2"
@@ -86,10 +87,17 @@ func main() {
 	if len(args) > 0 {
 		pattern = args[0]
 	}
+
+	start := time.Now()
+
 	searcher := search.Searcher{root, pattern, &opts}
 	err = searcher.Search()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
+	}
+	if opts.Stats {
+		elapsed := time.Since(start)
+		fmt.Printf("%s Elapsed\n", elapsed)
 	}
 }
