@@ -11,6 +11,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/print"
 	"os"
 	"sync"
+	"fmt"
 )
 
 type Params struct {
@@ -26,10 +27,13 @@ type Grepper struct {
 
 func (self *Grepper) ConcurrentGrep() {
 	var wg sync.WaitGroup
+	var filesSearched uint
+	filesSearched = 0
 	sem := make(chan bool, self.Option.Proc)
 	for arg := range self.In {
 		sem <- true
 		wg.Add(1)
+		filesSearched++
 		go func(self *Grepper, arg *Params, sem chan bool) {
 			defer wg.Done()
 			self.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
@@ -37,6 +41,9 @@ func (self *Grepper) ConcurrentGrep() {
 	}
 	wg.Wait()
 	close(self.Out)
+	if self.Option.Stats {
+		fmt.Printf("%d Files Searched\n", filesSearched)
+	}
 }
 
 func getDecoder(encode string) transform.Transformer {
