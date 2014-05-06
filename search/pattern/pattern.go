@@ -27,7 +27,7 @@ func NewPattern(pattern, filePattern string, smartCase bool, ignoreCase bool, li
 	if ignoreCase {
 		regExp, regExpErr = regexp.Compile(`(?i)(` + pattern + `)`)
 	} else {
-		regExp, regExpErr = regexp.Compile(pattern)
+		regExp, regExpErr = regexp.Compile(`(` + pattern + `)`)
 	}
 
 	var regFile *regexp.Regexp
