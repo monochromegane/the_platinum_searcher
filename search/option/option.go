@@ -21,6 +21,7 @@ type Option struct {
 	OutputEncode     string   `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
 	SearchStream     bool     // Input from pipe. Not user option.
 	Proc             int      // Number of goroutine. Not user option.
+	Stats            bool     `long:"stats" description:"Print stats about files scanned, time taken, etc"`
 	Version          bool     `long:"version" description:"Show version"`
 }
 
