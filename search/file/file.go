@@ -29,14 +29,12 @@ func IdentifyType(path string) string {
 	defer file.Close()
 
 	stat, _ := file.Stat()
-	bs := make([]byte, stat.Size())
-	file.Read(bs)
-
-	var length = len(bs)
-	var total = length
-	if total > 512 {
-		total = 512
+	length := int(stat.Size())
+	if length > 512 {
+		length = 512
 	}
+	bs := make([]byte, length)
+	file.Read(bs)
 
 	if length == 0 {
 		return ASCII
@@ -52,20 +50,20 @@ func IdentifyType(path string) string {
 		return BINARY
 	}
 
-	for i := 0; i < total; i++ {
+	for i := 0; i < length; i++ {
 		if bs[i] == 0x00 {
 			/* NULL char. It's binary */
 			return BINARY
 		} else if (bs[i] < 7 || bs[i] > 14) && (bs[i] < 32 || bs[i] > 127) {
 			/* UTF-8 detection */
-			if bs[i] > 193 && bs[i] < 224 && i+1 < total {
+			if bs[i] > 193 && bs[i] < 224 && i+1 < length {
 				i++
 				if bs[i] > 127 && bs[i] < 192 {
 					likelyUtf8++
 					continue
 				}
 
-			} else if bs[i] > 223 && bs[i] < 240 && i+2 < total {
+			} else if bs[i] > 223 && bs[i] < 240 && i+2 < length {
 				i++
 				if bs[i] > 127 && bs[i] < 192 && bs[i+1] > 127 && bs[i+1] < 192 {
 					i++
@@ -75,13 +73,13 @@ func IdentifyType(path string) string {
 			}
 
 			/* EUC-JP detection */
-			if bs[i] == 142 && i+1 < total {
+			if bs[i] == 142 && i+1 < length {
 				i++
 				if bs[i] > 160 && bs[i] < 224 {
 					likelyEucjp++
 					continue
 				}
-			} else if bs[i] > 160 && bs[i] < 255 && i+1 < total {
+			} else if bs[i] > 160 && bs[i] < 255 && i+1 < length {
 				i++
 				if bs[i] > 160 && bs[i] < 255 {
 					likelyEucjp++
@@ -93,7 +91,7 @@ func IdentifyType(path string) string {
 			if bs[i] > 160 && bs[i] < 224 {
 				likelyShiftjis++
 				continue
-			} else if ((bs[i] > 128 && bs[i] < 160) || (bs[i] > 223 && bs[i] < 240)) && i+1 < total {
+			} else if ((bs[i] > 128 && bs[i] < 160) || (bs[i] > 223 && bs[i] < 240)) && i+1 < length {
 				i++
 				if (bs[i] > 63 && bs[i] < 127) || (bs[i] > 127 && bs[i] < 253) {
 					likelyShiftjis++
@@ -102,14 +100,14 @@ func IdentifyType(path string) string {
 			}
 
 			suspiciousBytes++
-			if i >= 32 && (suspiciousBytes*100)/total > 10 {
+			if i >= 32 && (suspiciousBytes*100)/length > 10 {
 				return BINARY
 			}
 
 		}
 	}
 
-	if (suspiciousBytes*100)/total > 10 {
+	if (suspiciousBytes*100)/length > 10 {
 		return BINARY
 	}
 
