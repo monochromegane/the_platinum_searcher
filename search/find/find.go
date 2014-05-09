@@ -45,23 +45,20 @@ func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 			if depth > self.Option.Depth+1 {
 				return filepath.SkipDir, ig
 			}
-			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, self.Option.VcsIgnores())...)
-			// fmt.Printf("pattern -> %s = %s\n", path, ig.Patterns)
-			for _, p := range ig.Patterns {
-				files, _ := filepath.Glob(filepath.Join(path, p))
-				if files != nil {
-					// fmt.Printf("matches -> %s = %s\n", filepath.Join(path, p), files)
-					ig.Matches = append(ig.Matches, files...)
-				}
-			}
+			//Current Directory skipping should be checked first before loading ignores
+			//within this directory
 			if !isRoot(depth) && isHidden(info.Name()) {
 				return filepath.SkipDir, ig
-			} else if contains(path, &ig.Matches) {
-				// fmt.Printf("ignore  -> %s\n", path)
-				return filepath.SkipDir, ig
 			} else {
-				return nil, ig
+				for _, p := range ig.Patterns {
+					val, _:= filepath.Match(p, filepath.Base(path) + "/") 
+					if val {
+						return filepath.SkipDir, ig
+					}
+				}
 			}
+			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, self.Option.VcsIgnores())...)
+			return nil, ig
 		}
 		if !info.follow && info.IsSymlink() {
 			return nil, ig
@@ -69,9 +66,11 @@ func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 		if !isRoot(depth) && isHidden(info.Name()) {
 			return nil, ig
 		}
-		if contains(path, &ig.Matches) {
-			// fmt.Printf("ignore  -> %s\n", path)
-			return nil, ig
+		for _, p := range ig.Patterns {
+			val, _:= filepath.Match(p, filepath.Base(path)) 
+			if val {
+				return nil, ig
+			}
 		}
 		if pattern.FileRegexp != nil && !pattern.FileRegexp.MatchString(path) {
 			return nil, ig
