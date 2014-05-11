@@ -12,6 +12,8 @@ import (
 	"os"
 	"sync"
 	"fmt"
+	"launchpad.net/gommap"
+	//"strings"
 )
 
 type Params struct {
@@ -76,30 +78,61 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 		panic(err)
 	}
 
-	var f *bufio.Reader
-	if dec := getDecoder(encode); dec != nil {
-		f = bufio.NewReader(transform.NewReader(fh, dec))
-	} else {
-		f = bufio.NewReader(fh)
-	}
-
-	var buf []byte
 	matches := make([]*match.Match, 0)
 	m := match.NewMatch(self.Option.Before, self.Option.After)
-	var lineNum = 1
-	for {
-		buf, _, err = f.ReadLine()
-		if err != nil {
-			break
+	if self.Option.SearchStream {
+		var f *bufio.Reader
+		if dec := getDecoder(encode); dec != nil {
+			f = bufio.NewReader(transform.NewReader(fh, dec))
+		} else {
+			f = bufio.NewReader(fh)
 		}
-		if newMatch, ok := m.IsMatch(pattern, lineNum, string(buf)); ok {
+
+		var buf []byte
+		var lineNum = 1
+		for {
+			buf, _, err = f.ReadLine()
+			if err != nil {
+				break
+			}
+			if newMatch, ok := m.IsMatch(pattern, lineNum, string(buf)); ok {
+				matches = append(matches, m)
+				m = newMatch
+			}
+			lineNum++
+		}
+		if m.Matched {
 			matches = append(matches, m)
-			m = newMatch
 		}
-		lineNum++
-	}
-	if m.Matched {
-		matches = append(matches, m)
+	} else {
+		mmap, _ := gommap.Map(fh.Fd(), gommap.PROT_READ, gommap.MAP_PRIVATE|gommap.MAP_POPULATE)
+		if (0 != len(mmap)) {
+			var buf []byte
+			if dec := getDecoder(encode); dec != nil {
+				buf = transform.Bytes(dec, mmap)
+			} else {
+				buf = mmap
+			}
+			//buf can be nil due to transformation error
+			if (buf != nil) {
+				// buf2 := strings.SplitN(string(buf), "\n", -1)
+				// var lineNum = 1
+				// for _, buf3 := range buf2 {
+				// 	if newMatch, ok := m.IsMatch(pattern, lineNum, buf3); ok {
+				// 		matches = append(matches, m)
+				// 		m = newMatch
+				// 	}
+				// 	lineNum++
+				// }
+				// if m.Matched {
+				// 	matches = append(matches, m)
+				// }
+
+				m.FindMatches(pattern, string(buf), &matches)
+			}
+		}
+		//We are all done touching mmap. So it should be safe to unmap it now
+		mmap.UnsafeUnmap()
 	}
 	self.Out <- &print.Params{pattern, path, matches}
 	fh.Close()
