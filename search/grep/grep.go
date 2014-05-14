@@ -12,7 +12,6 @@ import (
 	"os"
 	"sync"
 	"launchpad.net/gommap"
-	"strings"
 )
 
 type Params struct {
@@ -111,20 +110,20 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 			}
 			//buf can be nil due to transformation error
 			if (buf != nil) {
-				buf2 := strings.SplitN(string(buf), "\n", -1)
-				var lineNum = 1
-				for _, buf3 := range buf2 {
-					if newMatch, ok := m.IsMatch(pattern, lineNum, buf3); ok {
-						matches = append(matches, m)
-						m = newMatch
-					}
-					lineNum++
-				}
-				if m.Matched {
-					matches = append(matches, m)
-				}
+				// buf2 := strings.SplitN(string(buf), "\n", -1)
+				// var lineNum = 1
+				// for _, buf3 := range buf2 {
+				// 	if newMatch, ok := m.IsMatch(pattern, lineNum, buf3); ok {
+				// 		matches = append(matches, m)
+				// 		m = newMatch
+				// 	}
+				// 	lineNum++
+				// }
+				// if m.Matched {
+				// 	matches = append(matches, m)
+				// }
 
-				//m.FindMatches(pattern, string(buf), &matches)
+				m.FindMatches(pattern, buf, &matches)
 			}
 		}
 		//We are all done touching mmap. So it should be safe to unmap it now
