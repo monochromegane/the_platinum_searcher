@@ -11,9 +11,8 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/print"
 	"os"
 	"sync"
-	"fmt"
 	"launchpad.net/gommap"
-	//"strings"
+	"strings"
 )
 
 type Params struct {
@@ -27,15 +26,15 @@ type Grepper struct {
 	Option *option.Option
 }
 
+var FilesSearched uint
 func (self *Grepper) ConcurrentGrep() {
 	var wg sync.WaitGroup
-	var filesSearched uint
-	filesSearched = 0
+	FilesSearched = 0
 	sem := make(chan bool, self.Option.Proc)
 	for arg := range self.In {
 		sem <- true
 		wg.Add(1)
-		filesSearched++
+		FilesSearched++
 		go func(self *Grepper, arg *Params, sem chan bool) {
 			defer wg.Done()
 			self.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
@@ -43,9 +42,6 @@ func (self *Grepper) ConcurrentGrep() {
 	}
 	wg.Wait()
 	close(self.Out)
-	if self.Option.Stats {
-		fmt.Printf("%d Files Searched\n", filesSearched)
-	}
 }
 
 func getDecoder(encode string) transform.Transformer {
@@ -115,20 +111,20 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 			}
 			//buf can be nil due to transformation error
 			if (buf != nil) {
-				// buf2 := strings.SplitN(string(buf), "\n", -1)
-				// var lineNum = 1
-				// for _, buf3 := range buf2 {
-				// 	if newMatch, ok := m.IsMatch(pattern, lineNum, buf3); ok {
-				// 		matches = append(matches, m)
-				// 		m = newMatch
-				// 	}
-				// 	lineNum++
-				// }
-				// if m.Matched {
-				// 	matches = append(matches, m)
-				// }
+				buf2 := strings.SplitN(string(buf), "\n", -1)
+				var lineNum = 1
+				for _, buf3 := range buf2 {
+					if newMatch, ok := m.IsMatch(pattern, lineNum, buf3); ok {
+						matches = append(matches, m)
+						m = newMatch
+					}
+					lineNum++
+				}
+				if m.Matched {
+					matches = append(matches, m)
+				}
 
-				m.FindMatches(pattern, string(buf), &matches)
+				//m.FindMatches(pattern, string(buf), &matches)
 			}
 		}
 		//We are all done touching mmap. So it should be safe to unmap it now
