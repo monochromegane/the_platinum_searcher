@@ -9,9 +9,9 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
+	"launchpad.net/gommap"
 	"os"
 	"sync"
-	"launchpad.net/gommap"
 )
 
 type Params struct {
@@ -110,19 +110,6 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 			}
 			//buf can be nil due to transformation error
 			if (buf != nil) {
-				// buf2 := strings.SplitN(string(buf), "\n", -1)
-				// var lineNum = 1
-				// for _, buf3 := range buf2 {
-				// 	if newMatch, ok := m.IsMatch(pattern, lineNum, buf3); ok {
-				// 		matches = append(matches, m)
-				// 		m = newMatch
-				// 	}
-				// 	lineNum++
-				// }
-				// if m.Matched {
-				// 	matches = append(matches, m)
-				// }
-
 				m.FindMatches(pattern, buf, &matches)
 			}
 		}

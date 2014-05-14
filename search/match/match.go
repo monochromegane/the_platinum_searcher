@@ -58,12 +58,6 @@ func (self *Match) setBefore(num int, s string) {
 	self.Befores = append(befores, &Line{num, s})
 }
 
-func (self *Match) setBeforePrepend(num int, s string) {
-	self.Befores = append(self.Befores, nil)
-	copy(self.Befores[1:], self.Befores[:])
-	self.Befores[0] = &Line{num, s}
-}
-
 func (self *Match) setAfter(num int, s string) bool {
 	if len(self.Afters) >= self.afterNum {
 		return false
