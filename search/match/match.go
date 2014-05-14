@@ -162,10 +162,16 @@ func (self *Match) FindMatches(pattern *pattern.Pattern, buf []byte, matches *[]
 			lineStartIndex = lineEndIndex + 1
 			tempIndex = lineStartIndex
 		}
+		matchEndIndex := bytes.Index(buf[matchIndexes[i][1]:], []byte("\n"))
 		line++
+		if (-1 == matchEndIndex) {
+			matchEndIndex = len(buf) 
+		} else {
+			matchEndIndex = matchIndexes[i][1] + matchEndIndex
+		}
 		//Setup new match and append here
 		currentMatch.Matched = true
-		currentMatch.setMatch(line, string (buf[lineStartIndex:matchIndexes[i][1]]))
+		currentMatch.setMatch(line, string (buf[lineStartIndex:matchEndIndex]))
 		*matches = append(*matches, currentMatch)
 		prevMatch = currentMatch
 		//Search for newlines within the match (multiline regex case)

@@ -105,13 +105,14 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 			var buf []byte
 			if dec := getDecoder(encode); dec != nil {
 				buf = transform.Bytes(dec, mmap)
-			} else {
+			}
+			//buf would be nil either due to not being init'ed yet or
+			//due to transformation error
+			if (buf == nil) {
 				buf = mmap
 			}
-			//buf can be nil due to transformation error
-			if (buf != nil) {
-				m.FindMatches(pattern, buf, &matches)
-			}
+
+			m.FindMatches(pattern, buf, &matches)
 		}
 		//We are all done touching mmap. So it should be safe to unmap it now
 		mmap.UnsafeUnmap()
