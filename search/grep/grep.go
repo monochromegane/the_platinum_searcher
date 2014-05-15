@@ -9,6 +9,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
+	"github.com/edsrzf/mmap-go"
 	"os"
 	"sync"
 )
@@ -72,30 +73,49 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 		panic(err)
 	}
 
-	var f *bufio.Reader
-	if dec := getDecoder(encode); dec != nil {
-		f = bufio.NewReader(transform.NewReader(fh, dec))
-	} else {
-		f = bufio.NewReader(fh)
-	}
-
-	var buf []byte
 	matches := make([]*match.Match, 0)
 	m := match.NewMatch(self.Option.Before, self.Option.After)
-	var lineNum = 1
-	for {
-		buf, _, err = f.ReadLine()
-		if err != nil {
-			break
+	if self.Option.SearchStream {
+		var f *bufio.Reader
+		if dec := getDecoder(encode); dec != nil {
+			f = bufio.NewReader(transform.NewReader(fh, dec))
+		} else {
+			f = bufio.NewReader(fh)
 		}
-		if newMatch, ok := m.IsMatch(pattern, lineNum, string(buf)); ok {
+
+		var buf []byte
+		var lineNum = 1
+		for {
+			buf, _, err = f.ReadLine()
+			if err != nil {
+				break
+			}
+			if newMatch, ok := m.IsMatch(pattern, lineNum, string(buf)); ok {
+				matches = append(matches, m)
+				m = newMatch
+			}
+			lineNum++
+		}
+		if m.Matched {
 			matches = append(matches, m)
-			m = newMatch
 		}
-		lineNum++
-	}
-	if m.Matched {
-		matches = append(matches, m)
+	} else {
+		mappedFile, _ := mmap.Map(fh, mmap.RDONLY, 0)
+		if (0 != len(mappedFile)) {
+			var buf []byte
+			if dec := getDecoder(encode); dec != nil {
+				buf = transform.Bytes(dec, mappedFile)
+			}
+			//buf would be nil either due to not being init'ed yet or
+			//due to transformation error
+			if (buf == nil) {
+				buf = mappedFile
+			}
+
+			m.FindMatches(pattern, buf, &matches)
+		}
+		//We are all done touching mmap. So it should be safe to unmap it now
+		mappedFile.Unmap()
 	}
 	self.Out <- &print.Params{pattern, path, matches}
 	fh.Close()

@@ -3,6 +3,7 @@ package match
 import (
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"strings"
+	"bytes"
 )
 
 type Match struct {
@@ -81,12 +82,15 @@ func (self *Match) setUpNewMatch(num int, s string) (*Match, bool) {
 	}
 }
 
+var MatchCount int
 func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match, bool) {
 	if pattern.IgnoreCase {
 		if pattern.Regexp.MatchString(s) {
+			MatchCount++
 			return self.setUpNewMatch(num, s)
 		}
 	} else if strings.Contains(s, pattern.Pattern) {
+		MatchCount++
 		return self.setUpNewMatch(num, s)
 	}
 	if !self.Matched && self.beforeNum > 0 {
@@ -117,5 +121,94 @@ func (self *Match) LastLineNum() int {
 		return self.Line.Num
 	} else {
 		return self.Afters[len(self.Afters)-1].Num
+	}
+}
+
+func (self *Match) FindMatches(pattern *pattern.Pattern, buf []byte, matches *[]*Match) {
+	var matchIndexes [][]int
+	if pattern.IgnoreCase {
+		matchIndexes = pattern.Regexp.FindAllIndex(buf, -1)
+	} else {
+		for i := 0; i < len(buf); {
+			matchIndex := make([]int, 2)
+			matchIndex[0] = bytes.Index(buf[i:], []byte (pattern.Pattern))
+			if (-1 == matchIndex[0]) { break }
+			matchIndex[0] = matchIndex[0] + i
+			matchIndex[1] = matchIndex[0] + len(pattern.Pattern)
+			matchIndexes = append(matchIndexes, matchIndex)
+			i = matchIndex[1] + 1
+		}
+	}
+	// Return right away if there were no matches found
+	if (nil == matchIndexes) {
+		return
+	}
+	MatchCount = MatchCount + len(matchIndexes)
+	// Found a match so find newlines
+	tempIndex := 0
+	line := 0
+	lineStartIndex := 0
+	var prevMatch *Match
+	for i := 0; i < len (matchIndexes); i++ {
+		currentMatch := NewMatch(self.beforeNum, self.afterNum)
+		for {
+			//If no more new lines before the current match, go to next match loop
+			if(tempIndex > matchIndexes[i][0]) {
+				i++
+				if (i >= len (matchIndexes)) { goto matchLoopDone }
+				continue
+			}
+			lineEndIndex := bytes.Index(buf[tempIndex:matchIndexes[i][0]], []byte("\n"))
+			if ( -1 == lineEndIndex) { break }
+			lineEndIndex = lineStartIndex + lineEndIndex
+			line++
+			if self.beforeNum > 0 {
+				currentMatch.setBefore(line, string (buf[lineStartIndex:lineEndIndex]))
+			}
+			if (self.afterNum > 0) && (prevMatch != nil) {
+				prevMatch.setAfter(line, string (buf[lineStartIndex:lineEndIndex]))
+			}
+			lineStartIndex = lineEndIndex + 1
+			tempIndex = lineStartIndex
+		}
+		matchEndIndex := bytes.Index(buf[matchIndexes[i][1]:], []byte("\n"))
+		line++
+		if (-1 == matchEndIndex) {
+			matchEndIndex = len(buf)
+		} else {
+			matchEndIndex = matchIndexes[i][1] + matchEndIndex
+		}
+		//Setup new match and append here
+		currentMatch.Matched = true
+		currentMatch.setMatch(line, string (buf[lineStartIndex:matchEndIndex]))
+		*matches = append(*matches, currentMatch)
+		prevMatch = currentMatch
+		//Search for newlines within the match (multiline regex case)
+		for j := lineStartIndex; j < matchIndexes[i][1]; {
+			tempIndex2 := bytes.Index(buf[j:matchIndexes[i][1]], []byte("\n"))
+			if( -1 == tempIndex2 ) { break }
+			line++
+			j = j + tempIndex2 + 1
+		}
+		//Next newline search should start from current match's end or newline 
+		//whichever is greater
+		if (matchEndIndex > matchIndexes[i][1]) {
+			tempIndex = matchEndIndex + 1
+		} else {
+			tempIndex = matchIndexes[i][1] + 1
+		}
+		lineStartIndex = tempIndex
+	}
+
+matchLoopDone:
+	//After context for last match should be done here as a special case
+	lastAfterCtr := 0
+	for i := lineStartIndex; (i < len(buf)) && (lastAfterCtr < self.afterNum) ; {
+		idx := bytes.Index(buf[i:], []byte("\n"))
+		if (-1 == idx) { break }
+		line++
+		lastAfterCtr++
+		prevMatch.setAfter(line, string (buf[i:i + idx]))
+		i = i + idx + 1
 	}
 }
