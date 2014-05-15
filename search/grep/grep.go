@@ -9,7 +9,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
-	"launchpad.net/gommap"
+	"github.com/edsrzf/mmap-go"
 	"os"
 	"sync"
 )
@@ -100,22 +100,22 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 			matches = append(matches, m)
 		}
 	} else {
-		mmap, _ := gommap.Map(fh.Fd(), gommap.PROT_READ, gommap.MAP_PRIVATE|gommap.MAP_POPULATE)
-		if (0 != len(mmap)) {
+		mappedFile, _ := mmap.Map(fh, mmap.RDONLY, 0)
+		if (0 != len(mappedFile)) {
 			var buf []byte
 			if dec := getDecoder(encode); dec != nil {
-				buf = transform.Bytes(dec, mmap)
+				buf = transform.Bytes(dec, mappedFile)
 			}
 			//buf would be nil either due to not being init'ed yet or
 			//due to transformation error
 			if (buf == nil) {
-				buf = mmap
+				buf = mappedFile
 			}
 
 			m.FindMatches(pattern, buf, &matches)
 		}
 		//We are all done touching mmap. So it should be safe to unmap it now
-		mmap.UnsafeUnmap()
+		mappedFile.Unmap()
 	}
 	self.Out <- &print.Params{pattern, path, matches}
 	fh.Close()

@@ -82,12 +82,15 @@ func (self *Match) setUpNewMatch(num int, s string) (*Match, bool) {
 	}
 }
 
+var MatchCount int
 func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match, bool) {
 	if pattern.IgnoreCase {
 		if pattern.Regexp.MatchString(s) {
+			MatchCount++
 			return self.setUpNewMatch(num, s)
 		}
 	} else if strings.Contains(s, pattern.Pattern) {
+		MatchCount++
 		return self.setUpNewMatch(num, s)
 	}
 	if !self.Matched && self.beforeNum > 0 {
@@ -140,6 +143,7 @@ func (self *Match) FindMatches(pattern *pattern.Pattern, buf []byte, matches *[]
 	if (nil == matchIndexes) {
 		return
 	}
+	MatchCount = MatchCount + len(matchIndexes)
 	// Found a match so find newlines
 	tempIndex := 0
 	line := 0
@@ -149,6 +153,11 @@ func (self *Match) FindMatches(pattern *pattern.Pattern, buf []byte, matches *[]
 		currentMatch := NewMatch(self.beforeNum, self.afterNum)
 		for {
 			//If no more new lines before the current match, go to next match loop
+			if(tempIndex > matchIndexes[i][0]) {
+				i++
+				if (i >= len (matchIndexes)) { goto matchLoopDone }
+				continue
+			}
 			lineEndIndex := bytes.Index(buf[tempIndex:matchIndexes[i][0]], []byte("\n"))
 			if ( -1 == lineEndIndex) { break }
 			lineEndIndex = lineStartIndex + lineEndIndex
@@ -165,7 +174,7 @@ func (self *Match) FindMatches(pattern *pattern.Pattern, buf []byte, matches *[]
 		matchEndIndex := bytes.Index(buf[matchIndexes[i][1]:], []byte("\n"))
 		line++
 		if (-1 == matchEndIndex) {
-			matchEndIndex = len(buf) 
+			matchEndIndex = len(buf)
 		} else {
 			matchEndIndex = matchIndexes[i][1] + matchEndIndex
 		}
@@ -181,10 +190,17 @@ func (self *Match) FindMatches(pattern *pattern.Pattern, buf []byte, matches *[]
 			line++
 			j = j + tempIndex2 + 1
 		}
-		//Next newline search should start from current match's end
-		tempIndex = matchIndexes[i][1] + 1
+		//Next newline search should start from current match's end or newline 
+		//whichever is greater
+		if (matchEndIndex > matchIndexes[i][1]) {
+			tempIndex = matchEndIndex + 1
+		} else {
+			tempIndex = matchIndexes[i][1] + 1
+		}
 		lineStartIndex = tempIndex
 	}
+
+matchLoopDone:
 	//After context for last match should be done here as a special case
 	lastAfterCtr := 0
 	for i := lineStartIndex; (i < len(buf)) && (lastAfterCtr < self.afterNum) ; {

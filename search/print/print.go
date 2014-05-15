@@ -37,9 +37,8 @@ func NewPrinter(in chan *Params, done chan bool, option *option.Option) *Printer
 }
 
 func (self *Printer) Print() {
-	var fileMatchCount, matchCount uint
+	var fileMatchCount uint
 	fileMatchCount = 0
-	matchCount     = 0
 	for arg := range self.In {
 
 		if self.Option.FilesWithRegexp != "" {
@@ -81,7 +80,6 @@ func (self *Printer) Print() {
 			}
 			self.printContext(v.Befores)
 			self.printMatch(arg.Pattern, v.Line)
-			matchCount++
 			fmt.Println()
 			self.printContext(v.Afters)
 		}
@@ -91,7 +89,7 @@ func (self *Printer) Print() {
 	}
 	if self.Option.Stats {
 		fmt.Printf("%d Files Matched\n", fileMatchCount)
-		fmt.Printf("%d Total Text Matches\n", matchCount)
+		fmt.Printf("%d Total Text Matches\n", match.MatchCount)
 	}
 	self.Done <- true
 }
