@@ -34,17 +34,7 @@ func (self *Finder) findStream(pattern *pattern.Pattern) {
 
 func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 	if self.Option.NoPtIgnore == false {
-		usr, err := user.Current()
-		var homeDir string
-		if err == nil {
-			homeDir = usr.HomeDir
-		} else {
-			// Maybe it's cross compilation without cgo support. (darwin, unix)
-			homeDir = os.Getenv("HOME")
-		}
-		if homeDir != "" {
-			self.Option.Ignore = append(self.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{".ptignore"})...)
-		}
+		self.addHomePtIgnore()
 	}
 	Walk(root, self.Option.Ignore, self.Option.Follow, func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
@@ -57,7 +47,7 @@ func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 				return filepath.SkipDir, ig
 			} else {
 				for _, p := range ig.Patterns {
-					val, _:= filepath.Match(p, filepath.Base(path) + "/") 
+					val, _ := filepath.Match(p, filepath.Base(path)+"/")
 					if val {
 						return filepath.SkipDir, ig
 					}
@@ -73,7 +63,7 @@ func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 			return nil, ig
 		}
 		for _, p := range ig.Patterns {
-			val, _:= filepath.Match(p, filepath.Base(path)) 
+			val, _ := filepath.Match(p, filepath.Base(path))
 			if val {
 				return nil, ig
 			}
@@ -168,4 +158,18 @@ func contains(path string, patterns *[]string) bool {
 		}
 	}
 	return false
+}
+
+func (self *Finder) addHomePtIgnore() {
+	usr, err := user.Current()
+	var homeDir string
+	if err == nil {
+		homeDir = usr.HomeDir
+	} else {
+		// Maybe it's cross compilation without cgo support. (darwin, unix)
+		homeDir = os.Getenv("HOME")
+	}
+	if homeDir != "" {
+		self.Option.Ignore = append(self.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{".ptignore"})...)
+	}
 }

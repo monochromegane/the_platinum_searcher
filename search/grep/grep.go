@@ -25,6 +25,7 @@ type Grepper struct {
 }
 
 var FilesSearched uint
+
 func (self *Grepper) ConcurrentGrep() {
 	var wg sync.WaitGroup
 	FilesSearched = 0

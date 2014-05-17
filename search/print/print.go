@@ -40,7 +40,7 @@ func NewPrinter(in chan *Params, done chan bool, option *option.Option) *Printer
 func (self *Printer) Print() {
 	var fileMatchCount, matchCount uint
 	fileMatchCount = 0
-	matchCount     = 0
+	matchCount = 0
 	for arg := range self.In {
 
 		if self.Option.FilesWithRegexp != "" {
