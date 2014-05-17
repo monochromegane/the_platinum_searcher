@@ -35,10 +35,16 @@ func (self *Finder) findStream(pattern *pattern.Pattern) {
 func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 	if self.Option.NoPtIgnore == false {
 		usr, err := user.Current()
-		if err != nil {
-			return
+		var homeDir string
+		if err == nil {
+			homeDir = usr.HomeDir
+		} else {
+			// Maybe it's cross compilation without cgo support. (darwin, unix)
+			homeDir = os.Getenv("HOME")
 		}
-		self.Option.Ignore = append(self.Option.Ignore, ignore.IgnorePatterns(usr.HomeDir, []string{".ptignore"})...)
+		if homeDir != "" {
+			self.Option.Ignore = append(self.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{".ptignore"})...)
+		}
 	}
 	Walk(root, self.Option.Ignore, self.Option.Follow, func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
