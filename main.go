@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const version = "1.5.2"
+const version = "1.6.1"
 
 var opts option.Option
 
