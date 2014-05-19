@@ -39,6 +39,13 @@ Download from following urls.
 - [Linux(x86 64bit)](https://drone.io/github.com/monochromegane/the_platinum_searcher/files/artifacts/bin/linun_amd64/pt)
 - [Linux(x86 32bit)](https://drone.io/github.com/monochromegane/the_platinum_searcher/files/artifacts/bin/linux_386/pt)
 
+Or, you can use Homebrew (Only MacOSX).
+
+```sh
+$ brew tap monochromegane/pt
+$ brew install pt
+```
+
 ## Usage
 
 ```sh
