@@ -72,6 +72,10 @@ if executable('pt')
 endif
 ```
 
+### Emacs + pt.el
+
+You can use pt with [pt.el](https://github.com/bling/pt.el), which can be installed from [MELPA](http://melpa.milkbox.net/).
+
 ## Code Status
 
 - [![Build Status](https://travis-ci.org/monochromegane/the_platinum_searcher.png?branch=master)](https://travis-ci.org/monochromegane/the_platinum_searcher)
