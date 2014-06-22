@@ -20,6 +20,7 @@ type Option struct {
 	Context          int      `short:"C" long:"context" description:"Print lines before and after match"`
 	OutputEncode     string   `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
 	SearchStream     bool     // Input from pipe. Not user option.
+	Regexp           bool     `short:"e" description:"Parse PATTERN as a regular expression (Disabled by default)"`
 	Proc             int      // Number of goroutine. Not user option.
 	Stats            bool     `long:"stats" description:"Print stats about files scanned, time taken, etc"`
 	Version          bool     `long:"version" description:"Show version"`
