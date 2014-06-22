@@ -30,7 +30,7 @@ func TestGrep(t *testing.T) {
 		out := make(chan *print.Params)
 		grepper := Grepper{in, out, &option.Option{Proc: 1}}
 
-		pattern, _ := pattern.NewPattern(g.pattern, "", false, false)
+		pattern, _ := pattern.NewPattern(g.pattern, "", false, false, false)
 		sem := make(chan bool, 1)
 		sem <- true
 		go grepper.Grep("../../files/"+g.path, g.fileType, pattern, sem)
@@ -57,7 +57,7 @@ func TestGrepWithStream(t *testing.T) {
 	out := make(chan *print.Params)
 	grepper := Grepper{in, out, &option.Option{Proc: 1, SearchStream: true}}
 
-	pattern, _ := pattern.NewPattern(g.pattern, "", false, false)
+	pattern, _ := pattern.NewPattern(g.pattern, "", false, false, false)
 	sem := make(chan bool, 1)
 	sem <- true
 	go grepper.Grep(g.path, g.fileType, pattern, sem)
