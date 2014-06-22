@@ -5,6 +5,48 @@ import (
 	"testing"
 )
 
+func testIsMatch(t *testing.T) {
+
+	match := NewMatch(0, 0)
+
+	// not use regexp
+	p, _ := pattern.NewPattern("go", "", false, false, false)
+	lines := []string{"go", "GO", "Go", "oo"}
+	for index, line := range lines {
+		_, ok := match.IsMatch(p, index+1, line)
+		if ok {
+			if match.Str != "go" {
+				t.Errorf("It should be equal %s, but %s.", "go", match.Str)
+			}
+		}
+	}
+
+	// ignore case
+	p, _ = pattern.NewPattern("go", "", false, true, false)
+	lines = []string{"go", "GO", "Go", "oo"}
+	for index, line := range lines {
+		_, ok := match.IsMatch(p, index+1, line)
+		if ok {
+			if match.Str != "go" || match.Str != "GO" || match.Str != "Go" {
+				t.Errorf("It should be equal %s, but %s.", "go|Go", match.Str)
+			}
+		}
+	}
+
+	// use regexp
+	p, _ = pattern.NewPattern("go|Go", "", false, false, true)
+	lines = []string{"go", "GO", "Go", "oo"}
+	for index, line := range lines {
+		_, ok := match.IsMatch(p, index+1, line)
+		if ok {
+			if match.Str != "go" || match.Str != "Go" {
+				t.Errorf("It should be equal %s, but %s.", "go|Go", match.Str)
+			}
+		}
+	}
+
+}
+
 func TestMatch(t *testing.T) {
 
 	pattern, _ := pattern.NewPattern("go", "", false, false, false)
