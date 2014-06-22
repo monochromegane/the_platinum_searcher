@@ -24,7 +24,7 @@ func NewPattern(pattern, filePattern string, smartCase, ignoreCase bool) (*Patte
 	var regIgnoreCase *regexp.Regexp
 	var ignoreErr error
 	if ignoreCase {
-		regIgnoreCase, ignoreErr = regexp.Compile(`(?i)(` + pattern + `)`)
+		regIgnoreCase, ignoreErr = regexp.Compile(`(?i)(\Q` + pattern + `\E)`)
 	}
 
 	var regFile *regexp.Regexp
