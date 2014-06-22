@@ -82,7 +82,11 @@ func (self *Match) setUpNewMatch(num int, s string) (*Match, bool) {
 }
 
 func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match, bool) {
-	if pattern.IgnoreCase {
+	if pattern.UseRegexp {
+		if pattern.Regexp.MatchString(s) {
+			return self.setUpNewMatch(num, s)
+		}
+	} else if pattern.IgnoreCase {
 		if strings.Contains(strings.ToUpper(s), strings.ToUpper(pattern.Pattern)) {
 			return self.setUpNewMatch(num, s)
 		}

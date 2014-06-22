@@ -38,6 +38,7 @@ func (self *Searcher) pattern() (*pattern.Pattern, error) {
 		fileRegexp,
 		self.Option.SmartCase,
 		self.Option.IgnoreCase,
+		self.Option.Regexp,
 	)
 }
 

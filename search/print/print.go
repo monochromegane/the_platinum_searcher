@@ -118,7 +118,7 @@ func (self *Printer) printMatch(pattern *pattern.Pattern, line *match.Line) {
 	self.printLineNumber(line.Num, ":")
 	if !self.Option.EnableColor {
 		fmt.Fprintf(self.writer, "%s", line.Str)
-	} else if pattern.IgnoreCase {
+	} else if pattern.UseRegexp || pattern.IgnoreCase {
 		fmt.Fprintf(self.writer, "%s", pattern.Regexp.ReplaceAllString(line.Str, ColorMatch+"${1}"+ColorReset))
 	} else {
 		fmt.Fprintf(self.writer, "%s", strings.Replace(line.Str, pattern.Pattern, ColorMatch+pattern.Pattern+ColorReset, -1))

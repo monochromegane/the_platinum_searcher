@@ -9,9 +9,10 @@ type Pattern struct {
 	Regexp     *regexp.Regexp
 	FileRegexp *regexp.Regexp
 	IgnoreCase bool
+	UseRegexp  bool
 }
 
-func NewPattern(pattern, filePattern string, smartCase, ignoreCase bool) (*Pattern, error) {
+func NewPattern(pattern, filePattern string, smartCase, ignoreCase, useRegexp bool) (*Pattern, error) {
 
 	if smartCase {
 		if regexp.MustCompile(`[[:upper:]]`).MatchString(pattern) {
@@ -21,10 +22,12 @@ func NewPattern(pattern, filePattern string, smartCase, ignoreCase bool) (*Patte
 		}
 	}
 
-	var regIgnoreCase *regexp.Regexp
-	var ignoreErr error
+	var regPattern *regexp.Regexp
+	var patternErr error
 	if ignoreCase {
-		regIgnoreCase, ignoreErr = regexp.Compile(`(?i)(\Q` + pattern + `\E)`)
+		regPattern, patternErr = regexp.Compile(`(?i)(` + pattern + `)`)
+	} else if useRegexp {
+		regPattern, patternErr = regexp.Compile(`(` + pattern + `)`)
 	}
 
 	var regFile *regexp.Regexp
@@ -35,8 +38,8 @@ func NewPattern(pattern, filePattern string, smartCase, ignoreCase bool) (*Patte
 
 	var err error
 	switch {
-	case ignoreErr != nil:
-		err = ignoreErr
+	case patternErr != nil:
+		err = patternErr
 	case fileErr != nil:
 		err = fileErr
 	default:
@@ -45,9 +48,10 @@ func NewPattern(pattern, filePattern string, smartCase, ignoreCase bool) (*Patte
 
 	return &Pattern{
 		Pattern:    pattern,
-		Regexp:     regIgnoreCase,
+		Regexp:     regPattern,
 		FileRegexp: regFile,
 		IgnoreCase: ignoreCase,
+		UseRegexp:  useRegexp,
 	}, err
 
 }
