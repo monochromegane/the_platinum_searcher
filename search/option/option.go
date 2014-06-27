@@ -13,7 +13,7 @@ type Option struct {
 	SmartCase        bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
 	FilesWithRegexp  string   `short:"g" description:"Print filenames matching PATTERN"`
 	FileSearchRegexp string   `short:"G" long:"file-search-regexp" description:"PATTERN Limit search to filenames matching PATTERN"`
-	Depth            int      `long:"depth" default:"25" default-mask:"-" description:"Search up to NUM derectories deep (Default: 25)"`
+	Depth            int      `long:"depth" default:"25" default-mask:"-" description:"Search up to NUM directories deep (Default: 25)"`
 	Follow           bool     `short:"f" long:"follow" description:"Follow symlinks"`
 	After            int      `short:"A" long:"after" description:"Print lines after match"`
 	Before           int      `short:"B" long:"before" description:"Print lines before match"`
