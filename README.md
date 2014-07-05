@@ -42,8 +42,7 @@ Download from following urls.
 Or, you can use Homebrew (Only MacOSX).
 
 ```sh
-$ brew tap monochromegane/pt
-$ brew install pt
+$ brew install the_platinum_searcher
 ```
 
 ## Usage
