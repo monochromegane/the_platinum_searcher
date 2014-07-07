@@ -2,6 +2,9 @@ package grep
 
 import (
 	"bufio"
+	"os"
+	"sync"
+
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
 	"github.com/monochromegane/the_platinum_searcher/search/file"
@@ -9,8 +12,6 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
-	"os"
-	"sync"
 )
 
 type Params struct {

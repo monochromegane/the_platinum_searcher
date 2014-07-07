@@ -1,8 +1,9 @@
 package match
 
 import (
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"strings"
+
+	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type Match struct {

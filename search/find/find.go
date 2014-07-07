@@ -1,17 +1,18 @@
 package find
 
 import (
-	"github.com/monochromegane/the_platinum_searcher/search/file"
-	"github.com/monochromegane/the_platinum_searcher/search/grep"
-	"github.com/monochromegane/the_platinum_searcher/search/ignore"
-	"github.com/monochromegane/the_platinum_searcher/search/option"
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
+
+	"github.com/monochromegane/the_platinum_searcher/search/file"
+	"github.com/monochromegane/the_platinum_searcher/search/grep"
+	"github.com/monochromegane/the_platinum_searcher/search/ignore"
+	"github.com/monochromegane/the_platinum_searcher/search/option"
+	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type Finder struct {
@@ -201,7 +202,7 @@ func globalGitIgnore() string {
 		return ""
 	}
 
-	file, err := exec.Command(gitCmd, "config", "--get",  "core.excludesfile").Output()
+	file, err := exec.Command(gitCmd, "config", "--get", "core.excludesfile").Output()
 	var filename string
 	if err != nil {
 		filename = ""
