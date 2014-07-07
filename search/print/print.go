@@ -1,17 +1,20 @@
 package print
 
 import (
+	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"fmt"
 	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/shiena/ansicolor"
-	"io"
-	"os"
-	"strings"
 )
+
+var FileMatchCount, MatchCount uint
 
 const (
 	ColorReset      = "\x1b[0m\x1b[K"
@@ -38,15 +41,14 @@ func NewPrinter(in chan *Params, done chan bool, option *option.Option) *Printer
 }
 
 func (self *Printer) Print() {
-	var fileMatchCount, matchCount uint
-	fileMatchCount = 0
-	matchCount = 0
+	FileMatchCount = 0
+	MatchCount = 0
 	for arg := range self.In {
 
 		if self.Option.FilesWithRegexp != "" {
 			self.printPath(arg.Path)
 			fmt.Println()
-			fileMatchCount++
+			FileMatchCount++
 			continue
 		}
 
@@ -57,13 +59,13 @@ func (self *Printer) Print() {
 		if self.Option.FilesWithMatches {
 			self.printPath(arg.Path)
 			fmt.Println()
-			fileMatchCount++
+			FileMatchCount++
 			continue
 		}
 		if !self.Option.NoGroup {
 			self.printPath(arg.Path)
 			fmt.Println()
-			fileMatchCount++
+			FileMatchCount++
 		}
 		lastLineNum := 0
 		enableContext := self.Option.Before > 0 || self.Option.After > 0
@@ -82,7 +84,7 @@ func (self *Printer) Print() {
 			}
 			self.printContext(v.Befores)
 			self.printMatch(arg.Pattern, v.Line)
-			matchCount++
+			MatchCount++
 			fmt.Println()
 			self.printContext(v.Afters)
 		}
@@ -91,8 +93,8 @@ func (self *Printer) Print() {
 		}
 	}
 	if self.Option.Stats {
-		fmt.Printf("%d Files Matched\n", fileMatchCount)
-		fmt.Printf("%d Total Text Matches\n", matchCount)
+		fmt.Printf("%d Files Matched\n", FileMatchCount)
+		fmt.Printf("%d Total Text Matches\n", MatchCount)
 	}
 	self.Done <- true
 }

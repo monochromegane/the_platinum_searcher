@@ -12,6 +12,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search"
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
+	"github.com/monochromegane/the_platinum_searcher/search/print"
 )
 
 const version = "1.6.4"
@@ -103,5 +104,9 @@ func main() {
 		elapsed := time.Since(start)
 		fmt.Printf("%d Files Searched\n", grep.FilesSearched)
 		fmt.Printf("%s Elapsed\n", elapsed)
+	}
+
+	if print.FileMatchCount == 0 {
+		os.Exit(1)
 	}
 }
