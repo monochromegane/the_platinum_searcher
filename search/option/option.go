@@ -22,6 +22,7 @@ type Option struct {
 	OutputEncode      string   `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
 	SearchStream      bool     // Input from pipe. Not user option.
 	Regexp            bool     `short:"e" description:"Parse PATTERN as a regular expression (Disabled by default)"`
+	WordRegexp        bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
 	Proc              int      // Number of goroutine. Not user option.
 	Stats             bool     `long:"stats" description:"Print stats about files scanned, time taken, etc"`
 	Version           bool     `long:"version" description:"Show version"`
