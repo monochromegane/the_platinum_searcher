@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"runtime"
+	"strings"
+	"time"
+
 	flags "github.com/jessevdk/go-flags"
 	"github.com/monochromegane/terminal"
 	"github.com/monochromegane/the_platinum_searcher/search"
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
-	"os"
-	"runtime"
-	"strings"
-	"time"
 )
 
 const version = "1.6.4"
@@ -83,6 +84,11 @@ func main() {
 	pattern := ""
 	if len(args) > 0 {
 		pattern = args[0]
+	}
+
+	if opts.WordRegexp {
+		opts.Regexp = true
+		pattern = "\\b" + pattern + "\\b"
 	}
 
 	start := time.Now()
