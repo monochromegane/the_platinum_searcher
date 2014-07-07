@@ -16,7 +16,7 @@ import (
 	"github.com/monochromegane/the_platinum_searcher/search/print"
 )
 
-const version = "1.6.4"
+const version = "1.6.5"
 
 var opts option.Option
 
