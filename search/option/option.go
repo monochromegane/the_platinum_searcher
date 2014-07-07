@@ -3,6 +3,7 @@ package option
 type Option struct {
 	Color             func()   `long:"color" description:"Print color codes in results (Enabled by default)"`
 	NoColor           func()   `long:"nocolor" description:"Don't print color codes in results (Disabled by default)"`
+	ForceColor        bool     // Force color.  Not user option.
 	EnableColor       bool     // Enable color. Not user option.
 	NoGroup           bool     `long:"nogroup" description:"Don't print file name at header (Disabled by default)"`
 	FilesWithMatches  bool     `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
@@ -36,6 +37,7 @@ func (self *Option) VcsIgnores() []string {
 }
 
 func (self *Option) SetEnableColor() {
+	self.ForceColor = true
 	self.EnableColor = true
 }
 

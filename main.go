@@ -9,6 +9,7 @@ import (
 
 	flags "github.com/jessevdk/go-flags"
 	"github.com/monochromegane/terminal"
+
 	"github.com/monochromegane/the_platinum_searcher/search"
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
@@ -73,7 +74,9 @@ func main() {
 	opts.Proc = runtime.NumCPU()
 
 	if !terminal.IsTerminal(os.Stdout) {
-		opts.EnableColor = false
+		if !opts.ForceColor {
+			opts.EnableColor = false
+		}
 		opts.NoGroup = true
 	}
 
