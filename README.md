@@ -40,7 +40,7 @@ Download from following urls.
 Or, you can use Homebrew (Only MacOSX).
 
 ```sh
-$ brew install the_platinum_searcher
+$ brew install pt
 ```
 
 ## Usage
