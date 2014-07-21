@@ -6,8 +6,8 @@ import (
 
 func TestFind(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &Option{}}
-	go finder.Find("files", &Pattern{Pattern: "go"})
+	find := find{out, &Option{}}
+	go find.Start("files", &Pattern{Pattern: "go"})
 
 	for o := range out {
 		if o.Path == ".hidden/hidden.txt" {
@@ -27,8 +27,8 @@ var Ignores = []string{
 
 func TestFindWithIgnore(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &Option{VcsIgnore: []string{".vcsignore"}}}
-	go finder.Find("files/vcs", &Pattern{Pattern: "go"})
+	find := find{out, &Option{VcsIgnore: []string{".vcsignore"}}}
+	go find.Start("files/vcs", &Pattern{Pattern: "go"})
 
 	for o := range out {
 		for _, ignore := range Ignores {
@@ -51,8 +51,8 @@ var Hiddens = []Hidden{
 func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 	for _, hidden := range Hiddens {
 		out := make(chan *GrepParams)
-		finder := Finder{out, &Option{}}
-		go finder.Find("files/"+hidden.Root, &Pattern{Pattern: "go"})
+		find := find{out, &Option{}}
+		go find.Start("files/"+hidden.Root, &Pattern{Pattern: "go"})
 
 		found := false
 		for o := range out {
@@ -69,8 +69,8 @@ func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 
 func TestFindWithDepth(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &Option{Depth: 1}}
-	go finder.Find("files/depth", &Pattern{Pattern: "go"})
+	find := find{out, &Option{Depth: 1}}
+	go find.Start("files/depth", &Pattern{Pattern: "go"})
 
 	for o := range out {
 		if o.Path == "files/depth/dir_1/dir_2/file_3.txt" {
@@ -81,9 +81,9 @@ func TestFindWithDepth(t *testing.T) {
 
 func TestFindWithFileSearchPattern(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &Option{}}
+	find := find{out, &Option{}}
 	pattern, _ := NewPattern("go", "match.txt", true, true, false)
-	go finder.Find("files/vcs/match", pattern)
+	go find.Start("files/vcs/match", pattern)
 
 	for o := range out {
 		if o.Path == "files/vcs/match/ignore.txt" {
@@ -94,8 +94,8 @@ func TestFindWithFileSearchPattern(t *testing.T) {
 
 func TestFindWithStream(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &Option{SearchStream: true}}
-	go finder.Find(".", &Pattern{Pattern: "go"})
+	find := find{out, &Option{SearchStream: true}}
+	go find.Start(".", &Pattern{Pattern: "go"})
 
 	for o := range out {
 		if o.Path != "" {

@@ -9,12 +9,20 @@ import (
 	"strings"
 )
 
-type Finder struct {
+type find struct {
 	Out    chan *GrepParams
 	Option *Option
 }
 
-func (f *Finder) Find(root string, pattern *Pattern) {
+func Find(root string, pattern *Pattern, out chan *GrepParams, option *Option) {
+	find := find{
+		Out:    out,
+		Option: option,
+	}
+	find.Start(root, pattern)
+}
+
+func (f *find) Start(root string, pattern *Pattern) {
 	if f.Option.SearchStream {
 		f.findStream(pattern)
 	} else {
@@ -22,13 +30,13 @@ func (f *Finder) Find(root string, pattern *Pattern) {
 	}
 }
 
-func (f *Finder) findStream(pattern *Pattern) {
+func (f *find) findStream(pattern *Pattern) {
 	// TODO: File type is fixed in ASCII because it can not determine the character code.
 	f.Out <- &GrepParams{"", ASCII, pattern}
 	close(f.Out)
 }
 
-func (f *Finder) findFile(root string, pattern *Pattern) {
+func (f *find) findFile(root string, pattern *Pattern) {
 	if f.Option.NoPtIgnore == false {
 		f.addHomePtIgnore()
 	}
@@ -161,7 +169,7 @@ func contains(path string, patterns *[]string) bool {
 	return false
 }
 
-func (f *Finder) addHomePtIgnore() {
+func (f *find) addHomePtIgnore() {
 	homeDir := setHomeDir()
 	if homeDir != "" {
 		f.Option.Ignore = append(f.Option.Ignore, IgnorePatterns(homeDir, []string{".ptignore"})...)
@@ -180,7 +188,7 @@ func setHomeDir() string {
 	return homeDir
 }
 
-func (f *Finder) addGlobalGitIgnore() {
+func (f *find) addGlobalGitIgnore() {
 	homeDir := setHomeDir()
 	if homeDir != "" {
 		globalIgnore := globalGitIgnore()

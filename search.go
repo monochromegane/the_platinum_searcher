@@ -35,8 +35,7 @@ func (p *PlatinumSearcher) pattern() (*Pattern, error) {
 }
 
 func (p *PlatinumSearcher) find(out chan *GrepParams, pattern *Pattern) {
-	finder := Finder{out, p.Option}
-	finder.Find(p.Root, pattern)
+	Find(p.Root, pattern, out, p.Option)
 }
 
 func (p *PlatinumSearcher) grep(in chan *GrepParams, out chan *PrintParams) {
