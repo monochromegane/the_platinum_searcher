@@ -28,14 +28,9 @@ $ go get -u github.com/monochromegane/the_platinum_searcher/...
 
 ### User
 
-Download from following urls.
+Download from the following url.
 
-- [Mac OS X(x86 64bit)](https://drone.io/github.com/monochromegane/the_platinum_searcher/files/artifacts/bin/darwin_amd64/pt)
-- [Mac OS X(x86 32bit)](https://drone.io/github.com/monochromegane/the_platinum_searcher/files/artifacts/bin/darwin_i386/pt)
-- [Windows(x86 64bit)](https://drone.io/github.com/monochromegane/the_platinum_searcher/files/artifacts/bin/windows_amd64/pt.exe)
-- [Windows(x86 32bit)](https://drone.io/github.com/monochromegane/the_platinum_searcher/files/artifacts/bin/windows_i386/pt.exe)
-- [Linux(x86 64bit)](https://drone.io/github.com/monochromegane/the_platinum_searcher/files/artifacts/bin/linux_amd64/pt)
-- [Linux(x86 32bit)](https://drone.io/github.com/monochromegane/the_platinum_searcher/files/artifacts/bin/linux_i386/pt)
+- [https://github.com/monochromegane/the_platinum_searcher/releases](https://github.com/monochromegane/the_platinum_searcher/releases)
 
 Or, you can use Homebrew (Only MacOSX).
 
@@ -75,8 +70,9 @@ You can use pt with [pt.el](https://github.com/bling/pt.el), which can be instal
 
 ## Code Status
 
-- [![Build Status](https://travis-ci.org/monochromegane/the_platinum_searcher.png?branch=master)](https://travis-ci.org/monochromegane/the_platinum_searcher)
-- [![Build Status](https://drone.io/github.com/monochromegane/the_platinum_searcher/status.png)](https://drone.io/github.com/monochromegane/the_platinum_searcher/latest)
+[![wercker status](https://app.wercker.com/status/59ef90ac217537abc0994546958037f3/m "wercker status")](https://app.wercker.com/project/bykey/59ef90ac217537abc0994546958037f3)
+
+[![Build Status](https://travis-ci.org/monochromegane/the_platinum_searcher.png?branch=master)](https://travis-ci.org/monochromegane/the_platinum_searcher)
 
 ## Contributing
 
