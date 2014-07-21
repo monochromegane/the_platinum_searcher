@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/monochromegane/the_platinum_searcher"
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/ignore"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
@@ -30,7 +29,7 @@ func (f *Finder) Find(root string, pattern *pattern.Pattern) {
 
 func (f *Finder) findStream(pattern *pattern.Pattern) {
 	// TODO: File type is fixed in ASCII because it can not determine the character code.
-	f.Out <- &grep.Params{"", the_platinum_searcher.ASCII, pattern}
+	f.Out <- &grep.Params{"", ASCII, pattern}
 	close(f.Out)
 }
 
@@ -80,8 +79,8 @@ func (f *Finder) findFile(root string, pattern *pattern.Pattern) {
 		}
 		fileType := ""
 		if f.Option.FilesWithRegexp == "" {
-			fileType = the_platinum_searcher.IdentifyType(path)
-			if fileType == the_platinum_searcher.ERROR || fileType == the_platinum_searcher.BINARY {
+			fileType = IdentifyType(path)
+			if fileType == ERROR || fileType == BINARY {
 				return nil, ig
 			}
 		}
