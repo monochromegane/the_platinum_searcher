@@ -1,0 +1,32 @@
+{
+	"ImportPath": "github.com/monochromegane/the_platinum_searcher",
+	"GoVersion": "go1.3",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/go.text/encoding",
+			"Comment": "null-86",
+			"Rev": "46250cb715a27b42c736a5ff2a4e6fa0b2118952"
+		},
+		{
+			"ImportPath": "code.google.com/p/go.text/transform",
+			"Comment": "null-86",
+			"Rev": "46250cb715a27b42c736a5ff2a4e6fa0b2118952"
+		},
+		{
+			"ImportPath": "github.com/jessevdk/go-flags",
+			"Comment": "v1-200-g7047cf7",
+			"Rev": "7047cf7a8dc6f41e53365420ab62d415055232c6"
+		},
+		{
+			"ImportPath": "github.com/monochromegane/terminal",
+			"Rev": "6d255869fb99937f1f287bd1fe3a034c6c4f68f6"
+		},
+		{
+			"ImportPath": "github.com/shiena/ansicolor",
+			"Rev": "6046e7d18a7698e98846e5d25842e9cf15aecf2c"
+		}
+	]
+}
