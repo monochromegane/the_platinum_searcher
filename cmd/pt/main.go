@@ -12,7 +12,6 @@ import (
 
 	"github.com/monochromegane/the_platinum_searcher"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
-	"github.com/monochromegane/the_platinum_searcher/search/print"
 )
 
 const version = "1.6.5"
@@ -108,7 +107,7 @@ func main() {
 		fmt.Printf("%s Elapsed\n", elapsed)
 	}
 
-	if print.FileMatchCount == 0 {
+	if the_platinum_searcher.FileMatchCount == 0 {
 		os.Exit(1)
 	}
 }

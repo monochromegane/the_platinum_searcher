@@ -9,7 +9,6 @@ import (
 	"code.google.com/p/go.text/transform"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
-	"github.com/monochromegane/the_platinum_searcher/search/print"
 )
 
 type GrepParams struct {
@@ -19,7 +18,7 @@ type GrepParams struct {
 
 type Grepper struct {
 	In     chan *GrepParams
-	Out    chan *print.Params
+	Out    chan *PrintParams
 	Option *option.Option
 }
 
@@ -62,7 +61,7 @@ func getFileHandler(path string, opt *option.Option) (*os.File, error) {
 
 func (g *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan bool) {
 	if g.Option.FilesWithRegexp != "" {
-		g.Out <- &print.Params{pattern, path, nil}
+		g.Out <- &PrintParams{pattern, path, nil}
 		<-sem
 		return
 	}
@@ -97,7 +96,7 @@ func (g *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan b
 	if m.Matched {
 		matches = append(matches, m)
 	}
-	g.Out <- &print.Params{pattern, path, matches}
+	g.Out <- &PrintParams{pattern, path, matches}
 	fh.Close()
 	<-sem
 }

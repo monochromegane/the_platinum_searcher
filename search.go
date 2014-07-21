@@ -3,7 +3,6 @@ package the_platinum_searcher
 import (
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
-	"github.com/monochromegane/the_platinum_searcher/search/print"
 )
 
 type Searcher struct {
@@ -17,7 +16,7 @@ func (s *Searcher) Search() error {
 		return err
 	}
 	grep := make(chan *GrepParams, s.Option.Proc)
-	match := make(chan *print.Params, s.Option.Proc)
+	match := make(chan *PrintParams, s.Option.Proc)
 	done := make(chan bool)
 	go s.find(grep, pattern)
 	go s.grep(grep, match)
@@ -45,12 +44,12 @@ func (s *Searcher) find(out chan *GrepParams, pattern *pattern.Pattern) {
 	finder.Find(s.Root, pattern)
 }
 
-func (s *Searcher) grep(in chan *GrepParams, out chan *print.Params) {
+func (s *Searcher) grep(in chan *GrepParams, out chan *PrintParams) {
 	grepper := Grepper{in, out, s.Option}
 	grepper.ConcurrentGrep()
 }
 
-func (s *Searcher) print(in chan *print.Params, done chan bool) {
-	printer := print.NewPrinter(in, done, s.Option)
+func (s *Searcher) print(in chan *PrintParams, done chan bool) {
+	printer := NewPrinter(in, done, s.Option)
 	printer.Print()
 }

@@ -1,4 +1,4 @@
-package print
+package the_platinum_searcher
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"github.com/monochromegane/the_platinum_searcher"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/shiena/ansicolor"
@@ -23,20 +22,20 @@ const (
 	ColorMatch      = "\x1b[30;43m" /* black with yellow background */
 )
 
-type Params struct {
+type PrintParams struct {
 	Pattern *pattern.Pattern
 	Path    string
-	Matches []*the_platinum_searcher.Match
+	Matches []*Match
 }
 
 type Printer struct {
-	In     chan *Params
+	In     chan *PrintParams
 	Done   chan bool
 	Option *option.Option
 	writer io.Writer
 }
 
-func NewPrinter(in chan *Params, done chan bool, option *option.Option) *Printer {
+func NewPrinter(in chan *PrintParams, done chan bool, option *option.Option) *Printer {
 	return &Printer{in, done, option, createWriter(option)}
 }
 
@@ -116,7 +115,7 @@ func (p *Printer) printLineNumber(lineNum int, sep string) {
 		fmt.Fprintf(p.writer, "%d%s", lineNum, sep)
 	}
 }
-func (p *Printer) printMatch(pattern *pattern.Pattern, line *the_platinum_searcher.Line) {
+func (p *Printer) printMatch(pattern *pattern.Pattern, line *Line) {
 	p.printLineNumber(line.Num, ":")
 	if !p.Option.EnableColor {
 		fmt.Fprintf(p.writer, "%s", line.Str)
@@ -127,7 +126,7 @@ func (p *Printer) printMatch(pattern *pattern.Pattern, line *the_platinum_search
 	}
 }
 
-func (p *Printer) printContext(lines []*the_platinum_searcher.Line) {
+func (p *Printer) printContext(lines []*Line) {
 	for _, line := range lines {
 		p.printLineNumber(line.Num, "-")
 		fmt.Fprintf(p.writer, "%s", line.Str)

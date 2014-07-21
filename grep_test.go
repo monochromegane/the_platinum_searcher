@@ -6,7 +6,6 @@ import (
 
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
-	"github.com/monochromegane/the_platinum_searcher/search/print"
 )
 
 type GrepAssert struct {
@@ -27,7 +26,7 @@ func TestGrep(t *testing.T) {
 
 	for _, g := range GrepAsserts {
 		in := make(chan *GrepParams)
-		out := make(chan *print.Params)
+		out := make(chan *PrintParams)
 		grepper := Grepper{in, out, &option.Option{Proc: 1}}
 
 		pattern, _ := pattern.NewPattern(g.pattern, "", false, false, false)
@@ -54,7 +53,7 @@ func TestGrepWithStream(t *testing.T) {
 	defer func() { os.Stdin = tempStdin }()
 	g := GrepAssert{"", "go", ASCII, "go test"}
 	in := make(chan *GrepParams)
-	out := make(chan *print.Params)
+	out := make(chan *PrintParams)
 	grepper := Grepper{in, out, &option.Option{Proc: 1, SearchStream: true}}
 
 	pattern, _ := pattern.NewPattern(g.pattern, "", false, false, false)
