@@ -8,7 +8,6 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/shiena/ansicolor"
 )
@@ -31,11 +30,11 @@ type PrintParams struct {
 type Printer struct {
 	In     chan *PrintParams
 	Done   chan bool
-	Option *option.Option
+	Option *Option
 	writer io.Writer
 }
 
-func NewPrinter(in chan *PrintParams, done chan bool, option *option.Option) *Printer {
+func NewPrinter(in chan *PrintParams, done chan bool, option *Option) *Printer {
 	return &Printer{in, done, option, createWriter(option)}
 }
 
@@ -134,7 +133,7 @@ func (p *Printer) printContext(lines []*Line) {
 	}
 }
 
-func createWriter(option *option.Option) io.Writer {
+func createWriter(option *Option) io.Writer {
 	encoder := func() io.Writer {
 		switch option.OutputEncode {
 		case "sjis":

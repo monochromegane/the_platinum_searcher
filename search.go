@@ -1,13 +1,12 @@
 package the_platinum_searcher
 
 import (
-	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type Searcher struct {
 	Root, Pattern string
-	Option        *option.Option
+	Option        *Option
 }
 
 func (s *Searcher) Search() error {

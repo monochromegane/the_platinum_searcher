@@ -3,13 +3,12 @@ package the_platinum_searcher
 import (
 	"testing"
 
-	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 func TestFind(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &option.Option{}}
+	finder := Finder{out, &Option{}}
 	go finder.Find("files", &pattern.Pattern{Pattern: "go"})
 
 	for o := range out {
@@ -30,7 +29,7 @@ var Ignores = []string{
 
 func TestFindWithIgnore(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &option.Option{VcsIgnore: []string{".vcsignore"}}}
+	finder := Finder{out, &Option{VcsIgnore: []string{".vcsignore"}}}
 	go finder.Find("files/vcs", &pattern.Pattern{Pattern: "go"})
 
 	for o := range out {
@@ -54,7 +53,7 @@ var Hiddens = []Hidden{
 func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 	for _, hidden := range Hiddens {
 		out := make(chan *GrepParams)
-		finder := Finder{out, &option.Option{}}
+		finder := Finder{out, &Option{}}
 		go finder.Find("files/"+hidden.Root, &pattern.Pattern{Pattern: "go"})
 
 		found := false
@@ -72,7 +71,7 @@ func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 
 func TestFindWithDepth(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &option.Option{Depth: 1}}
+	finder := Finder{out, &Option{Depth: 1}}
 	go finder.Find("files/depth", &pattern.Pattern{Pattern: "go"})
 
 	for o := range out {
@@ -84,7 +83,7 @@ func TestFindWithDepth(t *testing.T) {
 
 func TestFindWithFileSearchPattern(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &option.Option{}}
+	finder := Finder{out, &Option{}}
 	pattern, _ := pattern.NewPattern("go", "match.txt", true, true, false)
 	go finder.Find("files/vcs/match", pattern)
 
@@ -97,7 +96,7 @@ func TestFindWithFileSearchPattern(t *testing.T) {
 
 func TestFindWithStream(t *testing.T) {
 	out := make(chan *GrepParams)
-	finder := Finder{out, &option.Option{SearchStream: true}}
+	finder := Finder{out, &Option{SearchStream: true}}
 	go finder.Find(".", &pattern.Pattern{Pattern: "go"})
 
 	for o := range out {

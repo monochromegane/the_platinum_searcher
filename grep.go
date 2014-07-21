@@ -7,7 +7,6 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
@@ -19,7 +18,7 @@ type GrepParams struct {
 type Grepper struct {
 	In     chan *GrepParams
 	Out    chan *PrintParams
-	Option *option.Option
+	Option *Option
 }
 
 var FilesSearched uint
@@ -51,7 +50,7 @@ func getDecoder(encode string) transform.Transformer {
 	return nil
 }
 
-func getFileHandler(path string, opt *option.Option) (*os.File, error) {
+func getFileHandler(path string, opt *Option) (*os.File, error) {
 	if opt.SearchStream {
 		return os.Stdin, nil
 	} else {

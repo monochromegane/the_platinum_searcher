@@ -11,12 +11,11 @@ import (
 	"github.com/monochromegane/terminal"
 
 	"github.com/monochromegane/the_platinum_searcher"
-	"github.com/monochromegane/the_platinum_searcher/search/option"
 )
 
 const version = "1.6.5"
 
-var opts option.Option
+var opts the_platinum_searcher.Option
 
 func init() {
 	if cpu := runtime.NumCPU(); cpu == 1 {

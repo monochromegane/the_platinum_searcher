@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
@@ -27,7 +26,7 @@ func TestGrep(t *testing.T) {
 	for _, g := range GrepAsserts {
 		in := make(chan *GrepParams)
 		out := make(chan *PrintParams)
-		grepper := Grepper{in, out, &option.Option{Proc: 1}}
+		grepper := Grepper{in, out, &Option{Proc: 1}}
 
 		pattern, _ := pattern.NewPattern(g.pattern, "", false, false, false)
 		sem := make(chan bool, 1)
@@ -54,7 +53,7 @@ func TestGrepWithStream(t *testing.T) {
 	g := GrepAssert{"", "go", ASCII, "go test"}
 	in := make(chan *GrepParams)
 	out := make(chan *PrintParams)
-	grepper := Grepper{in, out, &option.Option{Proc: 1, SearchStream: true}}
+	grepper := Grepper{in, out, &Option{Proc: 1, SearchStream: true}}
 
 	pattern, _ := pattern.NewPattern(g.pattern, "", false, false, false)
 	sem := make(chan bool, 1)

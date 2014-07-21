@@ -1,4 +1,4 @@
-package option
+package the_platinum_searcher
 
 type Option struct {
 	Color             func()   `long:"color" description:"Print color codes in results (Enabled by default)"`

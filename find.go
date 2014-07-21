@@ -8,13 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type Finder struct {
 	Out    chan *GrepParams
-	Option *option.Option
+	Option *Option
 }
 
 func (f *Finder) Find(root string, pattern *pattern.Pattern) {
