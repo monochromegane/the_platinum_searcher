@@ -7,7 +7,7 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"github.com/monochromegane/the_platinum_searcher/search/file"
+	"github.com/monochromegane/the_platinum_searcher"
 	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
@@ -46,9 +46,9 @@ func (g *Grepper) ConcurrentGrep() {
 
 func getDecoder(encode string) transform.Transformer {
 	switch encode {
-	case file.EUCJP:
+	case the_platinum_searcher.EUCJP:
 		return japanese.EUCJP.NewDecoder()
-	case file.SHIFTJIS:
+	case the_platinum_searcher.SHIFTJIS:
 		return japanese.ShiftJIS.NewDecoder()
 	}
 	return nil

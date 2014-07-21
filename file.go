@@ -1,4 +1,4 @@
-package file
+package the_platinum_searcher
 
 import (
 	"os"
