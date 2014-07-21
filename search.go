@@ -39,8 +39,7 @@ func (p *PlatinumSearcher) find(out chan *GrepParams, pattern *Pattern) {
 }
 
 func (p *PlatinumSearcher) grep(in chan *GrepParams, out chan *PrintParams) {
-	grepper := Grepper{in, out, p.Option}
-	grepper.ConcurrentGrep()
+	Grep(in, out, p.Option)
 }
 
 func (p *PlatinumSearcher) print(in chan *PrintParams, done chan bool) {

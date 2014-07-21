@@ -26,12 +26,12 @@ func TestGrep(t *testing.T) {
 	for _, g := range GrepAsserts {
 		in := make(chan *GrepParams)
 		out := make(chan *PrintParams)
-		grepper := Grepper{in, out, &Option{Proc: 1}}
+		grep := grep{in, out, &Option{Proc: 1}}
 
 		pattern, _ := NewPattern(g.pattern, "", false, false, false)
 		sem := make(chan bool, 1)
 		sem <- true
-		go grepper.Grep("files/"+g.path, g.fileType, pattern, sem)
+		go grep.Start("files/"+g.path, g.fileType, pattern, sem)
 		o := <-out
 		if o.Path != "files/"+g.path {
 			t.Errorf("It should be equal files/%s.", g.path)
@@ -53,12 +53,12 @@ func TestGrepWithStream(t *testing.T) {
 	g := GrepAssert{"", "go", ASCII, "go test"}
 	in := make(chan *GrepParams)
 	out := make(chan *PrintParams)
-	grepper := Grepper{in, out, &Option{Proc: 1, SearchStream: true}}
+	grep := grep{in, out, &Option{Proc: 1, SearchStream: true}}
 
 	pattern, _ := NewPattern(g.pattern, "", false, false, false)
 	sem := make(chan bool, 1)
 	sem <- true
-	go grepper.Grep(g.path, g.fileType, pattern, sem)
+	go grep.Start(g.path, g.fileType, pattern, sem)
 	o := <-out
 	if o.Path != g.path {
 		t.Errorf("It should be equal %s.", g.path)

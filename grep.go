@@ -15,15 +15,24 @@ type GrepParams struct {
 	Pattern *Pattern
 }
 
-type Grepper struct {
+type grep struct {
 	In     chan *GrepParams
 	Out    chan *PrintParams
 	Option *Option
 }
 
+func Grep(in chan *GrepParams, out chan *PrintParams, option *Option) {
+	grep := grep{
+		In:     in,
+		Out:    out,
+		Option: option,
+	}
+	grep.ConcurrentStart()
+}
+
 var FilesSearched uint
 
-func (g *Grepper) ConcurrentGrep() {
+func (g *grep) ConcurrentStart() {
 	var wg sync.WaitGroup
 	FilesSearched = 0
 	sem := make(chan bool, g.Option.Proc)
@@ -31,34 +40,16 @@ func (g *Grepper) ConcurrentGrep() {
 		sem <- true
 		wg.Add(1)
 		FilesSearched++
-		go func(g *Grepper, arg *GrepParams, sem chan bool) {
+		go func(g *grep, arg *GrepParams, sem chan bool) {
 			defer wg.Done()
-			g.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
+			g.Start(arg.Path, arg.Encode, arg.Pattern, sem)
 		}(g, arg, sem)
 	}
 	wg.Wait()
 	close(g.Out)
 }
 
-func getDecoder(encode int) transform.Transformer {
-	switch encode {
-	case EUCJP:
-		return japanese.EUCJP.NewDecoder()
-	case SHIFTJIS:
-		return japanese.ShiftJIS.NewDecoder()
-	}
-	return nil
-}
-
-func getFileHandler(path string, opt *Option) (*os.File, error) {
-	if opt.SearchStream {
-		return os.Stdin, nil
-	} else {
-		return os.Open(path)
-	}
-}
-
-func (g *Grepper) Grep(path string, encode int, pattern *Pattern, sem chan bool) {
+func (g *grep) Start(path string, encode int, pattern *Pattern, sem chan bool) {
 	if g.Option.FilesWithRegexp != "" {
 		g.Out <- &PrintParams{pattern, path, nil}
 		<-sem
@@ -98,4 +89,22 @@ func (g *Grepper) Grep(path string, encode int, pattern *Pattern, sem chan bool)
 	g.Out <- &PrintParams{pattern, path, matches}
 	fh.Close()
 	<-sem
+}
+
+func getDecoder(encode int) transform.Transformer {
+	switch encode {
+	case EUCJP:
+		return japanese.EUCJP.NewDecoder()
+	case SHIFTJIS:
+		return japanese.ShiftJIS.NewDecoder()
+	}
+	return nil
+}
+
+func getFileHandler(path string, opt *Option) (*os.File, error) {
+	if opt.SearchStream {
+		return os.Stdin, nil
+	} else {
+		return os.Open(path)
+	}
 }
