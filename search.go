@@ -1,4 +1,4 @@
-package search
+package the_platinum_searcher
 
 import (
 	"github.com/monochromegane/the_platinum_searcher/search/find"

@@ -10,7 +10,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"github.com/monochromegane/terminal"
 
-	"github.com/monochromegane/the_platinum_searcher/search"
+	"github.com/monochromegane/the_platinum_searcher"
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
@@ -97,7 +97,7 @@ func main() {
 
 	start := time.Now()
 
-	searcher := search.Searcher{root, pattern, &opts}
+	searcher := the_platinum_searcher.Searcher{root, pattern, &opts}
 	err = searcher.Search()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
