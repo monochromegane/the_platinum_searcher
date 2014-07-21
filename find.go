@@ -7,8 +7,6 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
-
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type Finder struct {
@@ -16,7 +14,7 @@ type Finder struct {
 	Option *Option
 }
 
-func (f *Finder) Find(root string, pattern *pattern.Pattern) {
+func (f *Finder) Find(root string, pattern *Pattern) {
 	if f.Option.SearchStream {
 		f.findStream(pattern)
 	} else {
@@ -24,13 +22,13 @@ func (f *Finder) Find(root string, pattern *pattern.Pattern) {
 	}
 }
 
-func (f *Finder) findStream(pattern *pattern.Pattern) {
+func (f *Finder) findStream(pattern *Pattern) {
 	// TODO: File type is fixed in ASCII because it can not determine the character code.
 	f.Out <- &GrepParams{"", ASCII, pattern}
 	close(f.Out)
 }
 
-func (f *Finder) findFile(root string, pattern *pattern.Pattern) {
+func (f *Finder) findFile(root string, pattern *Pattern) {
 	if f.Option.NoPtIgnore == false {
 		f.addHomePtIgnore()
 	}

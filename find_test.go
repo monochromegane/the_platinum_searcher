@@ -2,14 +2,12 @@ package the_platinum_searcher
 
 import (
 	"testing"
-
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 func TestFind(t *testing.T) {
 	out := make(chan *GrepParams)
 	finder := Finder{out, &Option{}}
-	go finder.Find("files", &pattern.Pattern{Pattern: "go"})
+	go finder.Find("files", &Pattern{Pattern: "go"})
 
 	for o := range out {
 		if o.Path == ".hidden/hidden.txt" {
@@ -30,7 +28,7 @@ var Ignores = []string{
 func TestFindWithIgnore(t *testing.T) {
 	out := make(chan *GrepParams)
 	finder := Finder{out, &Option{VcsIgnore: []string{".vcsignore"}}}
-	go finder.Find("files/vcs", &pattern.Pattern{Pattern: "go"})
+	go finder.Find("files/vcs", &Pattern{Pattern: "go"})
 
 	for o := range out {
 		for _, ignore := range Ignores {
@@ -54,7 +52,7 @@ func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 	for _, hidden := range Hiddens {
 		out := make(chan *GrepParams)
 		finder := Finder{out, &Option{}}
-		go finder.Find("files/"+hidden.Root, &pattern.Pattern{Pattern: "go"})
+		go finder.Find("files/"+hidden.Root, &Pattern{Pattern: "go"})
 
 		found := false
 		for o := range out {
@@ -72,7 +70,7 @@ func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 func TestFindWithDepth(t *testing.T) {
 	out := make(chan *GrepParams)
 	finder := Finder{out, &Option{Depth: 1}}
-	go finder.Find("files/depth", &pattern.Pattern{Pattern: "go"})
+	go finder.Find("files/depth", &Pattern{Pattern: "go"})
 
 	for o := range out {
 		if o.Path == "files/depth/dir_1/dir_2/file_3.txt" {
@@ -84,7 +82,7 @@ func TestFindWithDepth(t *testing.T) {
 func TestFindWithFileSearchPattern(t *testing.T) {
 	out := make(chan *GrepParams)
 	finder := Finder{out, &Option{}}
-	pattern, _ := pattern.NewPattern("go", "match.txt", true, true, false)
+	pattern, _ := NewPattern("go", "match.txt", true, true, false)
 	go finder.Find("files/vcs/match", pattern)
 
 	for o := range out {
@@ -97,7 +95,7 @@ func TestFindWithFileSearchPattern(t *testing.T) {
 func TestFindWithStream(t *testing.T) {
 	out := make(chan *GrepParams)
 	finder := Finder{out, &Option{SearchStream: true}}
-	go finder.Find(".", &pattern.Pattern{Pattern: "go"})
+	go finder.Find(".", &Pattern{Pattern: "go"})
 
 	for o := range out {
 		if o.Path != "" {

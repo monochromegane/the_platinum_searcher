@@ -8,7 +8,6 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/shiena/ansicolor"
 )
 
@@ -22,7 +21,7 @@ const (
 )
 
 type PrintParams struct {
-	Pattern *pattern.Pattern
+	Pattern *Pattern
 	Path    string
 	Matches []*Match
 }
@@ -114,7 +113,7 @@ func (p *Printer) printLineNumber(lineNum int, sep string) {
 		fmt.Fprintf(p.writer, "%d%s", lineNum, sep)
 	}
 }
-func (p *Printer) printMatch(pattern *pattern.Pattern, line *Line) {
+func (p *Printer) printMatch(pattern *Pattern, line *Line) {
 	p.printLineNumber(line.Num, ":")
 	if !p.Option.EnableColor {
 		fmt.Fprintf(p.writer, "%s", line.Str)

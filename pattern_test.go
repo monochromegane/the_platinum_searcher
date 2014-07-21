@@ -1,19 +1,19 @@
-package pattern
+package the_platinum_searcher
 
 import (
 	"testing"
 )
 
-type Assert struct {
+type PatternAssert struct {
 	Pattern string
 	Expect  bool
 }
 
 func TestIgnoreCaseWithSmartCase(t *testing.T) {
 
-	asserts := []Assert{
-		Assert{"lowercase", true},
-		Assert{"Uppercase", false},
+	asserts := []PatternAssert{
+		PatternAssert{"lowercase", true},
+		PatternAssert{"Uppercase", false},
 	}
 
 	for _, assert := range asserts {

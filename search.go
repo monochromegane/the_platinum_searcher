@@ -1,9 +1,5 @@
 package the_platinum_searcher
 
-import (
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
-)
-
 type Searcher struct {
 	Root, Pattern string
 	Option        *Option
@@ -24,12 +20,12 @@ func (s *Searcher) Search() error {
 	return nil
 }
 
-func (s *Searcher) pattern() (*pattern.Pattern, error) {
+func (s *Searcher) pattern() (*Pattern, error) {
 	fileRegexp := s.Option.FileSearchRegexp
 	if s.Option.FilesWithRegexp != "" {
 		fileRegexp = s.Option.FilesWithRegexp
 	}
-	return pattern.NewPattern(
+	return NewPattern(
 		s.Pattern,
 		fileRegexp,
 		s.Option.SmartCase,
@@ -38,7 +34,7 @@ func (s *Searcher) pattern() (*pattern.Pattern, error) {
 	)
 }
 
-func (s *Searcher) find(out chan *GrepParams, pattern *pattern.Pattern) {
+func (s *Searcher) find(out chan *GrepParams, pattern *Pattern) {
 	finder := Finder{out, s.Option}
 	finder.Find(s.Root, pattern)
 }

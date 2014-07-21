@@ -3,8 +3,6 @@ package the_platinum_searcher
 import (
 	"os"
 	"testing"
-
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type GrepAssert struct {
@@ -28,7 +26,7 @@ func TestGrep(t *testing.T) {
 		out := make(chan *PrintParams)
 		grepper := Grepper{in, out, &Option{Proc: 1}}
 
-		pattern, _ := pattern.NewPattern(g.pattern, "", false, false, false)
+		pattern, _ := NewPattern(g.pattern, "", false, false, false)
 		sem := make(chan bool, 1)
 		sem <- true
 		go grepper.Grep("files/"+g.path, g.fileType, pattern, sem)
@@ -55,7 +53,7 @@ func TestGrepWithStream(t *testing.T) {
 	out := make(chan *PrintParams)
 	grepper := Grepper{in, out, &Option{Proc: 1, SearchStream: true}}
 
-	pattern, _ := pattern.NewPattern(g.pattern, "", false, false, false)
+	pattern, _ := NewPattern(g.pattern, "", false, false, false)
 	sem := make(chan bool, 1)
 	sem <- true
 	go grepper.Grep(g.path, g.fileType, pattern, sem)

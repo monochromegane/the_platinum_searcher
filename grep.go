@@ -7,12 +7,11 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type GrepParams struct {
 	Path, Encode string
-	Pattern      *pattern.Pattern
+	Pattern      *Pattern
 }
 
 type Grepper struct {
@@ -58,7 +57,7 @@ func getFileHandler(path string, opt *Option) (*os.File, error) {
 	}
 }
 
-func (g *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan bool) {
+func (g *Grepper) Grep(path, encode string, pattern *Pattern, sem chan bool) {
 	if g.Option.FilesWithRegexp != "" {
 		g.Out <- &PrintParams{pattern, path, nil}
 		<-sem

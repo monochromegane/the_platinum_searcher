@@ -2,8 +2,6 @@ package the_platinum_searcher
 
 import (
 	"strings"
-
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type Match struct {
@@ -82,7 +80,7 @@ func (m *Match) setUpNewMatch(num int, s string) (*Match, bool) {
 	}
 }
 
-func (m *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match, bool) {
+func (m *Match) IsMatch(pattern *Pattern, num int, s string) (*Match, bool) {
 	if pattern.UseRegexp {
 		if pattern.Regexp.MatchString(s) {
 			return m.setUpNewMatch(num, s)
