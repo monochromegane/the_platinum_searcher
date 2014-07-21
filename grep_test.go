@@ -6,7 +6,9 @@ import (
 )
 
 type GrepAssert struct {
-	path, pattern, fileType, match string
+	path, pattern string
+	fileType      int
+	match         string
 }
 
 var GrepAsserts = []GrepAssert{

@@ -5,7 +5,8 @@ import (
 )
 
 type Assert struct {
-	path, fileType string
+	path     string
+	fileType int
 }
 
 var Asserts = []Assert{

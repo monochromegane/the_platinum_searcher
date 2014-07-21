@@ -10,8 +10,9 @@ import (
 )
 
 type GrepParams struct {
-	Path, Encode string
-	Pattern      *Pattern
+	Path    string
+	Encode  int
+	Pattern *Pattern
 }
 
 type Grepper struct {
@@ -39,7 +40,7 @@ func (g *Grepper) ConcurrentGrep() {
 	close(g.Out)
 }
 
-func getDecoder(encode string) transform.Transformer {
+func getDecoder(encode int) transform.Transformer {
 	switch encode {
 	case EUCJP:
 		return japanese.EUCJP.NewDecoder()
@@ -57,7 +58,7 @@ func getFileHandler(path string, opt *Option) (*os.File, error) {
 	}
 }
 
-func (g *Grepper) Grep(path, encode string, pattern *Pattern, sem chan bool) {
+func (g *Grepper) Grep(path string, encode int, pattern *Pattern, sem chan bool) {
 	if g.Option.FilesWithRegexp != "" {
 		g.Out <- &PrintParams{pattern, path, nil}
 		<-sem
