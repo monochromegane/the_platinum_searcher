@@ -23,9 +23,7 @@ pt go   1.09s user 1.01s system 235% cpu 0.892 total # pt:  It's faster than ag!
 ### Developer
 
 ```sh
-$ go get github.com/monochromegane/the_platinum_searcher
-$ cd $GOPATH/src/github.com/monochromegane/the_platinum_searcher
-$ go build -o $GOBIN/pt
+$ go get -u github.com/monochromegane/the_platinum_searcher/...
 ```
 
 ### User
