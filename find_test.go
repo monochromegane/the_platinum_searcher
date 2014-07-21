@@ -1,10 +1,11 @@
-package find
+package the_platinum_searcher
 
 import (
+	"testing"
+
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
-	"testing"
 )
 
 func TestFind(t *testing.T) {

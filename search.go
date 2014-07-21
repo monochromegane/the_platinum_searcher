@@ -1,7 +1,6 @@
 package the_platinum_searcher
 
 import (
-	"github.com/monochromegane/the_platinum_searcher/search/find"
 	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
@@ -43,7 +42,7 @@ func (s *Searcher) pattern() (*pattern.Pattern, error) {
 }
 
 func (s *Searcher) find(out chan *grep.Params, pattern *pattern.Pattern) {
-	finder := find.Finder{out, s.Option}
+	finder := Finder{out, s.Option}
 	finder.Find(s.Root, pattern)
 }
 

@@ -1,4 +1,4 @@
-package find
+package the_platinum_searcher
 
 import (
 	"io/ioutil"
