@@ -8,14 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/ignore"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 type Finder struct {
-	Out    chan *grep.Params
+	Out    chan *GrepParams
 	Option *option.Option
 }
 
@@ -29,7 +28,7 @@ func (f *Finder) Find(root string, pattern *pattern.Pattern) {
 
 func (f *Finder) findStream(pattern *pattern.Pattern) {
 	// TODO: File type is fixed in ASCII because it can not determine the character code.
-	f.Out <- &grep.Params{"", ASCII, pattern}
+	f.Out <- &GrepParams{"", ASCII, pattern}
 	close(f.Out)
 }
 
@@ -84,7 +83,7 @@ func (f *Finder) findFile(root string, pattern *pattern.Pattern) {
 				return nil, ig
 			}
 		}
-		f.Out <- &grep.Params{path, fileType, pattern}
+		f.Out <- &GrepParams{path, fileType, pattern}
 		return nil, ig
 	})
 	close(f.Out)

@@ -1,10 +1,9 @@
-package grep
+package the_platinum_searcher
 
 import (
 	"os"
 	"testing"
 
-	"github.com/monochromegane/the_platinum_searcher"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
@@ -15,13 +14,13 @@ type Assert struct {
 }
 
 var Asserts = []Assert{
-	Assert{"ascii.txt", "go", the_platinum_searcher.ASCII, "go test"},
-	Assert{"ja/euc-jp.txt", "go", the_platinum_searcher.EUCJP, "go テスト"},
-	Assert{"ja/shift_jis.txt", "go", the_platinum_searcher.SHIFTJIS, "go テスト"},
-	Assert{"ja/utf8.txt", "go", the_platinum_searcher.UTF8, "go テスト"},
-	Assert{"ja/broken_euc-jp.txt", "go", the_platinum_searcher.EUCJP, "go テスト"},
-	Assert{"ja/broken_shift_jis.txt", "go", the_platinum_searcher.SHIFTJIS, "go テスト"},
-	Assert{"ja/broken_utf8.txt", "go", the_platinum_searcher.UTF8, "go テスト"},
+	Assert{"ascii.txt", "go", ASCII, "go test"},
+	Assert{"ja/euc-jp.txt", "go", EUCJP, "go テスト"},
+	Assert{"ja/shift_jis.txt", "go", SHIFTJIS, "go テスト"},
+	Assert{"ja/utf8.txt", "go", UTF8, "go テスト"},
+	Assert{"ja/broken_euc-jp.txt", "go", EUCJP, "go テスト"},
+	Assert{"ja/broken_shift_jis.txt", "go", SHIFTJIS, "go テスト"},
+	Assert{"ja/broken_utf8.txt", "go", UTF8, "go テスト"},
 }
 
 func TestGrep(t *testing.T) {
@@ -53,7 +52,7 @@ func TestGrepWithStream(t *testing.T) {
 	tempStdin := os.Stdin
 	os.Stdin = fh
 	defer func() { os.Stdin = tempStdin }()
-	g := Assert{"", "go", the_platinum_searcher.ASCII, "go test"}
+	g := Assert{"", "go", ASCII, "go test"}
 	in := make(chan *Params)
 	out := make(chan *print.Params)
 	grepper := Grepper{in, out, &option.Option{Proc: 1, SearchStream: true}}

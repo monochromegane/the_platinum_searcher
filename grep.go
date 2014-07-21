@@ -1,4 +1,4 @@
-package grep
+package the_platinum_searcher
 
 import (
 	"bufio"
@@ -7,20 +7,19 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"github.com/monochromegane/the_platinum_searcher"
 	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
 )
 
-type Params struct {
+type GrepParams struct {
 	Path, Encode string
 	Pattern      *pattern.Pattern
 }
 
 type Grepper struct {
-	In     chan *Params
+	In     chan *GrepParams
 	Out    chan *print.Params
 	Option *option.Option
 }
@@ -35,7 +34,7 @@ func (g *Grepper) ConcurrentGrep() {
 		sem <- true
 		wg.Add(1)
 		FilesSearched++
-		go func(g *Grepper, arg *Params, sem chan bool) {
+		go func(g *Grepper, arg *GrepParams, sem chan bool) {
 			defer wg.Done()
 			g.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
 		}(g, arg, sem)
@@ -46,9 +45,9 @@ func (g *Grepper) ConcurrentGrep() {
 
 func getDecoder(encode string) transform.Transformer {
 	switch encode {
-	case the_platinum_searcher.EUCJP:
+	case EUCJP:
 		return japanese.EUCJP.NewDecoder()
-	case the_platinum_searcher.SHIFTJIS:
+	case SHIFTJIS:
 		return japanese.ShiftJIS.NewDecoder()
 	}
 	return nil

@@ -1,7 +1,6 @@
 package the_platinum_searcher
 
 import (
-	"github.com/monochromegane/the_platinum_searcher/search/grep"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
@@ -17,7 +16,7 @@ func (s *Searcher) Search() error {
 	if err != nil {
 		return err
 	}
-	grep := make(chan *grep.Params, s.Option.Proc)
+	grep := make(chan *GrepParams, s.Option.Proc)
 	match := make(chan *print.Params, s.Option.Proc)
 	done := make(chan bool)
 	go s.find(grep, pattern)
@@ -41,13 +40,13 @@ func (s *Searcher) pattern() (*pattern.Pattern, error) {
 	)
 }
 
-func (s *Searcher) find(out chan *grep.Params, pattern *pattern.Pattern) {
+func (s *Searcher) find(out chan *GrepParams, pattern *pattern.Pattern) {
 	finder := Finder{out, s.Option}
 	finder.Find(s.Root, pattern)
 }
 
-func (s *Searcher) grep(in chan *grep.Params, out chan *print.Params) {
-	grepper := grep.Grepper{in, out, s.Option}
+func (s *Searcher) grep(in chan *GrepParams, out chan *print.Params) {
+	grepper := Grepper{in, out, s.Option}
 	grepper.ConcurrentGrep()
 }
 
