@@ -43,6 +43,5 @@ func (p *PlatinumSearcher) grep(in chan *GrepParams, out chan *PrintParams) {
 }
 
 func (p *PlatinumSearcher) print(in chan *PrintParams, done chan bool) {
-	printer := NewPrinter(in, done, p.Option)
-	printer.Print()
+	Print(in, done, p.Option)
 }

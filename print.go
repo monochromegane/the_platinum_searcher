@@ -26,18 +26,24 @@ type PrintParams struct {
 	Matches []*Match
 }
 
-type Printer struct {
+type print struct {
 	In     chan *PrintParams
 	Done   chan bool
 	Option *Option
 	writer io.Writer
 }
 
-func NewPrinter(in chan *PrintParams, done chan bool, option *Option) *Printer {
-	return &Printer{in, done, option, createWriter(option)}
+func Print(in chan *PrintParams, done chan bool, option *Option) {
+	print := &print{
+		In:     in,
+		Done:   done,
+		Option: option,
+		writer: createWriter(option),
+	}
+	print.Start()
 }
 
-func (p *Printer) Print() {
+func (p *print) Start() {
 	FileMatchCount = 0
 	MatchCount = 0
 	for arg := range p.In {
@@ -96,7 +102,7 @@ func (p *Printer) Print() {
 	p.Done <- true
 }
 
-func (p *Printer) printPath(path string) {
+func (p *print) printPath(path string) {
 	if p.Option.EnableColor {
 		fmt.Fprintf(p.writer, "%s%s%s", ColorPath, path, ColorReset)
 	} else {
@@ -106,14 +112,16 @@ func (p *Printer) printPath(path string) {
 		fmt.Fprintf(p.writer, ":")
 	}
 }
-func (p *Printer) printLineNumber(lineNum int, sep string) {
+
+func (p *print) printLineNumber(lineNum int, sep string) {
 	if p.Option.EnableColor {
 		fmt.Fprintf(p.writer, "%s%d%s%s", ColorLineNumber, lineNum, ColorReset, sep)
 	} else {
 		fmt.Fprintf(p.writer, "%d%s", lineNum, sep)
 	}
 }
-func (p *Printer) printMatch(pattern *Pattern, line *Line) {
+
+func (p *print) printMatch(pattern *Pattern, line *Line) {
 	p.printLineNumber(line.Num, ":")
 	if !p.Option.EnableColor {
 		fmt.Fprintf(p.writer, "%s", line.Str)
@@ -124,7 +132,7 @@ func (p *Printer) printMatch(pattern *Pattern, line *Line) {
 	}
 }
 
-func (p *Printer) printContext(lines []*Line) {
+func (p *print) printContext(lines []*Line) {
 	for _, line := range lines {
 		p.printLineNumber(line.Num, "-")
 		fmt.Fprintf(p.writer, "%s", line.Str)
