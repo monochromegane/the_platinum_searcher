@@ -1,4 +1,4 @@
-package match
+package the_platinum_searcher
 
 import (
 	"strings"

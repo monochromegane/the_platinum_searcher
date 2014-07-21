@@ -7,7 +7,6 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
-	"github.com/monochromegane/the_platinum_searcher/search/match"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"github.com/monochromegane/the_platinum_searcher/search/print"
@@ -81,8 +80,8 @@ func (g *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan b
 	}
 
 	var buf []byte
-	matches := make([]*match.Match, 0)
-	m := match.NewMatch(g.Option.Before, g.Option.After)
+	matches := make([]*Match, 0)
+	m := NewMatch(g.Option.Before, g.Option.After)
 	var lineNum = 1
 	for {
 		buf, _, err = f.ReadLine()

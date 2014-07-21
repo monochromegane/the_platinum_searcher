@@ -1,8 +1,9 @@
-package match
+package the_platinum_searcher
 
 import (
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"testing"
+
+	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
 
 func testIsMatch(t *testing.T) {
