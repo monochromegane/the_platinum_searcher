@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/monochromegane/the_platinum_searcher/search/ignore"
 	"github.com/monochromegane/the_platinum_searcher/search/option"
 	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 )
@@ -41,7 +40,7 @@ func (f *Finder) findFile(root string, pattern *pattern.Pattern) {
 		f.addGlobalGitIgnore()
 	}
 
-	Walk(root, f.Option.Ignore, f.Option.Follow, func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
+	Walk(root, f.Option.Ignore, f.Option.Follow, func(path string, info *FileInfo, depth int, ig Ignore, err error) (error, Ignore) {
 		if info.IsDir() {
 			if depth > f.Option.Depth+1 {
 				return filepath.SkipDir, ig
@@ -58,7 +57,7 @@ func (f *Finder) findFile(root string, pattern *pattern.Pattern) {
 					}
 				}
 			}
-			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, f.Option.VcsIgnores())...)
+			ig.Patterns = append(ig.Patterns, IgnorePatterns(path, f.Option.VcsIgnores())...)
 			return nil, ig
 		}
 		if !info.follow && info.IsSymlink() {
@@ -89,24 +88,24 @@ func (f *Finder) findFile(root string, pattern *pattern.Pattern) {
 	close(f.Out)
 }
 
-type WalkFunc func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore)
+type WalkFunc func(path string, info *FileInfo, depth int, ig Ignore, err error) (error, Ignore)
 
 func Walk(root string, ignorePatterns []string, follow bool, walkFn WalkFunc) error {
 	info, err := os.Lstat(root)
 	fileInfo := newFileInfo(root, info, follow)
 	if err != nil {
-		walkError, _ := walkFn(root, fileInfo, 1, ignore.Ignore{}, err)
+		walkError, _ := walkFn(root, fileInfo, 1, Ignore{}, err)
 		return walkError
 	}
-	return walk(root, fileInfo, 1, ignore.Ignore{Patterns: ignorePatterns}, walkFn)
+	return walk(root, fileInfo, 1, Ignore{Patterns: ignorePatterns}, walkFn)
 }
 
-func walkOnGoRoutine(path string, info *FileInfo, notify chan int, depth int, parentIgnore ignore.Ignore, walkFn WalkFunc) {
+func walkOnGoRoutine(path string, info *FileInfo, notify chan int, depth int, parentIgnore Ignore, walkFn WalkFunc) {
 	walk(path, info, depth, parentIgnore, walkFn)
 	notify <- 0
 }
 
-func walk(path string, info *FileInfo, depth int, parentIgnore ignore.Ignore, walkFn WalkFunc) error {
+func walk(path string, info *FileInfo, depth int, parentIgnore Ignore, walkFn WalkFunc) error {
 	err, ig := walkFn(path, info, depth, parentIgnore, nil)
 	if err != nil {
 		if info.IsDir() && err == filepath.SkipDir {
@@ -168,7 +167,7 @@ func contains(path string, patterns *[]string) bool {
 func (f *Finder) addHomePtIgnore() {
 	homeDir := setHomeDir()
 	if homeDir != "" {
-		f.Option.Ignore = append(f.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{".ptignore"})...)
+		f.Option.Ignore = append(f.Option.Ignore, IgnorePatterns(homeDir, []string{".ptignore"})...)
 	}
 }
 
@@ -189,7 +188,7 @@ func (f *Finder) addGlobalGitIgnore() {
 	if homeDir != "" {
 		globalIgnore := globalGitIgnore()
 		if globalIgnore != "" {
-			f.Option.Ignore = append(f.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{globalIgnore})...)
+			f.Option.Ignore = append(f.Option.Ignore, IgnorePatterns(homeDir, []string{globalIgnore})...)
 		}
 	}
 }

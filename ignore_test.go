@@ -1,4 +1,4 @@
-package ignore
+package the_platinum_searcher
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 func TestIgnorePatterns(t *testing.T) {
 
-	patterns := IgnorePatterns("../../files/ignore", []string{"ignore.txt"})
+	patterns := IgnorePatterns("files/ignore", []string{"ignore.txt"})
 
 	if patterns[0] != "pattern1" {
 		t.Errorf("It should be equal %s", "pattern1")
