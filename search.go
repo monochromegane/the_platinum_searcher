@@ -1,50 +1,50 @@
 package the_platinum_searcher
 
-type Searcher struct {
+type PlatinumSearcher struct {
 	Root, Pattern string
 	Option        *Option
 }
 
-func (s *Searcher) Search() error {
-	pattern, err := s.pattern()
+func (p *PlatinumSearcher) Search() error {
+	pattern, err := p.pattern()
 	if err != nil {
 		return err
 	}
-	grep := make(chan *GrepParams, s.Option.Proc)
-	match := make(chan *PrintParams, s.Option.Proc)
+	grep := make(chan *GrepParams, p.Option.Proc)
+	match := make(chan *PrintParams, p.Option.Proc)
 	done := make(chan bool)
-	go s.find(grep, pattern)
-	go s.grep(grep, match)
-	go s.print(match, done)
+	go p.find(grep, pattern)
+	go p.grep(grep, match)
+	go p.print(match, done)
 	<-done
 	return nil
 }
 
-func (s *Searcher) pattern() (*Pattern, error) {
-	fileRegexp := s.Option.FileSearchRegexp
-	if s.Option.FilesWithRegexp != "" {
-		fileRegexp = s.Option.FilesWithRegexp
+func (p *PlatinumSearcher) pattern() (*Pattern, error) {
+	fileRegexp := p.Option.FileSearchRegexp
+	if p.Option.FilesWithRegexp != "" {
+		fileRegexp = p.Option.FilesWithRegexp
 	}
 	return NewPattern(
-		s.Pattern,
+		p.Pattern,
 		fileRegexp,
-		s.Option.SmartCase,
-		s.Option.IgnoreCase,
-		s.Option.Regexp,
+		p.Option.SmartCase,
+		p.Option.IgnoreCase,
+		p.Option.Regexp,
 	)
 }
 
-func (s *Searcher) find(out chan *GrepParams, pattern *Pattern) {
-	finder := Finder{out, s.Option}
-	finder.Find(s.Root, pattern)
+func (p *PlatinumSearcher) find(out chan *GrepParams, pattern *Pattern) {
+	finder := Finder{out, p.Option}
+	finder.Find(p.Root, pattern)
 }
 
-func (s *Searcher) grep(in chan *GrepParams, out chan *PrintParams) {
-	grepper := Grepper{in, out, s.Option}
+func (p *PlatinumSearcher) grep(in chan *GrepParams, out chan *PrintParams) {
+	grepper := Grepper{in, out, p.Option}
 	grepper.ConcurrentGrep()
 }
 
-func (s *Searcher) print(in chan *PrintParams, done chan bool) {
-	printer := NewPrinter(in, done, s.Option)
+func (p *PlatinumSearcher) print(in chan *PrintParams, done chan bool) {
+	printer := NewPrinter(in, done, p.Option)
 	printer.Print()
 }

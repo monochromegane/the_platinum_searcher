@@ -93,7 +93,7 @@ func main() {
 
 	start := time.Now()
 
-	searcher := pt.Searcher{root, pattern, &opts}
+	searcher := pt.PlatinumSearcher{root, pattern, &opts}
 	err = searcher.Search()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
