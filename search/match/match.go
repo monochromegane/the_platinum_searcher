@@ -28,79 +28,79 @@ func NewMatch(before, after int) *Match {
 	}
 }
 
-func (self *Match) newMatch() *Match {
+func (m *Match) newMatch() *Match {
 	return &Match{
-		beforeNum: self.beforeNum,
-		afterNum:  self.afterNum,
+		beforeNum: m.beforeNum,
+		afterNum:  m.afterNum,
 		Line:      &Line{},
 	}
 }
 
-func (self *Match) LineNum() int {
-	return self.Line.Num
+func (m *Match) LineNum() int {
+	return m.Line.Num
 }
 
-func (self *Match) Match() string {
-	return self.Line.Str
+func (m *Match) Match() string {
+	return m.Line.Str
 }
 
-func (self *Match) setMatch(num int, s string) {
-	self.Line.Num = num
-	self.Line.Str = s
-	self.Matched = true
+func (m *Match) setMatch(num int, s string) {
+	m.Line.Num = num
+	m.Line.Str = s
+	m.Matched = true
 }
 
-func (self *Match) setBefore(num int, s string) {
-	befores := self.Befores
-	if len(self.Befores) >= self.beforeNum {
-		befores = self.Befores[1:]
+func (m *Match) setBefore(num int, s string) {
+	befores := m.Befores
+	if len(m.Befores) >= m.beforeNum {
+		befores = m.Befores[1:]
 	}
-	self.Befores = append(befores, &Line{num, s})
+	m.Befores = append(befores, &Line{num, s})
 }
 
-func (self *Match) setAfter(num int, s string) bool {
-	if len(self.Afters) >= self.afterNum {
+func (m *Match) setAfter(num int, s string) bool {
+	if len(m.Afters) >= m.afterNum {
 		return false
 	}
-	self.Afters = append(self.Afters, &Line{num, s})
+	m.Afters = append(m.Afters, &Line{num, s})
 	return true
 }
 
-func (self *Match) setUpNewMatch(num int, s string) (*Match, bool) {
+func (m *Match) setUpNewMatch(num int, s string) (*Match, bool) {
 	// already match
-	if self.Matched {
-		newMatch := self.newMatch()
+	if m.Matched {
+		newMatch := m.newMatch()
 		newMatch.setMatch(num, s)
 		return newMatch, true
 	}
-	self.setMatch(num, s)
-	if self.afterNum == 0 {
-		return self.newMatch(), true
+	m.setMatch(num, s)
+	if m.afterNum == 0 {
+		return m.newMatch(), true
 	} else {
 		// set after line
 		return nil, false
 	}
 }
 
-func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match, bool) {
+func (m *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match, bool) {
 	if pattern.UseRegexp {
 		if pattern.Regexp.MatchString(s) {
-			return self.setUpNewMatch(num, s)
+			return m.setUpNewMatch(num, s)
 		}
 	} else if pattern.IgnoreCase {
 		if strings.Contains(strings.ToUpper(s), strings.ToUpper(pattern.Pattern)) {
-			return self.setUpNewMatch(num, s)
+			return m.setUpNewMatch(num, s)
 		}
 	} else if strings.Contains(s, pattern.Pattern) {
-		return self.setUpNewMatch(num, s)
+		return m.setUpNewMatch(num, s)
 	}
-	if !self.Matched && self.beforeNum > 0 {
-		self.setBefore(num, s)
+	if !m.Matched && m.beforeNum > 0 {
+		m.setBefore(num, s)
 	}
-	if self.Matched && self.afterNum > 0 {
-		if !self.setAfter(num, s) {
-			newMatch := self.newMatch()
-			if self.beforeNum > 0 {
+	if m.Matched && m.afterNum > 0 {
+		if !m.setAfter(num, s) {
+			newMatch := m.newMatch()
+			if m.beforeNum > 0 {
 				newMatch.setBefore(num, s)
 			}
 			return newMatch, true
@@ -109,18 +109,18 @@ func (self *Match) IsMatch(pattern *pattern.Pattern, num int, s string) (*Match,
 	return nil, false
 }
 
-func (self *Match) FirstLineNum() int {
-	if len(self.Befores) == 0 {
-		return self.Line.Num
+func (m *Match) FirstLineNum() int {
+	if len(m.Befores) == 0 {
+		return m.Line.Num
 	} else {
-		return self.Befores[0].Num
+		return m.Befores[0].Num
 	}
 }
 
-func (self *Match) LastLineNum() int {
-	if len(self.Afters) == 0 {
-		return self.Line.Num
+func (m *Match) LastLineNum() int {
+	if len(m.Afters) == 0 {
+		return m.Line.Num
 	} else {
-		return self.Afters[len(self.Afters)-1].Num
+		return m.Afters[len(m.Afters)-1].Num
 	}
 }

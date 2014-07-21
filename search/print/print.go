@@ -40,13 +40,13 @@ func NewPrinter(in chan *Params, done chan bool, option *option.Option) *Printer
 	return &Printer{in, done, option, createWriter(option)}
 }
 
-func (self *Printer) Print() {
+func (p *Printer) Print() {
 	FileMatchCount = 0
 	MatchCount = 0
-	for arg := range self.In {
+	for arg := range p.In {
 
-		if self.Option.FilesWithRegexp != "" {
-			self.printPath(arg.Path)
+		if p.Option.FilesWithRegexp != "" {
+			p.printPath(arg.Path)
 			fmt.Println()
 			FileMatchCount++
 			continue
@@ -56,19 +56,19 @@ func (self *Printer) Print() {
 			continue
 		}
 
-		if self.Option.FilesWithMatches {
-			self.printPath(arg.Path)
+		if p.Option.FilesWithMatches {
+			p.printPath(arg.Path)
 			fmt.Println()
 			FileMatchCount++
 			continue
 		}
-		if !self.Option.NoGroup {
-			self.printPath(arg.Path)
+		if !p.Option.NoGroup {
+			p.printPath(arg.Path)
 			fmt.Println()
 			FileMatchCount++
 		}
 		lastLineNum := 0
-		enableContext := self.Option.Before > 0 || self.Option.After > 0
+		enableContext := p.Option.Before > 0 || p.Option.After > 0
 		for _, v := range arg.Matches {
 			if v == nil {
 				continue
@@ -79,59 +79,59 @@ func (self *Printer) Print() {
 				}
 				lastLineNum = v.LastLineNum()
 			}
-			if self.Option.NoGroup {
-				self.printPath(arg.Path)
+			if p.Option.NoGroup {
+				p.printPath(arg.Path)
 			}
-			self.printContext(v.Befores)
-			self.printMatch(arg.Pattern, v.Line)
+			p.printContext(v.Befores)
+			p.printMatch(arg.Pattern, v.Line)
 			MatchCount++
 			fmt.Println()
-			self.printContext(v.Afters)
+			p.printContext(v.Afters)
 		}
-		if !self.Option.NoGroup {
+		if !p.Option.NoGroup {
 			fmt.Println()
 		}
 	}
-	if self.Option.Stats {
+	if p.Option.Stats {
 		fmt.Printf("%d Files Matched\n", FileMatchCount)
 		fmt.Printf("%d Total Text Matches\n", MatchCount)
 	}
-	self.Done <- true
+	p.Done <- true
 }
 
-func (self *Printer) printPath(path string) {
-	if self.Option.EnableColor {
-		fmt.Fprintf(self.writer, "%s%s%s", ColorPath, path, ColorReset)
+func (p *Printer) printPath(path string) {
+	if p.Option.EnableColor {
+		fmt.Fprintf(p.writer, "%s%s%s", ColorPath, path, ColorReset)
 	} else {
-		fmt.Fprintf(self.writer, "%s", path)
+		fmt.Fprintf(p.writer, "%s", path)
 	}
-	if !self.Option.FilesWithMatches && self.Option.FilesWithRegexp == "" {
-		fmt.Fprintf(self.writer, ":")
+	if !p.Option.FilesWithMatches && p.Option.FilesWithRegexp == "" {
+		fmt.Fprintf(p.writer, ":")
 	}
 }
-func (self *Printer) printLineNumber(lineNum int, sep string) {
-	if self.Option.EnableColor {
-		fmt.Fprintf(self.writer, "%s%d%s%s", ColorLineNumber, lineNum, ColorReset, sep)
+func (p *Printer) printLineNumber(lineNum int, sep string) {
+	if p.Option.EnableColor {
+		fmt.Fprintf(p.writer, "%s%d%s%s", ColorLineNumber, lineNum, ColorReset, sep)
 	} else {
-		fmt.Fprintf(self.writer, "%d%s", lineNum, sep)
+		fmt.Fprintf(p.writer, "%d%s", lineNum, sep)
 	}
 }
-func (self *Printer) printMatch(pattern *pattern.Pattern, line *match.Line) {
-	self.printLineNumber(line.Num, ":")
-	if !self.Option.EnableColor {
-		fmt.Fprintf(self.writer, "%s", line.Str)
+func (p *Printer) printMatch(pattern *pattern.Pattern, line *match.Line) {
+	p.printLineNumber(line.Num, ":")
+	if !p.Option.EnableColor {
+		fmt.Fprintf(p.writer, "%s", line.Str)
 	} else if pattern.UseRegexp || pattern.IgnoreCase {
-		fmt.Fprintf(self.writer, "%s", pattern.Regexp.ReplaceAllString(line.Str, ColorMatch+"${1}"+ColorReset))
+		fmt.Fprintf(p.writer, "%s", pattern.Regexp.ReplaceAllString(line.Str, ColorMatch+"${1}"+ColorReset))
 	} else {
-		fmt.Fprintf(self.writer, "%s", strings.Replace(line.Str, pattern.Pattern, ColorMatch+pattern.Pattern+ColorReset, -1))
+		fmt.Fprintf(p.writer, "%s", strings.Replace(line.Str, pattern.Pattern, ColorMatch+pattern.Pattern+ColorReset, -1))
 	}
 }
 
-func (self *Printer) printContext(lines []*match.Line) {
+func (p *Printer) printContext(lines []*match.Line) {
 	for _, line := range lines {
-		self.printLineNumber(line.Num, "-")
-		fmt.Fprintf(self.writer, "%s", line.Str)
-		fmt.Fprintln(self.writer)
+		p.printLineNumber(line.Num, "-")
+		fmt.Fprintf(p.writer, "%s", line.Str)
+		fmt.Fprintln(p.writer)
 	}
 }
 

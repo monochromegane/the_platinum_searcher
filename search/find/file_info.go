@@ -12,20 +12,20 @@ type FileInfo struct {
 	follow bool
 }
 
-func (self *FileInfo) IsDir() bool {
-	if self.follow && self.IsSymlink() {
-		if _, err := ioutil.ReadDir(filepath.Join(self.path, self.FileInfo.Name())); err == nil {
+func (f *FileInfo) IsDir() bool {
+	if f.follow && f.IsSymlink() {
+		if _, err := ioutil.ReadDir(filepath.Join(f.path, f.FileInfo.Name())); err == nil {
 			return true
 		} else {
 			return false
 		}
 	} else {
-		return self.FileInfo.IsDir()
+		return f.FileInfo.IsDir()
 	}
 }
 
-func (self *FileInfo) IsSymlink() bool {
-	return self.FileInfo.Mode()&os.ModeSymlink == os.ModeSymlink
+func (f *FileInfo) IsSymlink() bool {
+	return f.FileInfo.Mode()&os.ModeSymlink == os.ModeSymlink
 }
 
 func newFileInfo(path string, info os.FileInfo, follow bool) *FileInfo {

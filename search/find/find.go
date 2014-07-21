@@ -20,32 +20,32 @@ type Finder struct {
 	Option *option.Option
 }
 
-func (self *Finder) Find(root string, pattern *pattern.Pattern) {
-	if self.Option.SearchStream {
-		self.findStream(pattern)
+func (f *Finder) Find(root string, pattern *pattern.Pattern) {
+	if f.Option.SearchStream {
+		f.findStream(pattern)
 	} else {
-		self.findFile(root, pattern)
+		f.findFile(root, pattern)
 	}
 }
 
-func (self *Finder) findStream(pattern *pattern.Pattern) {
+func (f *Finder) findStream(pattern *pattern.Pattern) {
 	// TODO: File type is fixed in ASCII because it can not determine the character code.
-	self.Out <- &grep.Params{"", file.ASCII, pattern}
-	close(self.Out)
+	f.Out <- &grep.Params{"", file.ASCII, pattern}
+	close(f.Out)
 }
 
-func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
-	if self.Option.NoPtIgnore == false {
-		self.addHomePtIgnore()
+func (f *Finder) findFile(root string, pattern *pattern.Pattern) {
+	if f.Option.NoPtIgnore == false {
+		f.addHomePtIgnore()
 	}
 
-	if self.Option.NoGlobalGitIgnore == false {
-		self.addGlobalGitIgnore()
+	if f.Option.NoGlobalGitIgnore == false {
+		f.addGlobalGitIgnore()
 	}
 
-	Walk(root, self.Option.Ignore, self.Option.Follow, func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
+	Walk(root, f.Option.Ignore, f.Option.Follow, func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore) {
 		if info.IsDir() {
-			if depth > self.Option.Depth+1 {
+			if depth > f.Option.Depth+1 {
 				return filepath.SkipDir, ig
 			}
 			//Current Directory skipping should be checked first before loading ignores
@@ -60,7 +60,7 @@ func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 					}
 				}
 			}
-			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, self.Option.VcsIgnores())...)
+			ig.Patterns = append(ig.Patterns, ignore.IgnorePatterns(path, f.Option.VcsIgnores())...)
 			return nil, ig
 		}
 		if !info.follow && info.IsSymlink() {
@@ -79,16 +79,16 @@ func (self *Finder) findFile(root string, pattern *pattern.Pattern) {
 			return nil, ig
 		}
 		fileType := ""
-		if self.Option.FilesWithRegexp == "" {
+		if f.Option.FilesWithRegexp == "" {
 			fileType = file.IdentifyType(path)
 			if fileType == file.ERROR || fileType == file.BINARY {
 				return nil, ig
 			}
 		}
-		self.Out <- &grep.Params{path, fileType, pattern}
+		f.Out <- &grep.Params{path, fileType, pattern}
 		return nil, ig
 	})
-	close(self.Out)
+	close(f.Out)
 }
 
 type WalkFunc func(path string, info *FileInfo, depth int, ig ignore.Ignore, err error) (error, ignore.Ignore)
@@ -167,10 +167,10 @@ func contains(path string, patterns *[]string) bool {
 	return false
 }
 
-func (self *Finder) addHomePtIgnore() {
+func (f *Finder) addHomePtIgnore() {
 	homeDir := setHomeDir()
 	if homeDir != "" {
-		self.Option.Ignore = append(self.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{".ptignore"})...)
+		f.Option.Ignore = append(f.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{".ptignore"})...)
 	}
 }
 
@@ -186,12 +186,12 @@ func setHomeDir() string {
 	return homeDir
 }
 
-func (self *Finder) addGlobalGitIgnore() {
+func (f *Finder) addGlobalGitIgnore() {
 	homeDir := setHomeDir()
 	if homeDir != "" {
 		globalIgnore := globalGitIgnore()
 		if globalIgnore != "" {
-			self.Option.Ignore = append(self.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{globalIgnore})...)
+			f.Option.Ignore = append(f.Option.Ignore, ignore.IgnorePatterns(homeDir, []string{globalIgnore})...)
 		}
 	}
 }

@@ -27,21 +27,21 @@ type Grepper struct {
 
 var FilesSearched uint
 
-func (self *Grepper) ConcurrentGrep() {
+func (g *Grepper) ConcurrentGrep() {
 	var wg sync.WaitGroup
 	FilesSearched = 0
-	sem := make(chan bool, self.Option.Proc)
-	for arg := range self.In {
+	sem := make(chan bool, g.Option.Proc)
+	for arg := range g.In {
 		sem <- true
 		wg.Add(1)
 		FilesSearched++
-		go func(self *Grepper, arg *Params, sem chan bool) {
+		go func(g *Grepper, arg *Params, sem chan bool) {
 			defer wg.Done()
-			self.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
-		}(self, arg, sem)
+			g.Grep(arg.Path, arg.Encode, arg.Pattern, sem)
+		}(g, arg, sem)
 	}
 	wg.Wait()
-	close(self.Out)
+	close(g.Out)
 }
 
 func getDecoder(encode string) transform.Transformer {
@@ -62,14 +62,14 @@ func getFileHandler(path string, opt *option.Option) (*os.File, error) {
 	}
 }
 
-func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan bool) {
-	if self.Option.FilesWithRegexp != "" {
-		self.Out <- &print.Params{pattern, path, nil}
+func (g *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem chan bool) {
+	if g.Option.FilesWithRegexp != "" {
+		g.Out <- &print.Params{pattern, path, nil}
 		<-sem
 		return
 	}
 
-	fh, err := getFileHandler(path, self.Option)
+	fh, err := getFileHandler(path, g.Option)
 	if err != nil {
 		panic(err)
 	}
@@ -83,7 +83,7 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 
 	var buf []byte
 	matches := make([]*match.Match, 0)
-	m := match.NewMatch(self.Option.Before, self.Option.After)
+	m := match.NewMatch(g.Option.Before, g.Option.After)
 	var lineNum = 1
 	for {
 		buf, _, err = f.ReadLine()
@@ -99,7 +99,7 @@ func (self *Grepper) Grep(path, encode string, pattern *pattern.Pattern, sem cha
 	if m.Matched {
 		matches = append(matches, m)
 	}
-	self.Out <- &print.Params{pattern, path, matches}
+	g.Out <- &print.Params{pattern, path, matches}
 	fh.Close()
 	<-sem
 }
