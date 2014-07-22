@@ -1,7 +1,6 @@
-package match
+package the_platinum_searcher
 
 import (
-	"github.com/monochromegane/the_platinum_searcher/search/pattern"
 	"testing"
 )
 
@@ -10,7 +9,7 @@ func testIsMatch(t *testing.T) {
 	match := NewMatch(0, 0)
 
 	// not use regexp
-	p, _ := pattern.NewPattern("go", "", false, false, false)
+	p, _ := NewPattern("go", "", false, false, false)
 	lines := []string{"go", "GO", "Go", "oo"}
 	for index, line := range lines {
 		_, ok := match.IsMatch(p, index+1, line)
@@ -22,7 +21,7 @@ func testIsMatch(t *testing.T) {
 	}
 
 	// ignore case
-	p, _ = pattern.NewPattern("go", "", false, true, false)
+	p, _ = NewPattern("go", "", false, true, false)
 	lines = []string{"go", "GO", "Go", "oo"}
 	for index, line := range lines {
 		_, ok := match.IsMatch(p, index+1, line)
@@ -34,7 +33,7 @@ func testIsMatch(t *testing.T) {
 	}
 
 	// use regexp
-	p, _ = pattern.NewPattern("go|Go", "", false, false, true)
+	p, _ = NewPattern("go|Go", "", false, false, true)
 	lines = []string{"go", "GO", "Go", "oo"}
 	for index, line := range lines {
 		_, ok := match.IsMatch(p, index+1, line)
@@ -49,7 +48,7 @@ func testIsMatch(t *testing.T) {
 
 func TestMatch(t *testing.T) {
 
-	pattern, _ := pattern.NewPattern("go", "", false, false, false)
+	pattern, _ := NewPattern("go", "", false, false, false)
 	match := NewMatch(1, 1)
 
 	lines := []string{
@@ -76,7 +75,7 @@ func TestMatch(t *testing.T) {
 
 func TestMatchWhenContextAndMatchDuplicate(t *testing.T) {
 
-	pattern, _ := pattern.NewPattern("go", "", false, false, false)
+	pattern, _ := NewPattern("go", "", false, false, false)
 	match := NewMatch(1, 1)
 
 	lines := []string{

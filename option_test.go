@@ -1,4 +1,4 @@
-package option
+package the_platinum_searcher
 
 import (
 	"testing"

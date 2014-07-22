@@ -9,16 +9,12 @@ import (
 
 	flags "github.com/jessevdk/go-flags"
 	"github.com/monochromegane/terminal"
-
-	"github.com/monochromegane/the_platinum_searcher/search"
-	"github.com/monochromegane/the_platinum_searcher/search/grep"
-	"github.com/monochromegane/the_platinum_searcher/search/option"
-	"github.com/monochromegane/the_platinum_searcher/search/print"
+	pt "github.com/monochromegane/the_platinum_searcher"
 )
 
 const version = "1.6.5"
 
-var opts option.Option
+var opts pt.Option
 
 func init() {
 	if cpu := runtime.NumCPU(); cpu == 1 {
@@ -97,7 +93,7 @@ func main() {
 
 	start := time.Now()
 
-	searcher := search.Searcher{root, pattern, &opts}
+	searcher := pt.PlatinumSearcher{root, pattern, &opts}
 	err = searcher.Search()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
@@ -105,11 +101,11 @@ func main() {
 	}
 	if opts.Stats {
 		elapsed := time.Since(start)
-		fmt.Printf("%d Files Searched\n", grep.FilesSearched)
+		fmt.Printf("%d Files Searched\n", pt.FilesSearched)
 		fmt.Printf("%s Elapsed\n", elapsed)
 	}
 
-	if print.FileMatchCount == 0 {
+	if pt.FileMatchCount == 0 {
 		os.Exit(1)
 	}
 }

@@ -1,4 +1,4 @@
-package pattern
+package the_platinum_searcher
 
 import (
 	"regexp"

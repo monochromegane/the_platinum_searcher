@@ -1,4 +1,4 @@
-package ignore
+package the_platinum_searcher
 
 import (
 	"bufio"

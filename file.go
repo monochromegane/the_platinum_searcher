@@ -1,19 +1,20 @@
-package file
+package the_platinum_searcher
 
 import (
 	"os"
 )
 
 const (
-	ERROR    = "Error"
-	BINARY   = "Binary"
-	ASCII    = "ASCII"
-	UTF8     = "UTF-8"
-	EUCJP    = "EUC-JP"
-	SHIFTJIS = "Shift_JIS"
+	UNKNOWN = iota
+	ERROR
+	BINARY
+	ASCII
+	UTF8
+	EUCJP
+	SHIFTJIS
 )
 
-func IdentifyType(path string) string {
+func IdentifyType(path string) int {
 
 	var (
 		suspiciousBytes = 0

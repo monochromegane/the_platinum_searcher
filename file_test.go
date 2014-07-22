@@ -1,11 +1,12 @@
-package file
+package the_platinum_searcher
 
 import (
 	"testing"
 )
 
 type Assert struct {
-	path, fileType string
+	path     string
+	fileType int
 }
 
 var Asserts = []Assert{
@@ -21,7 +22,7 @@ var Asserts = []Assert{
 
 func TestIdentifyType(t *testing.T) {
 	for _, f := range Asserts {
-		fileType := IdentifyType("../../files/" + f.path)
+		fileType := IdentifyType("files/" + f.path)
 		if fileType != f.fileType {
 			t.Errorf("%s should be %s.", f.path, f.fileType)
 		}

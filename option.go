@@ -1,4 +1,4 @@
-package option
+package the_platinum_searcher
 
 type Option struct {
 	Color             func()   `long:"color" description:"Print color codes in results (Enabled by default)"`
@@ -29,18 +29,18 @@ type Option struct {
 	Version           bool     `long:"version" description:"Show version"`
 }
 
-func (self *Option) VcsIgnores() []string {
-	if len(self.VcsIgnore) == 0 {
-		self.VcsIgnore = []string{".gitignore", ".hgignore", ".ptignore"}
+func (o *Option) VcsIgnores() []string {
+	if len(o.VcsIgnore) == 0 {
+		o.VcsIgnore = []string{".gitignore", ".hgignore", ".ptignore"}
 	}
-	return self.VcsIgnore
+	return o.VcsIgnore
 }
 
-func (self *Option) SetEnableColor() {
-	self.ForceColor = true
-	self.EnableColor = true
+func (o *Option) SetEnableColor() {
+	o.ForceColor = true
+	o.EnableColor = true
 }
 
-func (self *Option) SetDisableColor() {
-	self.EnableColor = false
+func (o *Option) SetDisableColor() {
+	o.EnableColor = false
 }
