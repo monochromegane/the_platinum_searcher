@@ -35,7 +35,7 @@ Download from the following url.
 Or, you can use Homebrew (Only MacOSX).
 
 ```sh
-$ brew install pt
+$ brew install the_platinum_searcher
 ```
 
 ## Usage
