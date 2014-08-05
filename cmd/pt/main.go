@@ -25,7 +25,6 @@ func init() {
 }
 
 func main() {
-
 	opts.Color = opts.SetEnableColor
 	opts.NoColor = opts.SetDisableColor
 	opts.EnableColor = true
