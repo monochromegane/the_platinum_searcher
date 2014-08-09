@@ -35,8 +35,10 @@ Download from the following url.
 Or, you can use Homebrew (Only MacOSX).
 
 ```sh
-$ brew install the_platinum_searcher
+$ brew install pt
 ```
+
+`pt` is an alias for `the_platinum_searcher` in Homebrew.
 
 ## Usage
 
