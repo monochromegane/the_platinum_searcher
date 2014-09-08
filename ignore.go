@@ -31,6 +31,11 @@ func IgnorePatterns(path string, ignores []string) []string {
 			if len(s) == 0 || strings.HasPrefix(s, "#") {
 				continue
 			}
+
+			if filepath.Ext(s) == "" {
+				patterns = append(patterns, s+"/")
+			}
+
 			patterns = append(patterns, s)
 		}
 		file.Close()

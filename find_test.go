@@ -72,6 +72,26 @@ func TestFindWithIgnore(t *testing.T) {
 	}
 }
 
+func TestFindWithIgnoreDir(t *testing.T) {
+	out := make(chan *GrepParams)
+	opts := defaultOpts()
+	opts.VcsIgnore = []string{".dirignore"}
+	find := find{out, opts}
+	go find.Start("files/vcs", &Pattern{Pattern: "go"})
+
+	testPath := mkFoundPaths(out)
+
+	if e := "files/vcs/ignore/ignore.txt"; testPath(e) {
+		t.Errorf("File should not have been returned: %s", e)
+	}
+
+	// Sanity check that some things are matching.
+	if e := "files/vcs/absolute/ignore.txt"; !testPath(e) {
+		t.Errorf("File should have been returned: %s", e)
+	}
+
+}
+
 type Hidden struct {
 	Root, Expect string
 }
