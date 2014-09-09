@@ -8,20 +8,24 @@ import (
 )
 
 type StringMatcher interface {
-	Match(string) bool
+	// Match matcher with pattern and depth
+	Match(string, int) bool
 }
 
 type Ignore struct {
 	Patterns []StringMatcher
 }
 
-type gitIgnoreMatcher []string
+type gitIgnoreMatcher struct {
+	patterns []string
+	depth    int
+}
 
-func (ps gitIgnoreMatcher) Match(file string) bool {
+func (ps gitIgnoreMatcher) Match(file string, depth int) bool {
 	negatedIgnoreMatch := false
 	ignoreMatch := false
 
-	for _, p := range ps {
+	for _, p := range ps.patterns {
 		if len(p) == 0 {
 			continue
 		}
@@ -30,7 +34,10 @@ func (ps gitIgnoreMatcher) Match(file string) bool {
 			negatedIgnoreMatch, _ = filepath.Match(p[1:], file)
 		} else if !ignoreMatch {
 			if p[0] == '/' {
-				ignoreMatch, _ = filepath.Match(p[1:], file)
+				// Only match with "/" prefix on current depth
+				if ps.depth == depth || ps.depth == -1 {
+					ignoreMatch, _ = filepath.Match(p[1:], file)
+				}
 			} else {
 				ignoreMatch, _ = filepath.Match(p, file)
 			}
@@ -42,7 +49,7 @@ func (ps gitIgnoreMatcher) Match(file string) bool {
 
 type genericIgnoreMatcher []string
 
-func (im genericIgnoreMatcher) Match(file string) bool {
+func (im genericIgnoreMatcher) Match(file string, depth int) bool {
 	for _, p := range im {
 		val, _ := filepath.Match(p, file)
 		if val {
@@ -52,7 +59,7 @@ func (im genericIgnoreMatcher) Match(file string) bool {
 	return false
 }
 
-func IgnorePatterns(path string, ignores []string) []StringMatcher {
+func IgnorePatterns(path string, ignores []string, depth int) []StringMatcher {
 	var patterns []StringMatcher
 	for _, ignore := range ignores {
 		file, err := os.Open(filepath.Join(path, ignore))
@@ -78,7 +85,7 @@ func IgnorePatterns(path string, ignores []string) []StringMatcher {
 
 		if len(thesePatterns) > 0 {
 			if ignore == ".gitignore" {
-				patterns = append(patterns, gitIgnoreMatcher(thesePatterns))
+				patterns = append(patterns, gitIgnoreMatcher{thesePatterns, depth})
 			} else {
 				patterns = append(patterns, genericIgnoreMatcher(thesePatterns))
 			}

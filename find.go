@@ -65,12 +65,12 @@ func (f *find) findFile(root string, pattern *Pattern) {
 				return filepath.SkipDir, ig
 			} else {
 				for _, p := range ig.Patterns {
-					if p.Match(filepath.Base(path) + "/") {
+					if p.Match(filepath.Base(path)+"/", depth) {
 						return filepath.SkipDir, ig
 					}
 				}
 			}
-			ig.Patterns = append(ig.Patterns, IgnorePatterns(path, f.Option.VcsIgnores())...)
+			ig.Patterns = append(ig.Patterns, IgnorePatterns(path, f.Option.VcsIgnores(), depth+1)...)
 			return nil, ig
 		}
 		if !info.follow && info.IsSymlink() {
@@ -81,7 +81,7 @@ func (f *find) findFile(root string, pattern *Pattern) {
 		}
 
 		for _, p := range ig.Patterns {
-			if p.Match(filepath.Base(path)) {
+			if p.Match(filepath.Base(path), depth) {
 				return nil, ig
 			}
 		}
@@ -183,7 +183,7 @@ func (f *find) addHomePtIgnore() {
 	if homeDir != "" {
 		f.State.IgnoreFiles = append(
 			f.State.IgnoreFiles,
-			IgnorePatterns(homeDir, []string{".ptignore"})...,
+			IgnorePatterns(homeDir, []string{".ptignore"}, -1)...,
 		)
 	}
 }
@@ -207,7 +207,7 @@ func (f *find) addGlobalGitIgnore() {
 		if globalIgnore != "" {
 			f.State.IgnoreFiles = append(
 				f.State.IgnoreFiles,
-				IgnorePatterns(homeDir, []string{globalIgnore})...,
+				IgnorePatterns(homeDir, []string{globalIgnore}, -1)...,
 			)
 		}
 	}
