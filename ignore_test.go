@@ -15,3 +15,39 @@ func TestIgnorePatterns(t *testing.T) {
 		t.Errorf("It should be match %s", "pattern2")
 	}
 }
+
+func TestGitIgnoreMatcher(t *testing.T) {
+	ignorePattern := "/ignoreme.txt"
+	gitMatcher := gitIgnoreMatcher{[]string{ignorePattern}, 1}
+
+	ignoreThis := "ignoreme.txt"
+	depth := 2
+	if gitMatcher.Match(ignoreThis, depth) {
+		t.Errorf(
+			"Git ignore pattern \"%s\" should not match \"%s\" on level %d",
+			ignorePattern,
+			ignoreThis,
+			depth,
+		)
+	}
+
+	depth = 0
+	if gitMatcher.Match(ignoreThis, depth) {
+		t.Errorf(
+			"Git ignore pattern \"%s\" should not match \"%s\" on level %d",
+			ignorePattern,
+			ignoreThis,
+			depth,
+		)
+	}
+
+	depth = 1
+	if !gitMatcher.Match(ignoreThis, depth) {
+		t.Errorf(
+			"Git ignore pattern \"%s\" should match \"%s\" on level %d",
+			ignorePattern,
+			ignoreThis,
+			depth,
+		)
+	}
+}
