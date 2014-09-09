@@ -51,3 +51,20 @@ func TestGitIgnoreMatcher(t *testing.T) {
 		)
 	}
 }
+
+func TestGitIgnoreDir(t *testing.T) {
+	gitMatcher := gitIgnoreMatcher{[]string{"node_modules"}, 1}
+
+	if !gitMatcher.Match("node_modules/", 1) {
+		t.Error(`Git ignore pattern: "node_modules" should match dir: "node_modules/"`)
+	}
+
+	gitMatcher = gitIgnoreMatcher{[]string{"node_modules/"}, 1}
+	if gitMatcher.Match("node_modules", 1) {
+		t.Error(`Git ignore pattern: "node_modules/" should not match file: "node_modules"`)
+	}
+
+	if !gitMatcher.Match("node_modules/", 1) {
+		t.Error(`Git ignore pattern: "node_modules/" should match dir: "node_modules/"`)
+	}
+}

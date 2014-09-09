@@ -30,6 +30,11 @@ func (ps gitIgnoreMatcher) Match(file string, depth int) bool {
 			continue
 		}
 
+		lastChar := p[len(p)-1]
+		if lastChar != '/' {
+			file = filepath.Base(file)
+		}
+
 		if p[0] == '!' {
 			negatedIgnoreMatch, _ = filepath.Match(p[1:], file)
 		} else if !ignoreMatch {
