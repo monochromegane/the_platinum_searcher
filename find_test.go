@@ -1,21 +1,52 @@
 package the_platinum_searcher
 
-import (
-	"testing"
-)
+import "testing"
+
+func defaultOpts() *Option {
+
+	return &Option{
+		Depth:             25,
+		NoGlobalGitIgnore: true,
+	}
+}
+
+func mkFoundPaths(ch chan *GrepParams) func(f string) bool {
+	var list []string
+	for o := range ch {
+		list = append(list, o.Path)
+	}
+	return func(m string) bool {
+		for _, s := range list {
+			if m == s {
+				return true
+			}
+		}
+		return false
+	}
+}
 
 func TestFind(t *testing.T) {
 	out := make(chan *GrepParams)
-	find := find{out, &Option{}}
+	find := find{out, defaultOpts()}
 	go find.Start("files", &Pattern{Pattern: "go"})
 
-	for o := range out {
-		if o.Path == ".hidden/hidden.txt" {
-			t.Errorf("It should not contains file under hidden directory.")
-		}
-		if o.Path == "binary/binary.bin" {
-			t.Errorf("It should be text file.")
-		}
+	testPath := mkFoundPaths(out)
+
+	// Ensure these files were not returned
+	if e := ".hidden/hidden.txt"; testPath(e) {
+		t.Errorf("Found %s, It should not contains file under hidden directory.", e)
+	}
+	if e := "binary/binary.bin"; testPath(e) {
+		t.Errorf("%s should be text file.", e)
+	}
+
+	// Enumerate found paths and ensure a couple of them are in there.
+	if e := "files/ascii.txt"; !testPath(e) {
+		t.Errorf("Find failed to locate: %s", e)
+	}
+
+	if e := "files/depth/file_1.txt"; !testPath(e) {
+		t.Errorf("Find failed to locate: %s", e)
 	}
 }
 
@@ -27,7 +58,9 @@ var Ignores = []string{
 
 func TestFindWithIgnore(t *testing.T) {
 	out := make(chan *GrepParams)
-	find := find{out, &Option{VcsIgnore: []string{".vcsignore"}}}
+	opts := defaultOpts()
+	opts.VcsIgnore = []string{".vcsignore"}
+	find := find{out, opts}
 	go find.Start("files/vcs", &Pattern{Pattern: "go"})
 
 	for o := range out {
