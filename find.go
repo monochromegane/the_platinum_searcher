@@ -9,15 +9,23 @@ import (
 	"strings"
 )
 
+type findState struct {
+	IgnoreFiles []StringMatcher
+}
+
 type find struct {
 	Out    chan *GrepParams
 	Option *Option
+	State  *findState
 }
 
 func Find(root string, pattern *Pattern, out chan *GrepParams, option *Option) {
 	find := find{
 		Out:    out,
 		Option: option,
+		State: &findState{
+			[]StringMatcher{genericIgnoreMatcher(option.Ignore)},
+		},
 	}
 	find.Start(root, pattern)
 }
@@ -45,7 +53,8 @@ func (f *find) findFile(root string, pattern *Pattern) {
 		f.addGlobalGitIgnore()
 	}
 
-	Walk(root, f.Option.Ignore, f.Option.Follow, func(path string, info *FileInfo, depth int, ig Ignore, err error) (error, Ignore) {
+	optionIgnoreMatchers := []StringMatcher{genericIgnoreMatcher(f.Option.Ignore)}
+	Walk(root, optionIgnoreMatchers, f.Option.Follow, func(path string, info *FileInfo, depth int, ig Ignore, err error) (error, Ignore) {
 		if info.IsDir() {
 			if depth > f.Option.Depth+1 {
 				return filepath.SkipDir, ig
@@ -56,13 +65,12 @@ func (f *find) findFile(root string, pattern *Pattern) {
 				return filepath.SkipDir, ig
 			} else {
 				for _, p := range ig.Patterns {
-					val, _ := filepath.Match(p, filepath.Base(path)+"/")
-					if val {
+					if p.Match(filepath.Base(path)+"/", depth) {
 						return filepath.SkipDir, ig
 					}
 				}
 			}
-			ig.Patterns = append(ig.Patterns, IgnorePatterns(path, f.Option.VcsIgnores())...)
+			ig.Patterns = append(ig.Patterns, IgnorePatterns(path, f.Option.VcsIgnores(), depth+1)...)
 			return nil, ig
 		}
 		if !info.follow && info.IsSymlink() {
@@ -71,12 +79,13 @@ func (f *find) findFile(root string, pattern *Pattern) {
 		if !isRoot(depth) && isHidden(info.Name()) {
 			return nil, ig
 		}
+
 		for _, p := range ig.Patterns {
-			val, _ := filepath.Match(p, filepath.Base(path))
-			if val {
+			if p.Match(filepath.Base(path), depth) {
 				return nil, ig
 			}
 		}
+
 		if pattern.FileRegexp != nil && !pattern.FileRegexp.MatchString(path) {
 			return nil, ig
 		}
@@ -95,7 +104,7 @@ func (f *find) findFile(root string, pattern *Pattern) {
 
 type WalkFunc func(path string, info *FileInfo, depth int, ig Ignore, err error) (error, Ignore)
 
-func Walk(root string, ignorePatterns []string, follow bool, walkFn WalkFunc) error {
+func Walk(root string, ignorePatterns []StringMatcher, follow bool, walkFn WalkFunc) error {
 	info, err := os.Lstat(root)
 	fileInfo := newFileInfo(root, info, follow)
 	if err != nil {
@@ -172,7 +181,10 @@ func contains(path string, patterns *[]string) bool {
 func (f *find) addHomePtIgnore() {
 	homeDir := setHomeDir()
 	if homeDir != "" {
-		f.Option.Ignore = append(f.Option.Ignore, IgnorePatterns(homeDir, []string{".ptignore"})...)
+		f.State.IgnoreFiles = append(
+			f.State.IgnoreFiles,
+			IgnorePatterns(homeDir, []string{".ptignore"}, -1)...,
+		)
 	}
 }
 
@@ -193,7 +205,10 @@ func (f *find) addGlobalGitIgnore() {
 	if homeDir != "" {
 		globalIgnore := globalGitIgnore()
 		if globalIgnore != "" {
-			f.Option.Ignore = append(f.Option.Ignore, IgnorePatterns(homeDir, []string{globalIgnore})...)
+			f.State.IgnoreFiles = append(
+				f.State.IgnoreFiles,
+				IgnorePatterns(homeDir, []string{globalIgnore}, -1)...,
+			)
 		}
 	}
 }
