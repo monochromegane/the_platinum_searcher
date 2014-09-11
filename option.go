@@ -27,6 +27,7 @@ type Option struct {
 	Proc              int      // Number of goroutine. Not user option.
 	Stats             bool     `long:"stats" description:"Print stats about files scanned, time taken, etc"`
 	Version           bool     `long:"version" description:"Show version"`
+	Tree              bool     `long:"tree" description:"Print tree"`
 }
 
 func (o *Option) VcsIgnores() []string {

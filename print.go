@@ -8,6 +8,7 @@ import (
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
+	"github.com/homburg/tree"
 	"github.com/shiena/ansicolor"
 )
 
@@ -46,6 +47,9 @@ func Print(in chan *PrintParams, done chan bool, option *Option) {
 func (p *print) Start() {
 	FileMatchCount = 0
 	MatchCount = 0
+
+	var files []string
+
 	for arg := range p.In {
 
 		if p.Option.FilesWithRegexp != "" {
@@ -56,6 +60,11 @@ func (p *print) Start() {
 		}
 
 		if len(arg.Matches) == 0 {
+			continue
+		}
+
+		if p.Option.Tree {
+			files = append(files, arg.Path)
 			continue
 		}
 
@@ -95,6 +104,13 @@ func (p *print) Start() {
 			fmt.Println()
 		}
 	}
+
+	if p.Option.Tree {
+		t := tree.New("/")
+		t.EatLines(files)
+		fmt.Fprint(p.writer, t.Format())
+	}
+
 	if p.Option.Stats {
 		fmt.Printf("%d Files Matched\n", FileMatchCount)
 		fmt.Printf("%d Total Text Matches\n", MatchCount)
