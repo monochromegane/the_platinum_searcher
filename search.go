@@ -12,7 +12,7 @@ func (p *PlatinumSearcher) Search() error {
 	}
 	grep := make(chan *GrepParams, p.Option.Proc)
 	match := make(chan *PrintParams, p.Option.Proc)
-	done := make(chan bool)
+	done := make(chan struct{})
 	go p.find(grep, pattern)
 	go p.grep(grep, match)
 	go p.print(match, done)
@@ -42,6 +42,6 @@ func (p *PlatinumSearcher) grep(in chan *GrepParams, out chan *PrintParams) {
 	Grep(in, out, p.Option)
 }
 
-func (p *PlatinumSearcher) print(in chan *PrintParams, done chan bool) {
+func (p *PlatinumSearcher) print(in chan *PrintParams, done chan struct{}) {
 	Print(in, done, p.Option)
 }

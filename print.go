@@ -28,12 +28,12 @@ type PrintParams struct {
 
 type print struct {
 	In     chan *PrintParams
-	Done   chan bool
+	Done   chan struct{}
 	Option *Option
 	writer io.Writer
 }
 
-func Print(in chan *PrintParams, done chan bool, option *Option) {
+func Print(in chan *PrintParams, done chan struct{}, option *Option) {
 	print := &print{
 		In:     in,
 		Done:   done,
@@ -99,7 +99,7 @@ func (p *print) Start() {
 		fmt.Printf("%d Files Matched\n", FileMatchCount)
 		fmt.Printf("%d Total Text Matches\n", MatchCount)
 	}
-	p.Done <- true
+	p.Done <- struct{}{}
 }
 
 func (p *print) printPath(path string) {
