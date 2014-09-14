@@ -35,12 +35,12 @@ var FilesSearched uint
 func (g *grep) ConcurrentStart() {
 	var wg sync.WaitGroup
 	FilesSearched = 0
-	sem := make(chan bool, g.Option.Proc)
+	sem := make(chan struct{}, g.Option.Proc)
 	for arg := range g.In {
-		sem <- true
+		sem <- struct{}{}
 		wg.Add(1)
 		FilesSearched++
-		go func(g *grep, arg *GrepParams, sem chan bool) {
+		go func(g *grep, arg *GrepParams, sem chan struct{}) {
 			defer wg.Done()
 			g.Start(arg.Path, arg.Encode, arg.Pattern, sem)
 		}(g, arg, sem)
@@ -49,7 +49,7 @@ func (g *grep) ConcurrentStart() {
 	close(g.Out)
 }
 
-func (g *grep) Start(path string, encode int, pattern *Pattern, sem chan bool) {
+func (g *grep) Start(path string, encode int, pattern *Pattern, sem chan struct{}) {
 	if g.Option.FilesWithRegexp != "" {
 		g.Out <- &PrintParams{pattern, path, nil}
 		<-sem

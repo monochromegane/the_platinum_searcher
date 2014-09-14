@@ -29,8 +29,8 @@ func TestGrep(t *testing.T) {
 		grep := grep{in, out, &Option{Proc: 1}}
 
 		pattern, _ := NewPattern(g.pattern, "", false, false, false)
-		sem := make(chan bool, 1)
-		sem <- true
+		sem := make(chan struct{}, 1)
+		sem <- struct{}{}
 		go grep.Start("files/"+g.path, g.fileType, pattern, sem)
 		o := <-out
 		if o.Path != "files/"+g.path {
@@ -56,8 +56,8 @@ func TestGrepWithStream(t *testing.T) {
 	grep := grep{in, out, &Option{Proc: 1, SearchStream: true}}
 
 	pattern, _ := NewPattern(g.pattern, "", false, false, false)
-	sem := make(chan bool, 1)
-	sem <- true
+	sem := make(chan struct{}, 1)
+	sem <- struct{}{}
 	go grep.Start(g.path, g.fileType, pattern, sem)
 	o := <-out
 	if o.Path != g.path {
