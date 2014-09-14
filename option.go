@@ -7,9 +7,11 @@ type Option struct {
 	EnableColor       bool     // Enable color. Not user option.
 	NoGroup           bool     `long:"nogroup" description:"Don't print file name at header (Disabled by default)"`
 	FilesWithMatches  bool     `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
-	VcsIgnore         []string `long:"vcs-ignore" description:"VCS ignore files (Default: .gitignore, .hgignore, .ptignore)"`
+	VcsIgnore         []string `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore" default:".hgignore" default:".ptignore"`
 	NoPtIgnore        bool     `long:"noptignore" description:"Don't use default ($Home/.ptignore) file for ignore patterns"`
 	NoGlobalGitIgnore bool     `long:"noglobal-gitignore" description:"Don't use git's global gitignore file for ignore patterns"`
+	SkipVcsIgnore     func()   `short:"U" long:"skip-vsc-ignores" description:"Don't use VCS ignore file for ignore patterns. Still obey .ptignore"`
+	skipVcsIgnore     bool     // Skip VCS ignore file. Not user option.
 	Ignore            []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 	IgnoreCase        bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
 	SmartCase         bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
@@ -30,10 +32,15 @@ type Option struct {
 }
 
 func (o *Option) VcsIgnores() []string {
-	if len(o.VcsIgnore) == 0 {
-		o.VcsIgnore = []string{".gitignore", ".hgignore", ".ptignore"}
+	if o.skipVcsIgnore {
+		return []string{}
 	}
 	return o.VcsIgnore
+}
+
+func (o *Option) SkipVcsIgnores() {
+	o.skipVcsIgnore = true
+	o.NoGlobalGitIgnore = true
 }
 
 func (o *Option) SetEnableColor() {

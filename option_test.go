@@ -5,11 +5,11 @@ import (
 )
 
 func TestVcsIgnores(t *testing.T) {
-	// When "VcsIgnore" is not specified
-	expected := []string{".gitignore", ".hgignore", ".ptignore"}
-	option := Option{}
+	// When "SkipVcsIgnore" is specified.
+	expected := []string{}
+	option := Option{VcsIgnore: []string{".gitignore", ".hgignore", ".ptignore"}, skipVcsIgnore: true}
 	result := option.VcsIgnores()
-	if !sliceEqual(expected, result) || !sliceEqual(expected, option.VcsIgnore) {
+	if !sliceEqual(expected, result) {
 		t.Errorf("The result is invalid. [Expected: %v, Actual: %v]", expected, result)
 	}
 

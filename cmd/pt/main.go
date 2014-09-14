@@ -28,6 +28,7 @@ func main() {
 	opts.Color = opts.SetEnableColor
 	opts.NoColor = opts.SetDisableColor
 	opts.EnableColor = true
+	opts.SkipVcsIgnore = opts.SkipVcsIgnores
 
 	parser := flags.NewParser(&opts, flags.Default)
 	parser.Name = "pt"
