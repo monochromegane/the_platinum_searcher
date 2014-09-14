@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"code.google.com/p/go.text/encoding/japanese"
 	"code.google.com/p/go.text/transform"
@@ -13,13 +12,6 @@ import (
 
 var FileMatchCount, MatchCount uint
 
-const (
-	ColorReset      = "\x1b[0m\x1b[K"
-	ColorLineNumber = "\x1b[1;33m"  /* yellow with black background */
-	ColorPath       = "\x1b[1;32m"  /* bold green */
-	ColorMatch      = "\x1b[30;43m" /* black with yellow background */
-)
-
 type PrintParams struct {
 	Pattern *Pattern
 	Path    string
@@ -27,18 +19,20 @@ type PrintParams struct {
 }
 
 type print struct {
-	In     chan *PrintParams
-	Done   chan struct{}
-	Option *Option
-	writer io.Writer
+	In        chan *PrintParams
+	Done      chan struct{}
+	Option    *Option
+	writer    io.Writer
+	decorator Decorator
 }
 
 func Print(in chan *PrintParams, done chan struct{}, option *Option) {
 	print := &print{
-		In:     in,
-		Done:   done,
-		Option: option,
-		writer: createWriter(option),
+		In:        in,
+		Done:      done,
+		Option:    option,
+		writer:    newWriter(option),
+		decorator: newDecorator(option),
 	}
 	print.Start()
 }
@@ -103,44 +97,30 @@ func (p *print) Start() {
 }
 
 func (p *print) printPath(path string) {
-	if p.Option.EnableColor {
-		fmt.Fprintf(p.writer, "%s%s%s", ColorPath, path, ColorReset)
-	} else {
-		fmt.Fprintf(p.writer, "%s", path)
-	}
+	fmt.Fprint(p.writer, p.decorator.path(path))
 	if !p.Option.FilesWithMatches && p.Option.FilesWithRegexp == "" {
 		fmt.Fprintf(p.writer, ":")
 	}
 }
 
 func (p *print) printLineNumber(lineNum int, sep string) {
-	if p.Option.EnableColor {
-		fmt.Fprintf(p.writer, "%s%d%s%s", ColorLineNumber, lineNum, ColorReset, sep)
-	} else {
-		fmt.Fprintf(p.writer, "%d%s", lineNum, sep)
-	}
+	fmt.Fprint(p.writer, p.decorator.lineNumber(lineNum, sep))
 }
 
 func (p *print) printMatch(pattern *Pattern, line *Line) {
 	p.printLineNumber(line.Num, ":")
-	if !p.Option.EnableColor {
-		fmt.Fprintf(p.writer, "%s", line.Str)
-	} else if pattern.UseRegexp || pattern.IgnoreCase {
-		fmt.Fprintf(p.writer, "%s", pattern.Regexp.ReplaceAllString(line.Str, ColorMatch+"${1}"+ColorReset))
-	} else {
-		fmt.Fprintf(p.writer, "%s", strings.Replace(line.Str, pattern.Pattern, ColorMatch+pattern.Pattern+ColorReset, -1))
-	}
+	fmt.Fprint(p.writer, p.decorator.match(pattern, line))
 }
 
 func (p *print) printContext(lines []*Line) {
 	for _, line := range lines {
 		p.printLineNumber(line.Num, "-")
-		fmt.Fprintf(p.writer, "%s", line.Str)
+		fmt.Fprint(p.writer, line.Str)
 		fmt.Fprintln(p.writer)
 	}
 }
 
-func createWriter(option *Option) io.Writer {
+func newWriter(option *Option) io.Writer {
 	encoder := func() io.Writer {
 		switch option.OutputEncode {
 		case "sjis":
