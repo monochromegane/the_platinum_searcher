@@ -6,6 +6,19 @@ import (
 	"strings"
 )
 
+type GitIgnore struct {
+	ignorePatterns patterns
+	acceptPatterns patterns
+	depth          int
+}
+
+func (g GitIgnore) IsMatch(path string, isDir bool, depth int) bool {
+	if match := g.acceptPatterns.IsMatch(path, isDir, depth == g.depth); match {
+		return false
+	}
+	return g.ignorePatterns.IsMatch(path, isDir, depth == g.depth)
+}
+
 type patterns []pattern
 
 func (ps patterns) IsMatch(path string, isDir, isRoot bool) bool {
