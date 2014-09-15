@@ -1,7 +1,9 @@
 package the_platinum_searcher
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"path/filepath"
 	"strings"
 )
@@ -10,6 +12,27 @@ type GitIgnore struct {
 	ignorePatterns patterns
 	acceptPatterns patterns
 	depth          int
+}
+
+func (g *GitIgnore) Parse(r io.Reader) {
+	reader := bufio.NewReader(r)
+	for {
+		buf, _, err := reader.ReadLine()
+		if err != nil {
+			break
+		}
+		line := strings.Trim(string(buf), " ")
+		if len(line) == 0 || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		if strings.HasPrefix(line, "!") {
+			g.acceptPatterns = append(g.acceptPatterns,
+				pattern(strings.TrimPrefix(line, "!")))
+		} else {
+			g.ignorePatterns = append(g.ignorePatterns, pattern(line))
+		}
+	}
 }
 
 func (g GitIgnore) IsMatch(path string, isDir bool, depth int) bool {
