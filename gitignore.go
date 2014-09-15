@@ -6,6 +6,18 @@ import (
 	"strings"
 )
 
+type patterns []pattern
+
+func (ps patterns) IsMatch(path string, isDir, isRoot bool) bool {
+	for _, p := range ps {
+		match := p.IsMatch(path, isDir, isRoot)
+		if match {
+			return true
+		}
+	}
+	return false
+}
+
 type pattern string
 
 func (p pattern) IsMatch(path string, isDir, isRoot bool) bool {
