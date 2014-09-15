@@ -14,6 +14,12 @@ type GitIgnore struct {
 	depth          int
 }
 
+func NewGitIgnore(depth int, patterns io.Reader) GitIgnore {
+	g := GitIgnore{depth: depth}
+	g.Parse(patterns)
+	return g
+}
+
 func (g *GitIgnore) Parse(r io.Reader) {
 	reader := bufio.NewReader(r)
 	for {
