@@ -171,12 +171,12 @@ func contains(path string, patterns *[]string) bool {
 }
 
 func (f *find) addHomePtIgnore() {
-	homeDir := setHomeDir()
+	homeDir := getHomeDir()
 	if homeDir != "" {
 	}
 }
 
-func setHomeDir() string {
+func getHomeDir() string {
 	usr, err := user.Current()
 	var homeDir string
 	if err == nil {
@@ -189,7 +189,7 @@ func setHomeDir() string {
 }
 
 func (f *find) addGlobalGitIgnore() {
-	homeDir := setHomeDir()
+	homeDir := getHomeDir()
 	if homeDir != "" {
 		globalIgnore := globalGitIgnore()
 		if globalIgnore != "" {
