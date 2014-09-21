@@ -9,23 +9,15 @@ import (
 	"strings"
 )
 
-type findState struct {
-	IgnoreFiles []StringMatcher
-}
-
 type find struct {
 	Out    chan *GrepParams
 	Option *Option
-	State  *findState
 }
 
 func Find(root string, pattern *Pattern, out chan *GrepParams, option *Option) {
 	find := find{
 		Out:    out,
 		Option: option,
-		State: &findState{
-			[]StringMatcher{genericIgnoreMatcher(option.Ignore)},
-		},
 	}
 	find.Start(root, pattern)
 }
@@ -181,10 +173,6 @@ func contains(path string, patterns *[]string) bool {
 func (f *find) addHomePtIgnore() {
 	homeDir := setHomeDir()
 	if homeDir != "" {
-		f.State.IgnoreFiles = append(
-			f.State.IgnoreFiles,
-			IgnorePatterns(homeDir, []string{".ptignore"}, -1)...,
-		)
 	}
 }
 
@@ -205,10 +193,6 @@ func (f *find) addGlobalGitIgnore() {
 	if homeDir != "" {
 		globalIgnore := globalGitIgnore()
 		if globalIgnore != "" {
-			f.State.IgnoreFiles = append(
-				f.State.IgnoreFiles,
-				IgnorePatterns(homeDir, []string{globalIgnore}, -1)...,
-			)
 		}
 	}
 }
