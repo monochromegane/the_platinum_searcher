@@ -1,9 +1,6 @@
 package the_platinum_searcher
 
-import (
-	"strings"
-	"testing"
-)
+import "testing"
 
 type assert struct {
 	patterns []string
@@ -40,11 +37,8 @@ func TestIsMatch(t *testing.T) {
 	}
 
 	for _, assert := range asserts {
-		gi := NewGitIgnore(
-			1,
-			strings.NewReader(strings.Join(assert.patterns, "\n")),
-		)
-		result := gi.IsMatch(assert.file.path, assert.file.isDir, assert.file.depth)
+		gi := NewGitIgnore(1, assert.patterns)
+		result := gi.Match(assert.file.path, assert.file.isDir, assert.file.depth)
 		if result != assert.expect {
 			t.Errorf("IsMatch should return %t, got %t on %v", assert.expect, result, assert)
 		}

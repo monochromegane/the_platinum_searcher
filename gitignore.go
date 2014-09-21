@@ -1,9 +1,7 @@
 package the_platinum_searcher
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"path/filepath"
 	"strings"
 )
@@ -14,45 +12,40 @@ type GitIgnore struct {
 	depth          int
 }
 
-func NewGitIgnore(depth int, patterns io.Reader) GitIgnore {
+func NewGitIgnore(depth int, patterns []string) GitIgnore {
 	g := GitIgnore{depth: depth}
 	g.Parse(patterns)
 	return g
 }
 
-func (g *GitIgnore) Parse(r io.Reader) {
-	reader := bufio.NewReader(r)
-	for {
-		buf, _, err := reader.ReadLine()
-		if err != nil {
-			break
-		}
-		line := strings.Trim(string(buf), " ")
-		if len(line) == 0 || strings.HasPrefix(line, "#") {
+func (g *GitIgnore) Parse(patterns []string) {
+	for _, p := range patterns {
+		p := strings.Trim(string(p), " ")
+		if len(p) == 0 || strings.HasPrefix(p, "#") {
 			continue
 		}
 
-		if strings.HasPrefix(line, "!") {
+		if strings.HasPrefix(p, "!") {
 			g.acceptPatterns = append(g.acceptPatterns,
-				pattern(strings.TrimPrefix(line, "!")))
+				pattern(strings.TrimPrefix(p, "!")))
 		} else {
-			g.ignorePatterns = append(g.ignorePatterns, pattern(line))
+			g.ignorePatterns = append(g.ignorePatterns, pattern(p))
 		}
 	}
 }
 
-func (g GitIgnore) IsMatch(path string, isDir bool, depth int) bool {
-	if match := g.acceptPatterns.IsMatch(path, isDir, depth == g.depth); match {
+func (g GitIgnore) Match(path string, isDir bool, depth int) bool {
+	if match := g.acceptPatterns.match(path, isDir, depth == g.depth); match {
 		return false
 	}
-	return g.ignorePatterns.IsMatch(path, isDir, depth == g.depth)
+	return g.ignorePatterns.match(path, isDir, depth == g.depth)
 }
 
 type patterns []pattern
 
-func (ps patterns) IsMatch(path string, isDir, isRoot bool) bool {
+func (ps patterns) match(path string, isDir, isRoot bool) bool {
 	for _, p := range ps {
-		match := p.IsMatch(path, isDir, isRoot)
+		match := p.match(path, isDir, isRoot)
 		if match {
 			return true
 		}
@@ -62,7 +55,7 @@ func (ps patterns) IsMatch(path string, isDir, isRoot bool) bool {
 
 type pattern string
 
-func (p pattern) IsMatch(path string, isDir, isRoot bool) bool {
+func (p pattern) match(path string, isDir, isRoot bool) bool {
 
 	if p.hasRootPrefix() && !isRoot {
 		return false
