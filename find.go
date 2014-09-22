@@ -37,14 +37,17 @@ func (f *find) findStream(pattern *Pattern) {
 }
 
 func (f *find) findFile(root string, pattern *Pattern) {
+
+	var matchers ignoreMatchers
 	if f.Option.NoPtIgnore == false {
-		f.addHomePtIgnore()
+		matchers = append(matchers, homePtIgnore())
 	}
 
 	if f.Option.NoGlobalGitIgnore == false {
-		f.addGlobalGitIgnore()
+		matchers = append(matchers, globalGitIgnore())
 	}
 
+	matchers = append(matchers, genericIgnore(f.Option.Ignore))
 	optionIgnoreMatchers := []StringMatcher{genericIgnoreMatcher(f.Option.Ignore)}
 	Walk(root, optionIgnoreMatchers, f.Option.Follow, func(path string, info *FileInfo, depth int, ig Ignore, err error) (error, Ignore) {
 		if info.IsDir() {
@@ -191,13 +194,13 @@ func getHomeDir() string {
 func (f *find) addGlobalGitIgnore() {
 	homeDir := getHomeDir()
 	if homeDir != "" {
-		globalIgnore := globalGitIgnore()
+		globalIgnore := globalGitIgnoreName()
 		if globalIgnore != "" {
 		}
 	}
 }
 
-func globalGitIgnore() string {
+func globalGitIgnoreName() string {
 	gitCmd, err := exec.LookPath("git")
 	if err != nil {
 		return ""

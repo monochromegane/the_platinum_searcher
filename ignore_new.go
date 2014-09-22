@@ -62,3 +62,22 @@ func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
 		return genericIgnore(patterns)
 	}
 }
+
+func homePtIgnore() ignoreMatcher {
+	homeDir := getHomeDir()
+	if homeDir != "" {
+		return newIgnoreMatcher(homeDir, ".ptignore", -1)
+	}
+	return nil
+}
+
+func globalGitIgnore() ignoreMatcher {
+	homeDir := getHomeDir()
+	if homeDir != "" {
+		globalIgnore := globalGitIgnoreName()
+		if globalIgnore != "" {
+			return newIgnoreMatcher(homeDir, globalIgnore, -1)
+		}
+	}
+	return nil
+}
