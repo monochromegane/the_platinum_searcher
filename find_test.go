@@ -27,7 +27,7 @@ func mkFoundPaths(ch chan *GrepParams) func(f string) bool {
 
 func TestFind(t *testing.T) {
 	out := make(chan *GrepParams)
-	find := find{out, defaultOpts(), &findState{}}
+	find := find{out, defaultOpts()}
 	go find.Start("files", &Pattern{Pattern: "go"})
 
 	testPath := mkFoundPaths(out)
@@ -60,7 +60,7 @@ func TestFindWithIgnore(t *testing.T) {
 	out := make(chan *GrepParams)
 	opts := defaultOpts()
 	opts.VcsIgnore = []string{".vcsignore"}
-	find := find{out, opts, &findState{}}
+	find := find{out, opts}
 	go find.Start("files/vcs", &Pattern{Pattern: "go"})
 
 	for o := range out {
@@ -84,7 +84,7 @@ var Hiddens = []Hidden{
 func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 	for _, hidden := range Hiddens {
 		out := make(chan *GrepParams)
-		find := find{out, &Option{}, &findState{}}
+		find := find{out, &Option{}}
 		go find.Start("files/"+hidden.Root, &Pattern{Pattern: "go"})
 
 		found := false
@@ -102,7 +102,7 @@ func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 
 func TestFindWithDepth(t *testing.T) {
 	out := make(chan *GrepParams)
-	find := find{out, &Option{Depth: 1}, &findState{}}
+	find := find{out, &Option{Depth: 1}}
 	go find.Start("files/depth", &Pattern{Pattern: "go"})
 
 	for o := range out {
@@ -114,7 +114,7 @@ func TestFindWithDepth(t *testing.T) {
 
 func TestFindWithFileSearchPattern(t *testing.T) {
 	out := make(chan *GrepParams)
-	find := find{out, &Option{}, &findState{}}
+	find := find{out, &Option{}}
 	pattern, _ := NewPattern("go", "match.txt", true, true, false)
 	go find.Start("files/vcs/match", pattern)
 
@@ -127,7 +127,7 @@ func TestFindWithFileSearchPattern(t *testing.T) {
 
 func TestFindWithStream(t *testing.T) {
 	out := make(chan *GrepParams)
-	find := find{out, &Option{SearchStream: true}, &findState{}}
+	find := find{out, &Option{SearchStream: true}}
 	go find.Start(".", &Pattern{Pattern: "go"})
 
 	for o := range out {

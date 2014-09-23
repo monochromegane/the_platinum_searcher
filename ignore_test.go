@@ -1,70 +1,64 @@
 package the_platinum_searcher
 
-import (
-	"testing"
-)
+import "testing"
 
-func TestIgnorePatterns(t *testing.T) {
+type assert struct {
+	patterns []string
+	file     file
+	expect   bool
+}
 
-	patterns := IgnorePatterns("files/ignore", []string{"ignore.txt"}, -1)
+type file struct {
+	path  string
+	isDir bool
+	depth int
+}
 
-	if !patterns[0].Match("pattern1", 0) {
-		t.Errorf("It should be match %s", "pattern1")
+func TestGenericIgnoreMatch(t *testing.T) {
+	asserts := []assert{
+		assert{[]string{"a.txt"}, file{"a.txt", false, 1}, true},
+		assert{[]string{"a.txt"}, file{"dir/a.txt", false, 1}, true},
+		assert{[]string{"dir"}, file{"dir", true, 1}, true},
+		assert{[]string{"dir"}, file{"dir/a.txt", false, 1}, false},
 	}
-	if !patterns[0].Match("pattern2", 0) {
-		t.Errorf("It should be match %s", "pattern2")
+
+	for _, assert := range asserts {
+		gi := genericIgnore(assert.patterns)
+		result := gi.Match(assert.file.path, assert.file.isDir, assert.file.depth)
+		if result != assert.expect {
+			t.Errorf("Match should return %t, got %t on %v", assert.expect, result, assert)
+		}
+
 	}
 }
 
-func TestGitIgnoreMatcher(t *testing.T) {
-	ignorePattern := "/ignoreme.txt"
-	gitMatcher := gitIgnoreMatcher{[]string{ignorePattern}, 1}
+func TestGitIgnoreMatch(t *testing.T) {
 
-	ignoreThis := "ignoreme.txt"
-	depth := 2
-	if gitMatcher.Match(ignoreThis, depth) {
-		t.Errorf(
-			"Git ignore pattern \"%s\" should not match \"%s\" on level %d",
-			ignorePattern,
-			ignoreThis,
-			depth,
-		)
+	asserts := []assert{
+		assert{[]string{"a.txt"}, file{"a.txt", false, 1}, true},
+		assert{[]string{"dir/a.txt"}, file{"dir/a.txt", false, 2}, true},
+		assert{[]string{"dir/*.txt"}, file{"dir/a.txt", false, 2}, true},
+		assert{[]string{"dir2/a.txt"}, file{"dir1/dir2/a.txt", false, 3}, true},
+		assert{[]string{"dir3/a.txt"}, file{"dir1/dir2/dir3/a.txt", false, 4}, true},
+		assert{[]string{"a.txt"}, file{"dir/a.txt", false, 2}, true},
+		assert{[]string{"a.txt"}, file{"dir1/dir2/a.txt", false, 3}, true},
+		assert{[]string{"dir2/a.txt"}, file{"dir1/dir2/a.txt", false, 3}, true},
+		assert{[]string{"dir"}, file{"dir", true, 1}, true},
+		assert{[]string{"dir/"}, file{"dir", true, 1}, true},
+		assert{[]string{"dir/"}, file{"dir", false, 1}, false},
+		assert{[]string{"/a.txt"}, file{"a.txt", false, 1}, true},
+		assert{[]string{"/a.txt"}, file{"dir/a.txt", false, 2}, false},
+		assert{[]string{"a.txt", "b.txt"}, file{"dir/b.txt", false, 2}, true},
+		assert{[]string{"*.txt", "!b.txt"}, file{"dir/b.txt", false, 2}, false},
+		assert{[]string{"dir/*.txt", "!dir/b.txt"}, file{"dir/b.txt", false, 2}, false},
+		assert{[]string{"dir/*.txt", "!/b.txt"}, file{"dir/b.txt", false, 2}, true},
 	}
 
-	depth = 0
-	if gitMatcher.Match(ignoreThis, depth) {
-		t.Errorf(
-			"Git ignore pattern \"%s\" should not match \"%s\" on level %d",
-			ignorePattern,
-			ignoreThis,
-			depth,
-		)
-	}
-
-	depth = 1
-	if !gitMatcher.Match(ignoreThis, depth) {
-		t.Errorf(
-			"Git ignore pattern \"%s\" should match \"%s\" on level %d",
-			ignorePattern,
-			ignoreThis,
-			depth,
-		)
-	}
-}
-
-func TestGitIgnoreDir(t *testing.T) {
-	gitMatcher := gitIgnoreMatcher{[]string{"node_modules"}, 1}
-
-	if !gitMatcher.Match("node_modules/", 1) {
-		t.Error(`Git ignore pattern: "node_modules" should match dir: "node_modules/"`)
-	}
-
-	gitMatcher = gitIgnoreMatcher{[]string{"node_modules/"}, 1}
-	if gitMatcher.Match("node_modules", 1) {
-		t.Error(`Git ignore pattern: "node_modules/" should not match file: "node_modules"`)
-	}
-
-	if !gitMatcher.Match("node_modules/", 1) {
-		t.Error(`Git ignore pattern: "node_modules/" should match dir: "node_modules/"`)
+	for _, assert := range asserts {
+		gi := newGitIgnore(1, assert.patterns)
+		result := gi.Match(assert.file.path, assert.file.isDir, assert.file.depth)
+		if result != assert.expect {
+			t.Errorf("Match should return %t, got %t on %v", assert.expect, result, assert)
+		}
 	}
 }

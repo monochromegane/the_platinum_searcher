@@ -3,29 +3,20 @@ package the_platinum_searcher
 import (
 	"io/ioutil"
 	"os"
-	"os/exec"
-	"os/user"
+
 	"path/filepath"
 	"strings"
 )
 
-type findState struct {
-	IgnoreFiles []StringMatcher
-}
-
 type find struct {
 	Out    chan *GrepParams
 	Option *Option
-	State  *findState
 }
 
 func Find(root string, pattern *Pattern, out chan *GrepParams, option *Option) {
 	find := find{
 		Out:    out,
 		Option: option,
-		State: &findState{
-			[]StringMatcher{genericIgnoreMatcher(option.Ignore)},
-		},
 	}
 	find.Start(root, pattern)
 }
@@ -45,82 +36,84 @@ func (f *find) findStream(pattern *Pattern) {
 }
 
 func (f *find) findFile(root string, pattern *Pattern) {
+
+	var ignores ignoreMatchers
 	if f.Option.NoPtIgnore == false {
-		f.addHomePtIgnore()
+		if ignore := homePtIgnore(); ignore != nil {
+			ignores = append(ignores, ignore)
+		}
 	}
 
 	if f.Option.NoGlobalGitIgnore == false {
-		f.addGlobalGitIgnore()
+		if ignore := globalGitIgnore(); ignore != nil {
+			ignores = append(ignores, ignore)
+		}
 	}
 
-	optionIgnoreMatchers := []StringMatcher{genericIgnoreMatcher(f.Option.Ignore)}
-	Walk(root, optionIgnoreMatchers, f.Option.Follow, func(path string, info *FileInfo, depth int, ig Ignore, err error) (error, Ignore) {
+	ignores = append(ignores, genericIgnore(f.Option.Ignore))
+	Walk(root, ignores, f.Option.Follow, func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers) {
 		if info.IsDir() {
 			if depth > f.Option.Depth+1 {
-				return filepath.SkipDir, ig
+				return filepath.SkipDir, ignores
 			}
 			//Current Directory skipping should be checked first before loading ignores
 			//within this directory
 			if !isRoot(depth) && isHidden(info.Name()) {
-				return filepath.SkipDir, ig
+				return filepath.SkipDir, ignores
 			} else {
-				for _, p := range ig.Patterns {
-					if p.Match(filepath.Base(path)+"/", depth) {
-						return filepath.SkipDir, ig
-					}
+				if ignores.Match(path, info.IsDir(), depth) {
+					return filepath.SkipDir, ignores
 				}
 			}
-			ig.Patterns = append(ig.Patterns, IgnorePatterns(path, f.Option.VcsIgnores(), depth+1)...)
-			return nil, ig
+			ignores = append(ignores, newIgnoreMatchers(path, f.Option.VcsIgnores(), depth+2)...)
+			return nil, ignores
 		}
 		if !info.follow && info.IsSymlink() {
-			return nil, ig
+			return nil, ignores
 		}
 		if !isRoot(depth) && isHidden(info.Name()) {
-			return nil, ig
+			return nil, ignores
 		}
 
-		for _, p := range ig.Patterns {
-			if p.Match(filepath.Base(path), depth) {
-				return nil, ig
-			}
+		if ignores.Match(path, info.IsDir(), depth) {
+			return nil, ignores
 		}
 
 		if pattern.FileRegexp != nil && !pattern.FileRegexp.MatchString(path) {
-			return nil, ig
+			return nil, ignores
 		}
 		fileType := UNKNOWN
 		if f.Option.FilesWithRegexp == "" {
 			fileType = IdentifyType(path)
 			if fileType == ERROR || fileType == BINARY {
-				return nil, ig
+				return nil, ignores
 			}
 		}
 		f.Out <- &GrepParams{path, fileType, pattern}
-		return nil, ig
+		return nil, ignores
 	})
 	close(f.Out)
 }
 
-type WalkFunc func(path string, info *FileInfo, depth int, ig Ignore, err error) (error, Ignore)
+type WalkFunc func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers)
 
-func Walk(root string, ignorePatterns []StringMatcher, follow bool, walkFn WalkFunc) error {
+func Walk(root string, ignores ignoreMatchers, follow bool, walkFn WalkFunc) error {
 	info, err := os.Lstat(root)
 	fileInfo := newFileInfo(root, info, follow)
 	if err != nil {
-		walkError, _ := walkFn(root, fileInfo, 1, Ignore{}, err)
+		walkError, _ := walkFn(root, fileInfo, 1, nil, err)
 		return walkError
 	}
-	return walk(root, fileInfo, 1, Ignore{Patterns: ignorePatterns}, walkFn)
+	return walk(root, fileInfo, 1, ignores, walkFn)
 }
 
-func walkOnGoRoutine(path string, info *FileInfo, notify chan int, depth int, parentIgnore Ignore, walkFn WalkFunc) {
+func walkOnGoRoutine(path string, info *FileInfo, notify chan int, depth int, parentIgnore ignoreMatchers, walkFn WalkFunc) {
 	walk(path, info, depth, parentIgnore, walkFn)
 	notify <- 0
 }
 
-func walk(path string, info *FileInfo, depth int, parentIgnore Ignore, walkFn WalkFunc) error {
-	err, ig := walkFn(path, info, depth, parentIgnore, nil)
+func walk(path string, info *FileInfo, depth int, parentIgnores ignoreMatchers, walkFn WalkFunc) error {
+	err, ig := walkFn(path, info, depth, parentIgnores, nil)
 	if err != nil {
 		if info.IsDir() && err == filepath.SkipDir {
 			return nil
@@ -176,55 +169,4 @@ func contains(path string, patterns *[]string) bool {
 		}
 	}
 	return false
-}
-
-func (f *find) addHomePtIgnore() {
-	homeDir := setHomeDir()
-	if homeDir != "" {
-		f.State.IgnoreFiles = append(
-			f.State.IgnoreFiles,
-			IgnorePatterns(homeDir, []string{".ptignore"}, -1)...,
-		)
-	}
-}
-
-func setHomeDir() string {
-	usr, err := user.Current()
-	var homeDir string
-	if err == nil {
-		homeDir = usr.HomeDir
-	} else {
-		// Maybe it's cross compilation without cgo support. (darwin, unix)
-		homeDir = os.Getenv("HOME")
-	}
-	return homeDir
-}
-
-func (f *find) addGlobalGitIgnore() {
-	homeDir := setHomeDir()
-	if homeDir != "" {
-		globalIgnore := globalGitIgnore()
-		if globalIgnore != "" {
-			f.State.IgnoreFiles = append(
-				f.State.IgnoreFiles,
-				IgnorePatterns(homeDir, []string{globalIgnore}, -1)...,
-			)
-		}
-	}
-}
-
-func globalGitIgnore() string {
-	gitCmd, err := exec.LookPath("git")
-	if err != nil {
-		return ""
-	}
-
-	file, err := exec.Command(gitCmd, "config", "--get", "core.excludesfile").Output()
-	var filename string
-	if err != nil {
-		filename = ""
-	} else {
-		filename = strings.TrimSpace(filepath.Base(string(file)))
-	}
-	return filename
 }
