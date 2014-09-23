@@ -1,11 +1,9 @@
 package the_platinum_searcher
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
-	"os/user"
+
 	"path/filepath"
 	"strings"
 )
@@ -51,7 +49,6 @@ func (f *find) findFile(root string, pattern *Pattern) {
 	}
 
 	ignores = append(ignores, genericIgnore(f.Option.Ignore))
-	fmt.Printf("--->%v\n", ignores)
 	Walk(root, ignores, f.Option.Follow, func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers) {
 		if info.IsDir() {
 			if depth > f.Option.Depth+1 {
@@ -170,47 +167,4 @@ func contains(path string, patterns *[]string) bool {
 		}
 	}
 	return false
-}
-
-func (f *find) addHomePtIgnore() {
-	homeDir := getHomeDir()
-	if homeDir != "" {
-	}
-}
-
-func getHomeDir() string {
-	usr, err := user.Current()
-	var homeDir string
-	if err == nil {
-		homeDir = usr.HomeDir
-	} else {
-		// Maybe it's cross compilation without cgo support. (darwin, unix)
-		homeDir = os.Getenv("HOME")
-	}
-	return homeDir
-}
-
-func (f *find) addGlobalGitIgnore() {
-	homeDir := getHomeDir()
-	if homeDir != "" {
-		globalIgnore := globalGitIgnoreName()
-		if globalIgnore != "" {
-		}
-	}
-}
-
-func globalGitIgnoreName() string {
-	gitCmd, err := exec.LookPath("git")
-	if err != nil {
-		return ""
-	}
-
-	file, err := exec.Command(gitCmd, "config", "--get", "core.excludesfile").Output()
-	var filename string
-	if err != nil {
-		filename = ""
-	} else {
-		filename = strings.TrimSpace(filepath.Base(string(file)))
-	}
-	return filename
 }

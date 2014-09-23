@@ -3,6 +3,8 @@ package the_platinum_searcher
 import (
 	"bufio"
 	"os"
+	"os/exec"
+	"os/user"
 	"path/filepath"
 	"strings"
 )
@@ -91,4 +93,32 @@ func globalGitIgnore() ignoreMatcher {
 		}
 	}
 	return nil
+}
+
+func getHomeDir() string {
+	usr, err := user.Current()
+	var homeDir string
+	if err == nil {
+		homeDir = usr.HomeDir
+	} else {
+		// Maybe it's cross compilation without cgo support. (darwin, unix)
+		homeDir = os.Getenv("HOME")
+	}
+	return homeDir
+}
+
+func globalGitIgnoreName() string {
+	gitCmd, err := exec.LookPath("git")
+	if err != nil {
+		return ""
+	}
+
+	file, err := exec.Command(gitCmd, "config", "--get", "core.excludesfile").Output()
+	var filename string
+	if err != nil {
+		filename = ""
+	} else {
+		filename = strings.TrimSpace(filepath.Base(string(file)))
+	}
+	return filename
 }
