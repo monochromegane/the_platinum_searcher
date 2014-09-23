@@ -14,6 +14,24 @@ type file struct {
 	depth int
 }
 
+func TestGenericIgnoreMatch(t *testing.T) {
+	asserts := []assert{
+		assert{[]string{"a.txt"}, file{"a.txt", false, 1}, true},
+		assert{[]string{"a.txt"}, file{"dir/a.txt", false, 1}, true},
+		assert{[]string{"dir"}, file{"dir", true, 1}, true},
+		assert{[]string{"dir"}, file{"dir/a.txt", false, 1}, false},
+	}
+
+	for _, assert := range asserts {
+		gi := genericIgnore(assert.patterns)
+		result := gi.Match(assert.file.path, assert.file.isDir, assert.file.depth)
+		if result != assert.expect {
+			t.Errorf("Match should return %t, got %t on %v", assert.expect, result, assert)
+		}
+
+	}
+}
+
 func TestGitIgnoreMatch(t *testing.T) {
 
 	asserts := []assert{
@@ -42,7 +60,5 @@ func TestGitIgnoreMatch(t *testing.T) {
 		if result != assert.expect {
 			t.Errorf("Match should return %t, got %t on %v", assert.expect, result, assert)
 		}
-
 	}
-
 }
