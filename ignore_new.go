@@ -9,6 +9,15 @@ import (
 
 type ignoreMatchers []ignoreMatcher
 
+func (im ignoreMatchers) Match(path string, isDir bool, depth int) bool {
+	for _, ig := range im {
+		if ig.Match(path, isDir, depth) {
+			return true
+		}
+	}
+	return false
+}
+
 type ignoreMatcher interface {
 	Match(path string, isDir bool, depth int) bool
 }
@@ -28,7 +37,9 @@ func (gi genericIgnore) Match(path string, isDir bool, depth int) bool {
 func newIgnoreMatchers(path string, ignores []string, depth int) ignoreMatchers {
 	var matchers ignoreMatchers
 	for _, i := range ignores {
-		matchers = append(matchers, newIgnoreMatcher(path, i, depth))
+		if matcher := newIgnoreMatcher(path, i, depth); matcher != nil {
+			matchers = append(matchers, matcher)
+		}
 	}
 	return matchers
 }

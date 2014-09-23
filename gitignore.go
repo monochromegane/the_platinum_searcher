@@ -1,7 +1,6 @@
 package the_platinum_searcher
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 )
@@ -68,7 +67,6 @@ func (p pattern) match(path string, isDir, isRoot bool) bool {
 	pattern := p.trimedPattern()
 
 	match, _ := filepath.Match(pattern, p.equalizeDepth(path))
-	fmt.Printf("ptn:%s path:%s(%s) => %t\n", pattern, p.equalizeDepth(path), path, match)
 	return match
 }
 
