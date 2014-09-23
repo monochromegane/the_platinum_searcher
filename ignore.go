@@ -7,56 +7,26 @@ import (
 	"strings"
 )
 
-type StringMatcher interface {
-	// Match matcher with pattern and depth
-	Match(string, int) bool
-}
+type ignoreMatchers []ignoreMatcher
 
-type Ignore struct {
-	Patterns []StringMatcher
-}
-
-type gitIgnoreMatcher struct {
-	patterns []string
-	depth    int
-}
-
-func (ps gitIgnoreMatcher) Match(file string, depth int) bool {
-	negatedIgnoreMatch := false
-	ignoreMatch := false
-
-	for _, p := range ps.patterns {
-		if len(p) == 0 {
-			continue
-		}
-
-		lastChar := p[len(p)-1]
-		if lastChar != '/' {
-			file = filepath.Base(file)
-		}
-
-		if p[0] == '!' {
-			negatedIgnoreMatch, _ = filepath.Match(p[1:], file)
-		} else if !ignoreMatch {
-			if p[0] == '/' {
-				// Only match with "/" prefix on current depth
-				if ps.depth == depth || ps.depth == -1 {
-					ignoreMatch, _ = filepath.Match(p[1:], file)
-				}
-			} else {
-				ignoreMatch, _ = filepath.Match(p, file)
-			}
+func (im ignoreMatchers) Match(path string, isDir bool, depth int) bool {
+	for _, ig := range im {
+		if ig.Match(path, isDir, depth) {
+			return true
 		}
 	}
-
-	return ignoreMatch && !negatedIgnoreMatch
+	return false
 }
 
-type genericIgnoreMatcher []string
+type ignoreMatcher interface {
+	Match(path string, isDir bool, depth int) bool
+}
 
-func (im genericIgnoreMatcher) Match(file string, depth int) bool {
-	for _, p := range im {
-		val, _ := filepath.Match(p, file)
+type genericIgnore []string
+
+func (gi genericIgnore) Match(path string, isDir bool, depth int) bool {
+	for _, p := range gi {
+		val, _ := filepath.Match(p, filepath.Base(path))
 		if val {
 			return true
 		}
@@ -64,38 +34,61 @@ func (im genericIgnoreMatcher) Match(file string, depth int) bool {
 	return false
 }
 
-func IgnorePatterns(path string, ignores []string, depth int) []StringMatcher {
-	var patterns []StringMatcher
-	for _, ignore := range ignores {
-		file, err := os.Open(filepath.Join(path, ignore))
+func newIgnoreMatchers(path string, ignores []string, depth int) ignoreMatchers {
+	var matchers ignoreMatchers
+	for _, i := range ignores {
+		if matcher := newIgnoreMatcher(path, i, depth); matcher != nil {
+			matchers = append(matchers, matcher)
+		}
+	}
+	return matchers
+}
+
+func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
+
+	file, err := os.Open(filepath.Join(path, ignore))
+	if err != nil {
+		return nil
+	}
+
+	defer file.Close()
+	reader := bufio.NewReader(file)
+
+	var patterns []string
+	for {
+		buf, _, err := reader.ReadLine()
 		if err != nil {
+			break
+		}
+		line := strings.Trim(string(buf), " ")
+		if len(line) == 0 {
 			continue
 		}
-		reader := bufio.NewReader(file)
-		buf := make([]byte, 1024)
-
-		var thesePatterns []string
-		for {
-			buf, _, err = reader.ReadLine()
-			if err != nil {
-				break
-			}
-			s := strings.Trim(string(buf), " ")
-
-			if len(s) == 0 || strings.HasPrefix(s, "#") {
-				continue
-			}
-			thesePatterns = append(thesePatterns, s)
-		}
-
-		if len(thesePatterns) > 0 {
-			if ignore == ".gitignore" {
-				patterns = append(patterns, gitIgnoreMatcher{thesePatterns, depth})
-			} else {
-				patterns = append(patterns, genericIgnoreMatcher(thesePatterns))
-			}
-		}
-		file.Close()
+		patterns = append(patterns, line)
 	}
-	return patterns
+
+	if ignore == ".ptignore" || ignore == ".gitignore" {
+		return NewGitIgnore(depth, patterns)
+	} else {
+		return genericIgnore(patterns)
+	}
+}
+
+func homePtIgnore() ignoreMatcher {
+	homeDir := getHomeDir()
+	if homeDir != "" {
+		return newIgnoreMatcher(homeDir, ".ptignore", -1)
+	}
+	return nil
+}
+
+func globalGitIgnore() ignoreMatcher {
+	homeDir := getHomeDir()
+	if homeDir != "" {
+		globalIgnore := globalGitIgnoreName()
+		if globalIgnore != "" {
+			return newIgnoreMatcher(homeDir, globalIgnore, -1)
+		}
+	}
+	return nil
 }
