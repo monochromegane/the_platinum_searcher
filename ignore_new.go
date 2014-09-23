@@ -26,7 +26,7 @@ type genericIgnore []string
 
 func (gi genericIgnore) Match(path string, isDir bool, depth int) bool {
 	for _, p := range gi {
-		val, _ := filepath.Match(p, path)
+		val, _ := filepath.Match(p, filepath.Base(path))
 		if val {
 			return true
 		}
