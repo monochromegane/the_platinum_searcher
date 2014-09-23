@@ -5,19 +5,19 @@ import (
 	"strings"
 )
 
-type GitIgnore struct {
+type gitIgnore struct {
 	ignorePatterns patterns
 	acceptPatterns patterns
 	depth          int
 }
 
-func NewGitIgnore(depth int, patterns []string) GitIgnore {
-	g := GitIgnore{depth: depth}
-	g.Parse(patterns)
+func newGitIgnore(depth int, patterns []string) gitIgnore {
+	g := gitIgnore{depth: depth}
+	g.parse(patterns)
 	return g
 }
 
-func (g *GitIgnore) Parse(patterns []string) {
+func (g *gitIgnore) parse(patterns []string) {
 	for _, p := range patterns {
 		p := strings.Trim(string(p), " ")
 		if len(p) == 0 || strings.HasPrefix(p, "#") {
@@ -33,7 +33,7 @@ func (g *GitIgnore) Parse(patterns []string) {
 	}
 }
 
-func (g GitIgnore) Match(path string, isDir bool, depth int) bool {
+func (g gitIgnore) Match(path string, isDir bool, depth int) bool {
 	if match := g.acceptPatterns.match(path, isDir, depth == g.depth); match {
 		return false
 	}

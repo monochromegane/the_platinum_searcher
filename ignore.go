@@ -20,22 +20,6 @@ func (im ignoreMatchers) Match(path string, isDir bool, depth int) bool {
 	return false
 }
 
-type ignoreMatcher interface {
-	Match(path string, isDir bool, depth int) bool
-}
-
-type genericIgnore []string
-
-func (gi genericIgnore) Match(path string, isDir bool, depth int) bool {
-	for _, p := range gi {
-		val, _ := filepath.Match(p, filepath.Base(path))
-		if val {
-			return true
-		}
-	}
-	return false
-}
-
 func newIgnoreMatchers(path string, ignores []string, depth int) ignoreMatchers {
 	var matchers ignoreMatchers
 	for _, i := range ignores {
@@ -44,6 +28,10 @@ func newIgnoreMatchers(path string, ignores []string, depth int) ignoreMatchers 
 		}
 	}
 	return matchers
+}
+
+type ignoreMatcher interface {
+	Match(path string, isDir bool, depth int) bool
 }
 
 func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
@@ -70,10 +58,22 @@ func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
 	}
 
 	if ignore == ".ptignore" || ignore == ".gitignore" {
-		return NewGitIgnore(depth, patterns)
+		return newGitIgnore(depth, patterns)
 	} else {
 		return genericIgnore(patterns)
 	}
+}
+
+type genericIgnore []string
+
+func (gi genericIgnore) Match(path string, isDir bool, depth int) bool {
+	for _, p := range gi {
+		val, _ := filepath.Match(p, filepath.Base(path))
+		if val {
+			return true
+		}
+	}
+	return false
 }
 
 func homePtIgnore() ignoreMatcher {

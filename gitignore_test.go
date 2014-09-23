@@ -14,7 +14,7 @@ type file struct {
 	depth int
 }
 
-func TestIsMatch(t *testing.T) {
+func TestGitIgnoreMatch(t *testing.T) {
 
 	asserts := []assert{
 		assert{[]string{"a.txt"}, file{"a.txt", false, 1}, true},
@@ -37,10 +37,10 @@ func TestIsMatch(t *testing.T) {
 	}
 
 	for _, assert := range asserts {
-		gi := NewGitIgnore(1, assert.patterns)
+		gi := newGitIgnore(1, assert.patterns)
 		result := gi.Match(assert.file.path, assert.file.isDir, assert.file.depth)
 		if result != assert.expect {
-			t.Errorf("IsMatch should return %t, got %t on %v", assert.expect, result, assert)
+			t.Errorf("Match should return %t, got %t on %v", assert.expect, result, assert)
 		}
 
 	}
