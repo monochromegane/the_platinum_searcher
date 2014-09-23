@@ -39,13 +39,15 @@ func (f *find) findFile(root string, pattern *Pattern) {
 
 	var ignores ignoreMatchers
 	if f.Option.NoPtIgnore == false {
-		if homePtIgnore := homePtIgnore(); homePtIgnore != nil {
-			ignores = append(ignores, homePtIgnore)
+		if ignore := homePtIgnore(); ignore != nil {
+			ignores = append(ignores, ignore)
 		}
 	}
 
 	if f.Option.NoGlobalGitIgnore == false {
-		ignores = append(ignores, globalGitIgnore())
+		if ignore := globalGitIgnore(); ignore != nil {
+			ignores = append(ignores, ignore)
+		}
 	}
 
 	ignores = append(ignores, genericIgnore(f.Option.Ignore))
