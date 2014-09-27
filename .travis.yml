@@ -6,5 +6,7 @@ go:
   - 1.2
   - release
   - tip
+env:
+  CGO_ENABLED=0
 script:
   - go test -v ./...
