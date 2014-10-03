@@ -11,8 +11,8 @@ type gitIgnore struct {
 	path           string
 }
 
-func newGitIgnore(path string, patterns []string) gitIgnore {
-	g := gitIgnore{path: path}
+func newGitIgnore(depth int, patterns []string) gitIgnore {
+	g := gitIgnore{depth: depth - 1}
 	g.parse(patterns)
 	return g
 }

@@ -3,6 +3,7 @@ package the_platinum_searcher
 import "testing"
 
 type assert struct {
+	depth    int
 	patterns []string
 	file     file
 	expect   bool
@@ -32,7 +33,6 @@ func TestGenericIgnoreMatch(t *testing.T) {
 }
 
 func TestGitIgnoreMatch(t *testing.T) {
-
 	asserts := []assert{
 		assert{[]string{"a.txt"}, file{"a.txt", false}, true},
 		assert{[]string{"dir/a.txt"}, file{"dir/a.txt", false}, true},
