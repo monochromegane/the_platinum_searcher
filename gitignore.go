@@ -26,9 +26,9 @@ func (g *gitIgnore) parse(patterns []string) {
 
 		if strings.HasPrefix(p, "!") {
 			g.acceptPatterns = append(g.acceptPatterns,
-				pattern(strings.TrimPrefix(p, "!")))
+				pattern{strings.TrimPrefix(p, "!"), g.depth - 1})
 		} else {
-			g.ignorePatterns = append(g.ignorePatterns, pattern(p))
+			g.ignorePatterns = append(g.ignorePatterns, pattern{p, g.depth - 1})
 		}
 	}
 }
@@ -52,7 +52,10 @@ func (ps patterns) match(path string, isDir, isRoot bool) bool {
 	return false
 }
 
-type pattern string
+type pattern struct {
+	path string
+	base int
+}
 
 func (p pattern) match(path string, isDir, isRoot bool) bool {
 
@@ -67,15 +70,15 @@ func (p pattern) match(path string, isDir, isRoot bool) bool {
 }
 
 func (p pattern) equalizeDepth(path string) string {
-	patternDepth := strings.Count(string(p), "/")
+	patternDepth := strings.Count(p.path, "/")
 	pathDepth := strings.Count(path, string(filepath.Separator))
 	if p.hasRootPrefix() {
 		// absolute path
-		end := patternDepth
-		if diff := patternDepth - pathDepth; diff > 0 {
+		end := p.base + patternDepth
+		if diff := end - pathDepth; diff > 0 {
 			end = pathDepth + 1
 		}
-		return filepath.Join(strings.Split(path, string(filepath.Separator))[:end]...)
+		return filepath.Join(strings.Split(path, string(filepath.Separator))[p.base:end]...)
 	} else {
 		// relative path
 		start := 0
@@ -87,11 +90,11 @@ func (p pattern) equalizeDepth(path string) string {
 }
 
 func (p pattern) prefix() string {
-	return string(p[0])
+	return string(p.path[0])
 }
 
 func (p pattern) suffix() string {
-	return string(p[len(p)-1])
+	return string(p.path[len(p.path)-1])
 }
 
 func (p pattern) hasRootPrefix() bool {
@@ -107,5 +110,5 @@ func (p pattern) hasDirSuffix() bool {
 }
 
 func (p pattern) trimedPattern() string {
-	return strings.Trim(string(p), "/")
+	return strings.Trim(p.path, "/")
 }
