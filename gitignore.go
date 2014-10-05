@@ -56,10 +56,6 @@ type pattern string
 
 func (p pattern) match(path string, isDir, isRoot bool) bool {
 
-	if p.hasRootPrefix() && !isRoot {
-		return false
-	}
-
 	if p.hasDirSuffix() && !isDir {
 		return false
 	}
@@ -73,11 +69,21 @@ func (p pattern) match(path string, isDir, isRoot bool) bool {
 func (p pattern) equalizeDepth(path string) string {
 	patternDepth := strings.Count(string(p), "/")
 	pathDepth := strings.Count(path, string(filepath.Separator))
-	start := 0
-	if diff := pathDepth - patternDepth; diff >= 0 {
-		start = diff
+	if p.hasRootPrefix() {
+		// absolute path
+		end := patternDepth
+		if diff := patternDepth - pathDepth; diff > 0 {
+			end = pathDepth + 1
+		}
+		return filepath.Join(strings.Split(path, string(filepath.Separator))[:end]...)
+	} else {
+		// relative path
+		start := 0
+		if diff := pathDepth - patternDepth; diff >= 0 {
+			start = diff
+		}
+		return filepath.Join(strings.Split(path, "/")[start:]...)
 	}
-	return filepath.Join(strings.Split(path, "/")[start:]...)
 }
 
 func (p pattern) prefix() string {

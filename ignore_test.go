@@ -47,6 +47,8 @@ func TestGitIgnoreMatch(t *testing.T) {
 		assert{[]string{"dir/"}, file{"dir", true, 1}, true},
 		assert{[]string{"dir/"}, file{"dir", false, 1}, false},
 		assert{[]string{"/a.txt"}, file{"a.txt", false, 1}, true},
+		assert{[]string{"/dir/a.txt"}, file{"dir/a.txt", false, 2}, true},
+		assert{[]string{"/dir1/a.txt"}, file{"dir/dir1/a.txt", false, 3}, false},
 		assert{[]string{"/a.txt"}, file{"dir/a.txt", false, 2}, false},
 		assert{[]string{"a.txt", "b.txt"}, file{"dir/b.txt", false, 2}, true},
 		assert{[]string{"*.txt", "!b.txt"}, file{"dir/b.txt", false, 2}, false},
