@@ -58,7 +58,7 @@ func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
 	}
 
 	if ignore == ".ptignore" || ignore == ".gitignore" {
-		return newGitIgnore(depth, patterns)
+		return newGitIgnore(path, depth, patterns)
 	} else {
 		return genericIgnore(patterns)
 	}

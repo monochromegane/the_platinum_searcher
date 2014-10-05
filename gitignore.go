@@ -8,11 +8,12 @@ import (
 type gitIgnore struct {
 	ignorePatterns patterns
 	acceptPatterns patterns
+	path           string
 	depth          int
 }
 
-func newGitIgnore(depth int, patterns []string) gitIgnore {
-	g := gitIgnore{depth: depth}
+func newGitIgnore(path string, depth int, patterns []string) gitIgnore {
+	g := gitIgnore{path: path, depth: depth}
 	g.parse(patterns)
 	return g
 }
@@ -26,9 +27,9 @@ func (g *gitIgnore) parse(patterns []string) {
 
 		if strings.HasPrefix(p, "!") {
 			g.acceptPatterns = append(g.acceptPatterns,
-				pattern{strings.TrimPrefix(p, "!"), g.depth - 1})
+				pattern{strings.TrimPrefix(p, "!"), g.path, g.depth - 1})
 		} else {
-			g.ignorePatterns = append(g.ignorePatterns, pattern{p, g.depth - 1})
+			g.ignorePatterns = append(g.ignorePatterns, pattern{p, g.path, g.depth - 1})
 		}
 	}
 }
@@ -53,8 +54,9 @@ func (ps patterns) match(path string, isDir, isRoot bool) bool {
 }
 
 type pattern struct {
-	path string
-	base int
+	path  string
+	base  string
+	depth int
 }
 
 func (p pattern) match(path string, isDir, isRoot bool) bool {
@@ -65,28 +67,25 @@ func (p pattern) match(path string, isDir, isRoot bool) bool {
 
 	pattern := p.trimedPattern()
 
-	match, _ := filepath.Match(pattern, p.equalizeDepth(path))
+	var match bool
+	if p.hasRootPrefix() {
+		// absolute pattern
+		match, _ = filepath.Match(filepath.Join(p.base, p.path), path)
+	} else {
+		// relative pattern
+		match, _ = filepath.Match(pattern, p.equalizeDepth(path))
+	}
 	return match
 }
 
 func (p pattern) equalizeDepth(path string) string {
 	patternDepth := strings.Count(p.path, "/")
 	pathDepth := strings.Count(path, string(filepath.Separator))
-	if p.hasRootPrefix() {
-		// absolute path
-		end := p.base + patternDepth
-		if diff := end - pathDepth; diff > 0 {
-			end = pathDepth + 1
-		}
-		return filepath.Join(strings.Split(path, string(filepath.Separator))[p.base:end]...)
-	} else {
-		// relative path
-		start := 0
-		if diff := pathDepth - patternDepth; diff >= 0 {
-			start = diff
-		}
-		return filepath.Join(strings.Split(path, "/")[start:]...)
+	start := 0
+	if diff := pathDepth - patternDepth; diff >= 0 {
+		start = diff
 	}
+	return filepath.Join(strings.Split(path, "/")[start:]...)
 }
 
 func (p pattern) prefix() string {
