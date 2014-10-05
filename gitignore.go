@@ -81,7 +81,10 @@ func (p pattern) match(path string, isDir bool) bool {
 func (p pattern) equalizeDepth(path string) string {
 	patternDepth := strings.Count(p.path, "/")
 	pathDepth := strings.Count(path, string(filepath.Separator))
-	start := p.depth
+	start := 0
+	if p.depth > 0 {
+		start = p.depth
+	}
 	if diff := pathDepth - patternDepth; diff > 0 {
 		start = diff
 	}
