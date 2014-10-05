@@ -63,3 +63,20 @@ func TestGitIgnoreMatch(t *testing.T) {
 		}
 	}
 }
+
+func TestGitIgnoreMatchOnSubDirectory(t *testing.T) {
+
+	asserts := []assert{
+		assert{[]string{"a.txt"}, file{"dir/a.txt", false}, true},
+		assert{[]string{"dir/a.txt"}, file{"dir/a.txt", false}, false},
+		assert{[]string{"dir/a.txt"}, file{"dir/dir/a.txt", false}, true},
+	}
+
+	for _, assert := range asserts {
+		gi := newGitIgnore(".", 2, assert.patterns)
+		result := gi.Match(assert.file.path, assert.file.isDir)
+		if result != assert.expect {
+			t.Errorf("Match should return %t, got %t on %v", assert.expect, result, assert)
+		}
+	}
+}
