@@ -61,7 +61,7 @@ func (f *find) findFile(root string, pattern *Pattern) {
 			if !isRoot(depth) && isHidden(info.Name()) {
 				return filepath.SkipDir, ignores
 			} else {
-				if ignores.Match(path, info.IsDir(), depth) {
+				if ignores.Match(path, info.IsDir()) {
 					return filepath.SkipDir, ignores
 				}
 			}
@@ -75,7 +75,7 @@ func (f *find) findFile(root string, pattern *Pattern) {
 			return nil, ignores
 		}
 
-		if ignores.Match(path, info.IsDir(), depth) {
+		if ignores.Match(path, info.IsDir()) {
 			return nil, ignores
 		}
 

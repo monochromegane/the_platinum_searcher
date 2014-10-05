@@ -11,9 +11,9 @@ import (
 
 type ignoreMatchers []ignoreMatcher
 
-func (im ignoreMatchers) Match(path string, isDir bool, depth int) bool {
+func (im ignoreMatchers) Match(path string, isDir bool) bool {
 	for _, ig := range im {
-		if ig.Match(path, isDir, depth) {
+		if ig.Match(path, isDir) {
 			return true
 		}
 	}
@@ -31,7 +31,7 @@ func newIgnoreMatchers(path string, ignores []string, depth int) ignoreMatchers 
 }
 
 type ignoreMatcher interface {
-	Match(path string, isDir bool, depth int) bool
+	Match(path string, isDir bool) bool
 }
 
 func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
@@ -66,7 +66,7 @@ func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
 
 type genericIgnore []string
 
-func (gi genericIgnore) Match(path string, isDir bool, depth int) bool {
+func (gi genericIgnore) Match(path string, isDir bool) bool {
 	for _, p := range gi {
 		val, _ := filepath.Match(p, filepath.Base(path))
 		if val {

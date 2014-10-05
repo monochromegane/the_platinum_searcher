@@ -34,18 +34,18 @@ func (g *gitIgnore) parse(patterns []string) {
 	}
 }
 
-func (g gitIgnore) Match(path string, isDir bool, depth int) bool {
-	if match := g.acceptPatterns.match(path, isDir, depth == g.depth); match {
+func (g gitIgnore) Match(path string, isDir bool) bool {
+	if match := g.acceptPatterns.match(path, isDir); match {
 		return false
 	}
-	return g.ignorePatterns.match(path, isDir, depth == g.depth)
+	return g.ignorePatterns.match(path, isDir)
 }
 
 type patterns []pattern
 
-func (ps patterns) match(path string, isDir, isRoot bool) bool {
+func (ps patterns) match(path string, isDir bool) bool {
 	for _, p := range ps {
-		match := p.match(path, isDir, isRoot)
+		match := p.match(path, isDir)
 		if match {
 			return true
 		}
@@ -59,7 +59,7 @@ type pattern struct {
 	depth int
 }
 
-func (p pattern) match(path string, isDir, isRoot bool) bool {
+func (p pattern) match(path string, isDir bool) bool {
 
 	if p.hasDirSuffix() && !isDir {
 		return false
