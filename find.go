@@ -61,11 +61,11 @@ func (f *find) findFile(root string, pattern *Pattern) {
 			if !isRoot(depth) && isHidden(info.Name()) {
 				return filepath.SkipDir, ignores
 			} else {
-				if ignores.Match(path, info.IsDir(), depth) {
+				if ignores.Match(path, info.IsDir()) {
 					return filepath.SkipDir, ignores
 				}
 			}
-			ignores = append(ignores, newIgnoreMatchers(path, f.Option.VcsIgnores(), depth+2)...)
+			ignores = append(ignores, newIgnoreMatchers(path, f.Option.VcsIgnores())...)
 			return nil, ignores
 		}
 		if !info.follow && info.IsSymlink() {
@@ -75,7 +75,7 @@ func (f *find) findFile(root string, pattern *Pattern) {
 			return nil, ignores
 		}
 
-		if ignores.Match(path, info.IsDir(), depth) {
+		if ignores.Match(path, info.IsDir()) {
 			return nil, ignores
 		}
 

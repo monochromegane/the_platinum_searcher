@@ -8,11 +8,11 @@ import (
 type gitIgnore struct {
 	ignorePatterns patterns
 	acceptPatterns patterns
-	depth          int
+	path           string
 }
 
-func newGitIgnore(depth int, patterns []string) gitIgnore {
-	g := gitIgnore{depth: depth}
+func newGitIgnore(path string, patterns []string) gitIgnore {
+	g := gitIgnore{path: path}
 	g.parse(patterns)
 	return g
 }
@@ -26,25 +26,25 @@ func (g *gitIgnore) parse(patterns []string) {
 
 		if strings.HasPrefix(p, "!") {
 			g.acceptPatterns = append(g.acceptPatterns,
-				pattern(strings.TrimPrefix(p, "!")))
+				pattern{strings.TrimPrefix(p, "!"), g.path})
 		} else {
-			g.ignorePatterns = append(g.ignorePatterns, pattern(p))
+			g.ignorePatterns = append(g.ignorePatterns, pattern{p, g.path})
 		}
 	}
 }
 
-func (g gitIgnore) Match(path string, isDir bool, depth int) bool {
-	if match := g.acceptPatterns.match(path, isDir, depth == g.depth); match {
+func (g gitIgnore) Match(path string, isDir bool) bool {
+	if match := g.acceptPatterns.match(path, isDir); match {
 		return false
 	}
-	return g.ignorePatterns.match(path, isDir, depth == g.depth)
+	return g.ignorePatterns.match(path, isDir)
 }
 
 type patterns []pattern
 
-func (ps patterns) match(path string, isDir, isRoot bool) bool {
+func (ps patterns) match(path string, isDir bool) bool {
 	for _, p := range ps {
-		match := p.match(path, isDir, isRoot)
+		match := p.match(path, isDir)
 		if match {
 			return true
 		}
@@ -52,13 +52,12 @@ func (ps patterns) match(path string, isDir, isRoot bool) bool {
 	return false
 }
 
-type pattern string
+type pattern struct {
+	path string
+	base string
+}
 
-func (p pattern) match(path string, isDir, isRoot bool) bool {
-
-	if p.hasRootPrefix() && !isRoot {
-		return false
-	}
+func (p pattern) match(path string, isDir bool) bool {
 
 	if p.hasDirSuffix() && !isDir {
 		return false
@@ -66,26 +65,34 @@ func (p pattern) match(path string, isDir, isRoot bool) bool {
 
 	pattern := p.trimedPattern()
 
-	match, _ := filepath.Match(pattern, p.equalizeDepth(path))
+	var match bool
+	if p.hasRootPrefix() {
+		// absolute pattern
+		match, _ = filepath.Match(filepath.Join(p.base, p.path), path)
+	} else {
+		// relative pattern
+		match, _ = filepath.Match(pattern, p.equalizeDepth(path))
+	}
 	return match
 }
 
 func (p pattern) equalizeDepth(path string) string {
-	patternDepth := strings.Count(string(p), "/")
-	pathDepth := strings.Count(path, string(filepath.Separator))
+	trimedPath := strings.TrimPrefix(path, p.base)
+	patternDepth := strings.Count(p.path, "/")
+	pathDepth := strings.Count(trimedPath, string(filepath.Separator))
 	start := 0
-	if diff := pathDepth - patternDepth; diff >= 0 {
+	if diff := pathDepth - patternDepth; diff > 0 {
 		start = diff
 	}
-	return filepath.Join(strings.Split(path, "/")[start:]...)
+	return filepath.Join(strings.Split(trimedPath, string(filepath.Separator))[start:]...)
 }
 
 func (p pattern) prefix() string {
-	return string(p[0])
+	return string(p.path[0])
 }
 
 func (p pattern) suffix() string {
-	return string(p[len(p)-1])
+	return string(p.path[len(p.path)-1])
 }
 
 func (p pattern) hasRootPrefix() bool {
@@ -101,5 +108,5 @@ func (p pattern) hasDirSuffix() bool {
 }
 
 func (p pattern) trimedPattern() string {
-	return strings.Trim(string(p), "/")
+	return strings.Trim(p.path, "/")
 }
