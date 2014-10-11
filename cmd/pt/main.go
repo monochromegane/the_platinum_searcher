@@ -12,7 +12,7 @@ import (
 	pt "github.com/monochromegane/the_platinum_searcher"
 )
 
-const version = "1.7.4"
+const version = "1.7.5"
 
 var opts pt.Option
 
