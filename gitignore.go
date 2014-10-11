@@ -79,16 +79,14 @@ func (p pattern) match(path string, isDir bool) bool {
 }
 
 func (p pattern) equalizeDepth(path string) string {
+	trimedPath := strings.TrimPrefix(path, p.base)
 	patternDepth := strings.Count(p.path, "/")
-	pathDepth := strings.Count(path, string(filepath.Separator))
+	pathDepth := strings.Count(trimedPath, string(filepath.Separator))
 	start := 0
-	if p.depth > 0 {
-		start = p.depth
-	}
 	if diff := pathDepth - patternDepth; diff > 0 {
 		start = diff
 	}
-	return filepath.Join(strings.Split(path, string(filepath.Separator))[start:]...)
+	return filepath.Join(strings.Split(trimedPath, string(filepath.Separator))[start:]...)
 }
 
 func (p pattern) prefix() string {
