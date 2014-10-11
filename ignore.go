@@ -20,10 +20,10 @@ func (im ignoreMatchers) Match(path string, isDir bool) bool {
 	return false
 }
 
-func newIgnoreMatchers(path string, ignores []string, depth int) ignoreMatchers {
+func newIgnoreMatchers(path string, ignores []string) ignoreMatchers {
 	var matchers ignoreMatchers
 	for _, i := range ignores {
-		if matcher := newIgnoreMatcher(path, i, depth); matcher != nil {
+		if matcher := newIgnoreMatcher(path, i); matcher != nil {
 			matchers = append(matchers, matcher)
 		}
 	}
@@ -34,7 +34,7 @@ type ignoreMatcher interface {
 	Match(path string, isDir bool) bool
 }
 
-func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
+func newIgnoreMatcher(path string, ignore string) ignoreMatcher {
 
 	file, err := os.Open(filepath.Join(path, ignore))
 	if err != nil {
@@ -58,7 +58,7 @@ func newIgnoreMatcher(path string, ignore string, depth int) ignoreMatcher {
 	}
 
 	if ignore == ".ptignore" || ignore == ".gitignore" {
-		return newGitIgnore(path, depth, patterns)
+		return newGitIgnore(path, patterns)
 	} else {
 		return genericIgnore(patterns)
 	}
@@ -79,7 +79,7 @@ func (gi genericIgnore) Match(path string, isDir bool) bool {
 func homePtIgnore() ignoreMatcher {
 	homeDir := getHomeDir()
 	if homeDir != "" {
-		return newIgnoreMatcher(homeDir, ".ptignore", -1)
+		return newIgnoreMatcher(homeDir, ".ptignore")
 	}
 	return nil
 }
@@ -89,7 +89,7 @@ func globalGitIgnore() ignoreMatcher {
 	if homeDir != "" {
 		globalIgnore := globalGitIgnoreName()
 		if globalIgnore != "" {
-			return newIgnoreMatcher(homeDir, globalIgnore, -1)
+			return newIgnoreMatcher(homeDir, globalIgnore)
 		}
 	}
 	return nil

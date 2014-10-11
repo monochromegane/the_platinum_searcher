@@ -9,11 +9,10 @@ type gitIgnore struct {
 	ignorePatterns patterns
 	acceptPatterns patterns
 	path           string
-	depth          int
 }
 
-func newGitIgnore(path string, depth int, patterns []string) gitIgnore {
-	g := gitIgnore{path: path, depth: depth}
+func newGitIgnore(path string, patterns []string) gitIgnore {
+	g := gitIgnore{path: path}
 	g.parse(patterns)
 	return g
 }
@@ -27,9 +26,9 @@ func (g *gitIgnore) parse(patterns []string) {
 
 		if strings.HasPrefix(p, "!") {
 			g.acceptPatterns = append(g.acceptPatterns,
-				pattern{strings.TrimPrefix(p, "!"), g.path, g.depth - 1})
+				pattern{strings.TrimPrefix(p, "!"), g.path})
 		} else {
-			g.ignorePatterns = append(g.ignorePatterns, pattern{p, g.path, g.depth - 1})
+			g.ignorePatterns = append(g.ignorePatterns, pattern{p, g.path})
 		}
 	}
 }
@@ -54,9 +53,8 @@ func (ps patterns) match(path string, isDir bool) bool {
 }
 
 type pattern struct {
-	path  string
-	base  string
-	depth int
+	path string
+	base string
 }
 
 func (p pattern) match(path string, isDir bool) bool {
