@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	flags "github.com/jessevdk/go-flags"
@@ -32,7 +31,7 @@ func main() {
 
 	parser := flags.NewParser(&opts, flags.Default)
 	parser.Name = "pt"
-	parser.Usage = "[OPTIONS] PATTERN [PATH]"
+	parser.Usage = "[OPTIONS] PATTERN [PATH1 [PATH2 [...]]]"
 
 	args, err := parser.Parse()
 	if err != nil {
@@ -57,13 +56,15 @@ func main() {
 		}
 	}
 
-	var root = "."
-	if len(args) == 2 {
-		root = strings.TrimRight(args[1], "\"")
-		_, err := os.Lstat(root)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err)
-			os.Exit(1)
+	roots := []string{"."}
+	if len(args) > 1 {
+		roots = args[1:]
+		for _, root := range roots {
+			_, err := os.Lstat(root)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%s\n", err)
+				os.Exit(1)
+			}
 		}
 	}
 
@@ -93,11 +94,14 @@ func main() {
 
 	start := time.Now()
 
-	searcher := pt.PlatinumSearcher{root, pattern, &opts}
-	err = searcher.Search()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
+	// accept multi-paths
+	for _, root := range roots {
+		searcher := pt.PlatinumSearcher{root, pattern, &opts}
+		err = searcher.Search()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
 	}
 	if opts.Stats {
 		elapsed := time.Since(start)
