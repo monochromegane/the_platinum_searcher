@@ -1,8 +1,9 @@
 package the_platinum_searcher
 
 type PlatinumSearcher struct {
-	Root, Pattern string
-	Option        *Option
+	Roots   []string
+	Pattern string
+	Option  *Option
 }
 
 func (p *PlatinumSearcher) Search() error {
@@ -35,7 +36,7 @@ func (p *PlatinumSearcher) pattern() (*Pattern, error) {
 }
 
 func (p *PlatinumSearcher) find(out chan *GrepParams, pattern *Pattern) {
-	Find(p.Root, pattern, out, p.Option)
+	Find(p.Roots, pattern, out, p.Option)
 }
 
 func (p *PlatinumSearcher) grep(in chan *GrepParams, out chan *PrintParams) {

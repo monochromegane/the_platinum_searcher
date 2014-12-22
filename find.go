@@ -13,12 +13,15 @@ type find struct {
 	Option *Option
 }
 
-func Find(root string, pattern *Pattern, out chan *GrepParams, option *Option) {
+func Find(roots []string, pattern *Pattern, out chan *GrepParams, option *Option) {
 	find := find{
 		Out:    out,
 		Option: option,
 	}
-	find.Start(root, pattern)
+	for _, root := range roots {
+		find.Start(root, pattern)
+	}
+	close(find.Out)
 }
 
 func (f *find) Start(root string, pattern *Pattern) {
@@ -32,7 +35,6 @@ func (f *find) Start(root string, pattern *Pattern) {
 func (f *find) findStream(pattern *Pattern) {
 	// TODO: File type is fixed in ASCII because it can not determine the character code.
 	f.Out <- &GrepParams{"", ASCII, pattern}
-	close(f.Out)
 }
 
 func (f *find) findFile(root string, pattern *Pattern) {
@@ -92,7 +94,6 @@ func (f *find) findFile(root string, pattern *Pattern) {
 		f.Out <- &GrepParams{path, fileType, pattern}
 		return nil, ignores
 	})
-	close(f.Out)
 }
 
 type WalkFunc func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers)
