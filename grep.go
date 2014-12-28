@@ -5,8 +5,8 @@ import (
 	"os"
 	"sync"
 
-	"code.google.com/p/go.text/encoding/japanese"
-	"code.google.com/p/go.text/transform"
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
 )
 
 type GrepParams struct {
