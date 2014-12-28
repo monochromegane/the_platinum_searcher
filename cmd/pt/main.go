@@ -57,13 +57,19 @@ func main() {
 		}
 	}
 
-	var root = "."
-	if len(args) == 2 {
-		root = strings.TrimRight(args[1], "\"")
-		_, err := os.Lstat(root)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", err)
-			os.Exit(1)
+	var roots = []string{"."}
+	if len(args) >= 2 {
+		roots = []string{}
+		// check if every argument exists on the filesystem
+		for _, root := range args[1:] {
+			path := strings.TrimRight(root, "\"")
+			_, err := os.Lstat(path)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%s\n", err)
+				os.Exit(1)
+			} else {
+				roots = append(roots, path)
+			}
 		}
 	}
 
@@ -93,7 +99,7 @@ func main() {
 
 	start := time.Now()
 
-	searcher := pt.PlatinumSearcher{root, pattern, &opts}
+	searcher := pt.PlatinumSearcher{roots, pattern, &opts}
 	err = searcher.Search()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
