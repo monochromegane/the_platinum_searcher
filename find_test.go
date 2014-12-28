@@ -28,7 +28,7 @@ func mkFoundPaths(ch chan *GrepParams) func(f string) bool {
 func TestFind(t *testing.T) {
 	out := make(chan *GrepParams)
 	find := find{out, defaultOpts()}
-	go find.Start("files", &Pattern{Pattern: "go"})
+	go find.Start([]string{"files"}, &Pattern{Pattern: "go"})
 
 	testPath := mkFoundPaths(out)
 
@@ -61,7 +61,7 @@ func TestFindWithIgnore(t *testing.T) {
 	opts := defaultOpts()
 	opts.VcsIgnore = []string{".vcsignore"}
 	find := find{out, opts}
-	go find.Start("files/vcs", &Pattern{Pattern: "go"})
+	go find.Start([]string{"files/vcs"}, &Pattern{Pattern: "go"})
 
 	for o := range out {
 		for _, ignore := range Ignores {
@@ -85,7 +85,7 @@ func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 	for _, hidden := range Hiddens {
 		out := make(chan *GrepParams)
 		find := find{out, &Option{}}
-		go find.Start("files/"+hidden.Root, &Pattern{Pattern: "go"})
+		go find.Start([]string{"files/" + hidden.Root}, &Pattern{Pattern: "go"})
 
 		found := false
 		for o := range out {
@@ -103,7 +103,7 @@ func TestFindWhenSpecifiedHiddenFile(t *testing.T) {
 func TestFindWithDepth(t *testing.T) {
 	out := make(chan *GrepParams)
 	find := find{out, &Option{Depth: 1}}
-	go find.Start("files/depth", &Pattern{Pattern: "go"})
+	go find.Start([]string{"files/depth"}, &Pattern{Pattern: "go"})
 
 	for o := range out {
 		if o.Path == "files/depth/dir_1/dir_2/file_3.txt" {
@@ -116,7 +116,7 @@ func TestFindWithFileSearchPattern(t *testing.T) {
 	out := make(chan *GrepParams)
 	find := find{out, &Option{}}
 	pattern, _ := NewPattern("go", "match.txt", true, true, false)
-	go find.Start("files/vcs/match", pattern)
+	go find.Start([]string{"files/vcs/match"}, pattern)
 
 	for o := range out {
 		if o.Path == "files/vcs/match/ignore.txt" {
@@ -128,7 +128,7 @@ func TestFindWithFileSearchPattern(t *testing.T) {
 func TestFindWithStream(t *testing.T) {
 	out := make(chan *GrepParams)
 	find := find{out, &Option{SearchStream: true}}
-	go find.Start(".", &Pattern{Pattern: "go"})
+	go find.Start([]string{"."}, &Pattern{Pattern: "go"})
 
 	for o := range out {
 		if o.Path != "" {
