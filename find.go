@@ -3,6 +3,8 @@ package the_platinum_searcher
 import (
 	"io/ioutil"
 	"os"
+	"runtime"
+	"sync"
 
 	"path/filepath"
 	"strings"
@@ -115,15 +117,20 @@ func Walk(root string, ignores ignoreMatchers, follow bool, walkFn WalkFunc) err
 		walkError, _ := walkFn(root, fileInfo, 1, nil, err)
 		return walkError
 	}
-	return walk(root, fileInfo, 1, ignores, walkFn)
+	workerNum := runtime.NumCPU()
+	pool := make(chan struct{}, workerNum)
+	for i := 0; i < workerNum; i++ {
+		pool <- struct{}{}
+	}
+	return walk(root, fileInfo, 1, ignores, walkFn, pool)
 }
 
-func walkOnGoRoutine(path string, info *FileInfo, notify chan int, depth int, parentIgnore ignoreMatchers, walkFn WalkFunc) {
-	walk(path, info, depth, parentIgnore, walkFn)
-	notify <- 0
+func walkOnGoRoutine(path string, info *FileInfo, depth int, parentIgnore ignoreMatchers, walkFn WalkFunc, pool chan struct{}) {
+	walk(path, info, depth, parentIgnore, walkFn, pool)
+	pool <- struct{}{}
 }
 
-func walk(path string, info *FileInfo, depth int, parentIgnores ignoreMatchers, walkFn WalkFunc) error {
+func walk(path string, info *FileInfo, depth int, parentIgnores ignoreMatchers, walkFn WalkFunc, pool chan struct{}) error {
 	err, ig := walkFn(path, info, depth, parentIgnores, nil)
 	if err != nil {
 		if info.IsDir() && err == filepath.SkipDir {
@@ -143,21 +150,22 @@ func walk(path string, info *FileInfo, depth int, parentIgnores ignoreMatchers, 
 	}
 
 	depth++
-	notify := make(chan int, len(list))
+	waiter := &sync.WaitGroup{}
 	for _, l := range list {
 		fileInfo := newFileInfo(path, l, info.follow)
-		if isDirectRoot(depth) {
-			go walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, notify, depth, ig, walkFn)
+		select {
+		case <-pool:
+			waiter.Add(1)
+			go func() {
+				walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, pool)
+				waiter.Done()
+			}()
+		default:
+			walk(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, pool)
+		}
+	}
 
-		} else {
-			walk(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn)
-		}
-	}
-	if isDirectRoot(depth) {
-		for i := 0; i < cap(notify); i++ {
-			<-notify
-		}
-	}
+	waiter.Wait()
 	return nil
 }
 
