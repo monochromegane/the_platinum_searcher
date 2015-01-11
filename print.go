@@ -106,7 +106,7 @@ func (p *print) printPath(path string) {
 func (p *print) printLineNumber(lineNum int, sep string, col int) {
 	fmt.Fprint(p.writer, p.decorator.lineNumber(lineNum, sep))
 	if p.Option.Column {
-		fmt.Fprint(p.writer, col)
+		fmt.Fprintf(p.writer, "%d:", col)
 	}
 }
 
