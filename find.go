@@ -13,19 +13,19 @@ type find struct {
 	Option *Option
 }
 
-func Find(root string, pattern *Pattern, out chan *GrepParams, option *Option) {
+func Find(roots []string, pattern *Pattern, out chan *GrepParams, option *Option) {
 	find := find{
 		Out:    out,
 		Option: option,
 	}
-	find.Start(root, pattern)
+	find.Start(roots, pattern)
 }
 
-func (f *find) Start(root string, pattern *Pattern) {
+func (f *find) Start(roots []string, pattern *Pattern) {
 	if f.Option.SearchStream {
 		f.findStream(pattern)
 	} else {
-		f.findFile(root, pattern)
+		f.findFiles(roots, pattern)
 	}
 }
 
@@ -35,7 +35,18 @@ func (f *find) findStream(pattern *Pattern) {
 	close(f.Out)
 }
 
-func (f *find) findFile(root string, pattern *Pattern) {
+func (f *find) findFiles(roots []string, pattern *Pattern) {
+	done := make(chan struct{}, len(roots))
+	for _, root := range roots {
+		go f.findFile(root, pattern, done)
+	}
+	for i := 0; i < cap(done); i++ {
+		<-done
+	}
+	close(f.Out)
+}
+
+func (f *find) findFile(root string, pattern *Pattern, done chan struct{}) {
 
 	var ignores ignoreMatchers
 	if f.Option.NoPtIgnore == false {
@@ -92,7 +103,7 @@ func (f *find) findFile(root string, pattern *Pattern) {
 		f.Out <- &GrepParams{path, fileType, pattern}
 		return nil, ignores
 	})
-	close(f.Out)
+	done <- struct{}{}
 }
 
 type WalkFunc func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers)
