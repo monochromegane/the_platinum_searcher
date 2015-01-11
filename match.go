@@ -85,16 +85,16 @@ func (m *Match) setUpNewMatch(num int, col int, s string) (*Match, bool) {
 func (m *Match) IsMatch(pattern *Pattern, num int, s string) (*Match, bool) {
 	if pattern.UseRegexp {
 		if pattern.Regexp.MatchString(s) {
-			col := strings.Index(s, pattern.Pattern)
+			col := strings.Index(s, pattern.Pattern)+1
 			return m.setUpNewMatch(num, col, s)
 		}
 	} else if pattern.IgnoreCase {
 		if strings.Contains(strings.ToUpper(s), strings.ToUpper(pattern.Pattern)) {
-			col := strings.Index(strings.ToUpper(s), strings.ToUpper(pattern.Pattern))
+			col := strings.Index(strings.ToUpper(s), strings.ToUpper(pattern.Pattern))+1
 			return m.setUpNewMatch(num, col, s)
 		}
 	} else if strings.Contains(s, pattern.Pattern) {
-		col := strings.Index(s, pattern.Pattern)
+		col := strings.Index(s, pattern.Pattern)+1
 		return m.setUpNewMatch(num, col, s)
 	}
 	if !m.Matched && m.beforeNum > 0 {
