@@ -103,18 +103,21 @@ func (p *print) printPath(path string) {
 	}
 }
 
-func (p *print) printLineNumber(lineNum int, sep string) {
+func (p *print) printLineNumber(lineNum int, sep string, col int) {
 	fmt.Fprint(p.writer, p.decorator.lineNumber(lineNum, sep))
+	if p.Option.Column {
+		fmt.Fprint(p.writer, col)
+	}
 }
 
 func (p *print) printMatch(pattern *Pattern, line *Line) {
-	p.printLineNumber(line.Num, ":")
+	p.printLineNumber(line.Num, ":", line.Col)
 	fmt.Fprint(p.writer, p.decorator.match(pattern, line))
 }
 
 func (p *print) printContext(lines []*Line) {
 	for _, line := range lines {
-		p.printLineNumber(line.Num, "-")
+		p.printLineNumber(line.Num, "-", line.Col)
 		fmt.Fprint(p.writer, line.Str)
 		fmt.Fprintln(p.writer)
 	}

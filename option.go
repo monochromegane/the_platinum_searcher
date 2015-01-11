@@ -23,6 +23,7 @@ type Option struct {
 	Before            int      `short:"B" long:"before" description:"Print lines before match"`
 	Context           int      `short:"C" long:"context" description:"Print lines before and after match"`
 	OutputEncode      string   `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
+	Column            bool     `long:"column" description:"Print column number"`
 	SearchStream      bool     // Input from pipe. Not user option.
 	Regexp            bool     `short:"e" description:"Parse PATTERN as a regular expression (Disabled by default)"`
 	WordRegexp        bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
