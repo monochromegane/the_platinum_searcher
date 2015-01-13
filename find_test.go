@@ -136,3 +136,14 @@ func TestFindWithStream(t *testing.T) {
 		}
 	}
 }
+
+func TestFindWithInvalidRoot(t *testing.T) {
+	out := make(chan *GrepParams)
+	find := find{out, defaultOpts()}
+	go find.Start([]string{"invalidpath"}, &Pattern{Pattern: "go"})
+
+	for o := range out {
+		t.Errorf("It should not return any file, but returned: %s", o.Path)
+		return
+	}
+}
