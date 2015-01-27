@@ -6,6 +6,7 @@ type Option struct {
 	ForceColor        bool     // Force color.  Not user option.
 	EnableColor       bool     // Enable color. Not user option.
 	NoGroup           bool     `long:"nogroup" description:"Don't print file name at header (Disabled by default)"`
+	Column            bool     `long:"column" description:"Print column (Disabled by default)"`
 	FilesWithMatches  bool     `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
 	VcsIgnore         []string `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore" default:".hgignore" default:".ptignore"`
 	NoPtIgnore        bool     `long:"noptignore" description:"Don't use default ($Home/.ptignore) file for ignore patterns"`

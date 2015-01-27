@@ -9,8 +9,10 @@ type Match struct {
 	*Line
 	beforeNum int
 	afterNum  int
+	setCol    bool
 	Befores   []*Line
 	Afters    []*Line
+	Col       int
 }
 
 type Line struct {
@@ -18,10 +20,11 @@ type Line struct {
 	Str string
 }
 
-func NewMatch(before, after int) *Match {
+func NewMatch(before, after int, setCol bool) *Match {
 	return &Match{
 		beforeNum: before,
 		afterNum:  after,
+		setCol:    setCol,
 		Line:      &Line{},
 	}
 }
@@ -30,6 +33,7 @@ func (m *Match) newMatch() *Match {
 	return &Match{
 		beforeNum: m.beforeNum,
 		afterNum:  m.afterNum,
+		setCol:    m.setCol,
 		Line:      &Line{},
 	}
 }
@@ -42,9 +46,16 @@ func (m *Match) Match() string {
 	return m.Line.Str
 }
 
-func (m *Match) setMatch(num int, s string) {
+func (m *Match) setMatch(pattern *Pattern, num int, s string) {
 	m.Line.Num = num
 	m.Line.Str = s
+	if m.setCol {
+		if pattern.UseRegexp || pattern.IgnoreCase {
+			m.Col = pattern.Regexp.FindStringIndex(m.Str)[0] + 1
+		} else {
+			m.Col = strings.Index(m.Str, pattern.Pattern) + 1
+		}
+	}
 	m.Matched = true
 }
 
@@ -64,14 +75,14 @@ func (m *Match) setAfter(num int, s string) bool {
 	return true
 }
 
-func (m *Match) setUpNewMatch(num int, s string) (*Match, bool) {
+func (m *Match) setUpNewMatch(pattern *Pattern, num int, s string) (*Match, bool) {
 	// already match
 	if m.Matched {
 		newMatch := m.newMatch()
-		newMatch.setMatch(num, s)
+		newMatch.setMatch(pattern, num, s)
 		return newMatch, true
 	}
-	m.setMatch(num, s)
+	m.setMatch(pattern, num, s)
 	if m.afterNum == 0 {
 		return m.newMatch(), true
 	} else {
@@ -83,14 +94,14 @@ func (m *Match) setUpNewMatch(num int, s string) (*Match, bool) {
 func (m *Match) IsMatch(pattern *Pattern, num int, s string) (*Match, bool) {
 	if pattern.UseRegexp {
 		if pattern.Regexp.MatchString(s) {
-			return m.setUpNewMatch(num, s)
+			return m.setUpNewMatch(pattern, num, s)
 		}
 	} else if pattern.IgnoreCase {
 		if strings.Contains(strings.ToUpper(s), strings.ToUpper(pattern.Pattern)) {
-			return m.setUpNewMatch(num, s)
+			return m.setUpNewMatch(pattern, num, s)
 		}
 	} else if strings.Contains(s, pattern.Pattern) {
-		return m.setUpNewMatch(num, s)
+		return m.setUpNewMatch(pattern, num, s)
 	}
 	if !m.Matched && m.beforeNum > 0 {
 		m.setBefore(num, s)

@@ -6,7 +6,7 @@ import (
 
 func testIsMatch(t *testing.T) {
 
-	match := NewMatch(0, 0)
+	match := NewMatch(0, 0, false)
 
 	// not use regexp
 	p, _ := NewPattern("go", "", false, false, false)
@@ -49,7 +49,7 @@ func testIsMatch(t *testing.T) {
 func TestMatch(t *testing.T) {
 
 	pattern, _ := NewPattern("go", "", false, false, false)
-	match := NewMatch(1, 1)
+	match := NewMatch(1, 1, false)
 
 	lines := []string{
 		"before",
@@ -76,7 +76,7 @@ func TestMatch(t *testing.T) {
 func TestMatchWhenContextAndMatchDuplicate(t *testing.T) {
 
 	pattern, _ := NewPattern("go", "", false, false, false)
-	match := NewMatch(1, 1)
+	match := NewMatch(1, 1, false)
 
 	lines := []string{
 		"before",
