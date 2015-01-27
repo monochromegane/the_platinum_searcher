@@ -12,6 +12,7 @@ type Option struct {
 	NoGlobalGitIgnore bool     `long:"noglobal-gitignore" description:"Don't use git's global gitignore file for ignore patterns"`
 	SkipVcsIgnore     func()   `short:"U" long:"skip-vsc-ignores" description:"Don't use VCS ignore file for ignore patterns. Still obey .ptignore"`
 	skipVcsIgnore     bool     // Skip VCS ignore file. Not user option.
+	Hidden            bool     `short:"H" long:"hidden" description:"Search hidden files and directories"`
 	Ignore            []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 	IgnoreCase        bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
 	SmartCase         bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`

@@ -50,6 +50,19 @@ func TestFind(t *testing.T) {
 	}
 }
 
+func TestFindWithHidden(t *testing.T) {
+	out := make(chan *GrepParams)
+	find := find{out, &Option{Hidden: true}}
+	go find.Start([]string{"files"}, &Pattern{Pattern: "go"})
+
+	testPath := mkFoundPaths(out)
+
+	// Ensure these files were returned
+	if e := ".hidden/hidden.txt"; testPath(e) {
+		t.Errorf("Found %s, It should not contains file under hidden directory.", e)
+	}
+}
+
 var Ignores = []string{
 	"match/ignore.txt",
 	"ignore/ignore.txt",
