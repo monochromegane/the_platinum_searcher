@@ -69,7 +69,7 @@ func (f *find) findFile(root string, pattern *Pattern, done chan struct{}) {
 			}
 			//Current Directory skipping should be checked first before loading ignores
 			//within this directory
-			if !isRoot(depth) && isHidden(info.Name()) {
+			if !isRoot(depth) && (!f.Option.Hidden && isHidden(info.Name())) {
 				return filepath.SkipDir, ignores
 			} else {
 				if ignores.Match(path, info.IsDir()) {
@@ -82,7 +82,7 @@ func (f *find) findFile(root string, pattern *Pattern, done chan struct{}) {
 		if !info.follow && info.IsSymlink() {
 			return nil, ignores
 		}
-		if !isRoot(depth) && isHidden(info.Name()) {
+		if !isRoot(depth) && (!f.Option.Hidden && isHidden(info.Name())) {
 			return nil, ignores
 		}
 
