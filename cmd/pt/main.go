@@ -51,7 +51,13 @@ func main() {
 
 	opts.SearchStream = false
 	if len(args) == 1 {
-		if !terminal.IsTerminal(os.Stdin) {
+		fi, err := os.Stdin.Stat()
+		if err != nil {
+			os.Exit(1)
+		}
+
+		mode := fi.Mode()
+		if (mode & os.ModeNamedPipe != 0) || mode.IsRegular() {
 			opts.SearchStream = true
 			opts.NoGroup = true
 		}
