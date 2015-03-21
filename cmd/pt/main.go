@@ -109,7 +109,7 @@ func main() {
 		fmt.Printf("%s Elapsed\n", elapsed)
 	}
 
-	if pt.FileMatchCount == 0 {
+	if pt.FileMatchCount == 0 && pt.MatchCount == 0 {
 		os.Exit(1)
 	}
 }
