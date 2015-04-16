@@ -52,14 +52,21 @@ func main() {
 	opts.SearchStream = false
 	if len(args) == 1 {
 		fi, err := os.Stdin.Stat()
-		if err != nil {
-			os.Exit(1)
-		}
+		if runtime.GOOS == "windows" {
+			if err == nil {
+				opts.SearchStream = true
+				opts.NoGroup = true
+			}
+		} else {
+			if err != nil {
+				os.Exit(1)
+			}
 
-		mode := fi.Mode()
-		if (mode & os.ModeNamedPipe != 0) || mode.IsRegular() {
-			opts.SearchStream = true
-			opts.NoGroup = true
+			mode := fi.Mode()
+			if (mode & os.ModeNamedPipe != 0) || mode.IsRegular() {
+				opts.SearchStream = true
+				opts.NoGroup = true
+			}
 		}
 	}
 
