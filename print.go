@@ -5,9 +5,9 @@ import (
 	"io"
 	"os"
 
+	"github.com/shiena/ansicolor"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
-	"github.com/shiena/ansicolor"
 )
 
 var FileMatchCount, MatchCount uint
@@ -80,7 +80,7 @@ func (p *print) Start() {
 				p.printPath(arg.Path)
 			}
 			p.printContext(v.Befores)
-			p.printMatch(arg.Pattern, v.Line)
+			p.printMatch(arg.Pattern, v)
 			MatchCount++
 			fmt.Println()
 			p.printContext(v.Afters)
@@ -107,9 +107,16 @@ func (p *print) printLineNumber(lineNum int, sep string) {
 	fmt.Fprint(p.writer, p.decorator.lineNumber(lineNum, sep))
 }
 
-func (p *print) printMatch(pattern *Pattern, line *Line) {
-	p.printLineNumber(line.Num, ":")
-	fmt.Fprint(p.writer, p.decorator.match(pattern, line))
+func (p *print) printColumn(column int, sep string) {
+	fmt.Fprint(p.writer, p.decorator.column(column, sep))
+}
+
+func (p *print) printMatch(pattern *Pattern, match *Match) {
+	p.printLineNumber(match.Num, ":")
+	if p.Option.Column {
+		p.printColumn(match.Col, ":")
+	}
+	fmt.Fprint(p.writer, p.decorator.match(pattern, match.Line))
 }
 
 func (p *print) printContext(lines []*Line) {

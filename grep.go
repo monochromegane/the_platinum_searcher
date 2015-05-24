@@ -70,7 +70,7 @@ func (g *grep) Start(path string, encode int, pattern *Pattern, sem chan struct{
 
 	var buf []byte
 	matches := make([]*Match, 0)
-	m := NewMatch(g.Option.Before, g.Option.After)
+	m := NewMatch(g.Option.Before, g.Option.After, g.Option.Column)
 	var lineNum = 1
 	for {
 		buf, _, err = f.ReadLine()
