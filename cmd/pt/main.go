@@ -12,7 +12,7 @@ import (
 	pt "github.com/monochromegane/the_platinum_searcher"
 )
 
-const version = "1.7.6"
+const version = "1.7.7"
 
 var opts pt.Option
 
@@ -63,7 +63,7 @@ func main() {
 			}
 
 			mode := fi.Mode()
-			if (mode & os.ModeNamedPipe != 0) || mode.IsRegular() {
+			if (mode&os.ModeNamedPipe != 0) || mode.IsRegular() {
 				opts.SearchStream = true
 				opts.NoGroup = true
 			}
