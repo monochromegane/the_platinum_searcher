@@ -63,7 +63,7 @@ func main() {
 			}
 
 			mode := fi.Mode()
-			if (mode & os.ModeNamedPipe != 0) || mode.IsRegular() {
+			if (mode&os.ModeNamedPipe != 0) || mode.IsRegular() {
 				opts.SearchStream = true
 				opts.NoGroup = true
 			}
