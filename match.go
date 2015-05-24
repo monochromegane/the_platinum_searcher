@@ -15,6 +15,7 @@ type Match struct {
 
 type Line struct {
 	Num int
+	Col int
 	Str string
 }
 
@@ -42,8 +43,9 @@ func (m *Match) Match() string {
 	return m.Line.Str
 }
 
-func (m *Match) setMatch(num int, s string) {
+func (m *Match) setMatch(num int, col int, s string) {
 	m.Line.Num = num
+	m.Line.Col = col
 	m.Line.Str = s
 	m.Matched = true
 }
@@ -53,25 +55,25 @@ func (m *Match) setBefore(num int, s string) {
 	if len(m.Befores) >= m.beforeNum {
 		befores = m.Befores[1:]
 	}
-	m.Befores = append(befores, &Line{num, s})
+	m.Befores = append(befores, &Line{num, 0, s})
 }
 
 func (m *Match) setAfter(num int, s string) bool {
 	if len(m.Afters) >= m.afterNum {
 		return false
 	}
-	m.Afters = append(m.Afters, &Line{num, s})
+	m.Afters = append(m.Afters, &Line{num, 0, s})
 	return true
 }
 
-func (m *Match) setUpNewMatch(num int, s string) (*Match, bool) {
+func (m *Match) setUpNewMatch(num int, col int, s string) (*Match, bool) {
 	// already match
 	if m.Matched {
 		newMatch := m.newMatch()
-		newMatch.setMatch(num, s)
+		newMatch.setMatch(num, col, s)
 		return newMatch, true
 	}
-	m.setMatch(num, s)
+	m.setMatch(num, col, s)
 	if m.afterNum == 0 {
 		return m.newMatch(), true
 	} else {
@@ -83,14 +85,17 @@ func (m *Match) setUpNewMatch(num int, s string) (*Match, bool) {
 func (m *Match) IsMatch(pattern *Pattern, num int, s string) (*Match, bool) {
 	if pattern.UseRegexp {
 		if pattern.Regexp.MatchString(s) {
-			return m.setUpNewMatch(num, s)
+			col := strings.Index(s, pattern.Pattern)+1
+			return m.setUpNewMatch(num, col, s)
 		}
 	} else if pattern.IgnoreCase {
 		if strings.Contains(strings.ToUpper(s), strings.ToUpper(pattern.Pattern)) {
-			return m.setUpNewMatch(num, s)
+			col := strings.Index(strings.ToUpper(s), strings.ToUpper(pattern.Pattern))+1
+			return m.setUpNewMatch(num, col, s)
 		}
 	} else if strings.Contains(s, pattern.Pattern) {
-		return m.setUpNewMatch(num, s)
+		col := strings.Index(s, pattern.Pattern)+1
+		return m.setUpNewMatch(num, col, s)
 	}
 	if !m.Matched && m.beforeNum > 0 {
 		m.setBefore(num, s)
