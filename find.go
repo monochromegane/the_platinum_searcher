@@ -156,10 +156,10 @@ func walk(path string, info *FileInfo, depth int, parentIgnores ignoreMatchers, 
 		select {
 		case <-pool:
 			waiter.Add(1)
-			go func() {
-				walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, pool)
+			go func(path string) {
+				walkOnGoRoutine(path, fileInfo, depth, ig, walkFn, pool)
 				waiter.Done()
-			}()
+			}(filepath.Join(path, fileInfo.Name()))
 		default:
 			walk(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, pool)
 		}
