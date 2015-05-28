@@ -3,11 +3,10 @@ package the_platinum_searcher
 import (
 	"io/ioutil"
 	"os"
-	"runtime"
-	"sync"
-
 	"path/filepath"
+	"runtime"
 	"strings"
+	"sync"
 )
 
 type find struct {
@@ -64,7 +63,7 @@ func (f *find) findFile(root string, pattern *Pattern, done chan struct{}) {
 	}
 
 	ignores = append(ignores, genericIgnore(f.Option.Ignore))
-	Walk(root, ignores, f.Option.Follow, func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers) {
+	Walk(root, ignores, f.Option.Follow, f.Option.MultiFinder, func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers) {
 		if info.IsDir() {
 			if depth > f.Option.Depth+1 {
 				return filepath.SkipDir, ignores
@@ -110,27 +109,33 @@ func (f *find) findFile(root string, pattern *Pattern, done chan struct{}) {
 
 type WalkFunc func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers)
 
-func Walk(root string, ignores ignoreMatchers, follow bool, walkFn WalkFunc) error {
+func Walk(root string, ignores ignoreMatchers, follow, multiFinder bool, walkFn WalkFunc) error {
 	info, err := os.Lstat(root)
 	fileInfo := newFileInfo(root, info, follow)
 	if err != nil {
 		walkError, _ := walkFn(root, fileInfo, 1, nil, err)
 		return walkError
 	}
-	workerNum := runtime.NumCPU()
-	pool := make(chan struct{}, workerNum)
-	for i := 0; i < workerNum; i++ {
-		pool <- struct{}{}
+
+	var pool chan struct{}
+	if multiFinder {
+		pool = make(chan struct{}, runtime.NumCPU())
 	}
-	return walk(root, fileInfo, 1, ignores, walkFn, pool)
+	waiter := &sync.WaitGroup{}
+	err = walk(root, fileInfo, 1, ignores, walkFn, waiter, pool)
+	waiter.Wait()
+	return err
 }
 
-func walkOnGoRoutine(path string, info *FileInfo, depth int, parentIgnore ignoreMatchers, walkFn WalkFunc, pool chan struct{}) {
-	walk(path, info, depth, parentIgnore, walkFn, pool)
-	pool <- struct{}{}
+func walkOnGoRoutine(path string, info *FileInfo, depth int, parentIgnore ignoreMatchers, walkFn WalkFunc, waiter *sync.WaitGroup, pool chan struct{}) {
+	walk(path, info, depth, parentIgnore, walkFn, waiter, pool)
+	if pool != nil {
+		<-pool
+	}
+	waiter.Done()
 }
 
-func walk(path string, info *FileInfo, depth int, parentIgnores ignoreMatchers, walkFn WalkFunc, pool chan struct{}) error {
+func walk(path string, info *FileInfo, depth int, parentIgnores ignoreMatchers, walkFn WalkFunc, waiter *sync.WaitGroup, pool chan struct{}) error {
 	err, ig := walkFn(path, info, depth, parentIgnores, nil)
 	if err != nil {
 		if info.IsDir() && err == filepath.SkipDir {
@@ -150,22 +155,29 @@ func walk(path string, info *FileInfo, depth int, parentIgnores ignoreMatchers, 
 	}
 
 	depth++
-	waiter := &sync.WaitGroup{}
 	for _, l := range list {
 		fileInfo := newFileInfo(path, l, info.follow)
-		select {
-		case <-pool:
-			waiter.Add(1)
-			go func(path string) {
-				walkOnGoRoutine(path, fileInfo, depth, ig, walkFn, pool)
-				waiter.Done()
-			}(filepath.Join(path, fileInfo.Name()))
-		default:
-			walk(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, pool)
+
+		// normal mode(pool == nil): spawn goroutine on DirectRoot
+		// multiple finder mode(pool != nil): spawn goroutine as many as possible
+		if pool == nil {
+			if isDirectRoot(depth) {
+				waiter.Add(1)
+				go walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, waiter, pool)
+			} else {
+				walk(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, waiter, pool)
+			}
+		} else {
+			select {
+			case pool <- struct{}{}:
+				waiter.Add(1)
+				go walkOnGoRoutine(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, waiter, pool)
+			default:
+				walk(filepath.Join(path, fileInfo.Name()), fileInfo, depth, ig, walkFn, waiter, pool)
+			}
 		}
 	}
 
-	waiter.Wait()
 	return nil
 }
 
