@@ -32,7 +32,7 @@ func main() {
 
 	parser := flags.NewParser(&opts, flags.Default)
 	parser.Name = "pt"
-	parser.Usage = "[OPTIONS] PATTERN [PATH]"
+	parser.Usage = "[OPTIONS] [PATTERN] [PATH]"
 
 	args, err := parser.Parse()
 	if err != nil {
@@ -50,7 +50,7 @@ func main() {
 	}
 
 	opts.SearchStream = false
-	if len(args) == 1 {
+	if opts.FilesWithRegexp == "" && len(args) == 1 {
 		fi, err := os.Stdin.Stat()
 		if runtime.GOOS == "windows" {
 			if err == nil {
@@ -71,9 +71,14 @@ func main() {
 	}
 
 	var roots = []string{"."}
-	if len(args) >= 2 {
+	if (opts.FilesWithRegexp == "" && len(args) >= 2) ||
+		(opts.FilesWithRegexp != "" && len(args) > 0) {
 		roots = []string{}
-		for _, root := range args[1:] {
+		paths := args[1:]
+		if opts.FilesWithRegexp != "" {
+			paths = args
+		}
+		for _, root := range paths {
 			root = strings.TrimRight(root, "\"")
 			_, err := os.Lstat(root)
 			if err != nil {
@@ -99,7 +104,7 @@ func main() {
 	}
 
 	pattern := ""
-	if len(args) > 0 {
+	if opts.FilesWithRegexp == "" && len(args) > 0 {
 		pattern = args[0]
 	}
 
