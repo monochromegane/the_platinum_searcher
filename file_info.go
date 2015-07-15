@@ -28,6 +28,10 @@ func (f *FileInfo) IsSymlink() bool {
 	return f.FileInfo.Mode()&os.ModeSymlink == os.ModeSymlink
 }
 
+func (f *FileInfo) IsNamedPipe() bool {
+	return f.FileInfo.Mode()&os.ModeNamedPipe == os.ModeNamedPipe
+}
+
 func newFileInfo(path string, info os.FileInfo, follow bool) *FileInfo {
 	return &FileInfo{path, info, follow}
 }
