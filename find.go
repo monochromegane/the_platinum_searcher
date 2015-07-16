@@ -82,6 +82,9 @@ func (f *find) findFile(root string, pattern *Pattern, done chan struct{}) {
 		if !info.follow && info.IsSymlink() {
 			return nil, ignores
 		}
+		if info.IsNamedPipe() {
+			return nil, ignores
+		}
 		if !isRoot(depth) && (!f.Option.Hidden && isHidden(info.Name())) {
 			return nil, ignores
 		}
