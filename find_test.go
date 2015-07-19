@@ -50,6 +50,33 @@ func TestFind(t *testing.T) {
 	}
 }
 
+func TestMultiFind(t *testing.T) {
+	out := make(chan *GrepParams)
+	opt := defaultOpts()
+	opt.MultiFinder = true
+	find := find{out, opt}
+	go find.Start([]string{"files"}, &Pattern{Pattern: "go"})
+
+	testPath := mkFoundPaths(out)
+
+	// Ensure these files were not returned
+	if e := ".hidden/hidden.txt"; testPath(e) {
+		t.Errorf("Found %s, It should not contains file under hidden directory.", e)
+	}
+	if e := "binary/binary.bin"; testPath(e) {
+		t.Errorf("%s should be text file.", e)
+	}
+
+	// Enumerate found paths and ensure a couple of them are in there.
+	if e := "files/ascii.txt"; !testPath(e) {
+		t.Errorf("Find failed to locate: %s", e)
+	}
+
+	if e := "files/depth/file_1.txt"; !testPath(e) {
+		t.Errorf("Find failed to locate: %s", e)
+	}
+}
+
 func TestFindWithHidden(t *testing.T) {
 	out := make(chan *GrepParams)
 	find := find{out, &Option{Hidden: true}}

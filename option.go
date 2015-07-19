@@ -30,6 +30,7 @@ type Option struct {
 	WordRegexp        bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
 	Proc              int      // Number of goroutine. Not user option.
 	Stats             bool     `long:"stats" description:"Print stats about files scanned, time taken, etc"`
+	MultiFinder       bool     `long:"multi-finder" description:"Use as many concurrent finders as possible, this will lead the result disorder"`
 	Version           bool     `long:"version" description:"Show version"`
 }
 
