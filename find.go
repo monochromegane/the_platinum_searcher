@@ -63,7 +63,7 @@ func (f *find) findFile(root string, pattern *Pattern, done chan struct{}) {
 	}
 
 	ignores = append(ignores, genericIgnore(f.Option.Ignore))
-	Walk(root, ignores, f.Option.Follow, f.Option.MultiFinder, func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers) {
+	Walk(root, ignores, f.Option.Follow, f.Option.Parallel, func(path string, info *FileInfo, depth int, ignores ignoreMatchers, err error) (error, ignoreMatchers) {
 		if info.IsDir() {
 			if depth > f.Option.Depth+1 {
 				return filepath.SkipDir, ignores

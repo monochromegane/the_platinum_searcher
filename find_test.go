@@ -50,10 +50,10 @@ func TestFind(t *testing.T) {
 	}
 }
 
-func TestMultiFind(t *testing.T) {
+func TestParallel(t *testing.T) {
 	out := make(chan *GrepParams)
 	opt := defaultOpts()
-	opt.MultiFinder = true
+	opt.Parallel = true
 	find := find{out, opt}
 	go find.Start([]string{"files"}, &Pattern{Pattern: "go"})
 
