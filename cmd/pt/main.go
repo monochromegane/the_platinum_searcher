@@ -44,7 +44,21 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(args) == 0 && opts.FilesWithRegexp == "" {
+	pattern := ""
+	if opts.FilesWithRegexp == "" && len(args) > 0 {
+		pattern = args[0]
+	}
+
+	if opts.Pattern != "" {
+		pattern = opts.Pattern
+	}
+
+	if opts.WordRegexp {
+		opts.Regexp = true
+		pattern = "\\b" + pattern + "\\b"
+	}
+
+	if pattern == "" && opts.FilesWithRegexp == "" {
 		parser.WriteHelp(os.Stdout)
 		os.Exit(1)
 	}
@@ -101,16 +115,6 @@ func main() {
 	if opts.Context > 0 {
 		opts.Before = opts.Context
 		opts.After = opts.Context
-	}
-
-	pattern := ""
-	if opts.FilesWithRegexp == "" && len(args) > 0 {
-		pattern = args[0]
-	}
-
-	if opts.WordRegexp {
-		opts.Regexp = true
-		pattern = "\\b" + pattern + "\\b"
 	}
 
 	start := time.Now()
