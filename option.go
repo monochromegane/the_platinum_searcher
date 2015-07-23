@@ -32,6 +32,7 @@ type Option struct {
 	Stats             bool     `long:"stats" description:"Print stats about files scanned, time taken, etc"`
 	Parallel          bool     `long:"parallel" description:"Use as many concurrent finders as possible, this will lead the result disorder"`
 	Version           bool     `long:"version" description:"Show version"`
+	Pattern           string   `long:"pattern" description:"Pattern to search for"`
 }
 
 func (o *Option) VcsIgnores() []string {
