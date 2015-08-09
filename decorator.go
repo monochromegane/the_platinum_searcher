@@ -17,6 +17,7 @@ type Decorator interface {
 	lineNumber(lineNum int, sep string) string
 	column(col int, sep string) string
 	match(pattern *Pattern, line *Line) string
+	count(cnt int) string
 }
 
 func newDecorator(option *Option) Decorator {
@@ -36,6 +37,10 @@ func (c Color) path(path string) string {
 
 func (c Color) lineNumber(lineNum int, sep string) string {
 	return fmt.Sprintf("%s%d%s%s", ColorLineNumber, lineNum, ColorReset, sep)
+}
+
+func (c Color) count(cnt int) string {
+	return fmt.Sprintf("%s%d%s", ColorLineNumber, cnt, ColorReset)
 }
 
 func (c Color) column(col int, sep string) string {
@@ -67,4 +72,8 @@ func (p Plain) column(col int, sep string) string {
 
 func (p Plain) match(pattern *Pattern, line *Line) string {
 	return line.Str
+}
+
+func (p Plain) count(cnt int) string {
+	return fmt.Sprintf("%d", cnt)
 }

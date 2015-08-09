@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 
 	"github.com/shiena/ansicolor"
 	"golang.org/x/text/encoding/japanese"
@@ -50,6 +51,28 @@ func (p *print) Start() {
 		}
 
 		if len(arg.Matches) == 0 {
+			continue
+		}
+
+		if p.Option.Count {
+			p.printPath(arg.Path)
+
+			var re *regexp.Regexp
+			pattern := arg.Pattern
+			if pattern.UseRegexp || pattern.IgnoreCase {
+				re = pattern.Regexp
+			} else {
+				re = regexp.MustCompile(regexp.QuoteMeta(pattern.Pattern))
+			}
+
+			count := 0
+			for _, m := range arg.Matches {
+				count += len(re.FindAllString(m.Line.Str, -1))
+				MatchCount++
+			}
+			p.printCount(count)
+			fmt.Println()
+			FileMatchCount++
 			continue
 		}
 
@@ -117,6 +140,10 @@ func (p *print) printMatch(pattern *Pattern, match *Match) {
 		p.printColumn(match.Col, ":")
 	}
 	fmt.Fprint(p.writer, p.decorator.match(pattern, match.Line))
+}
+
+func (p *print) printCount(cnt int) {
+	fmt.Fprint(p.writer, p.decorator.count(cnt))
 }
 
 func (p *print) printContext(lines []*Line) {
