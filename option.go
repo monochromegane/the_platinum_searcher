@@ -11,7 +11,7 @@ type Option struct {
 	VcsIgnore         []string `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore" default:".hgignore" default:".ptignore"`
 	NoPtIgnore        bool     `long:"noptignore" description:"Don't use default ($Home/.ptignore) file for ignore patterns"`
 	NoGlobalGitIgnore bool     `long:"noglobal-gitignore" description:"Don't use git's global gitignore file for ignore patterns"`
-	SkipVcsIgnore     func()   `short:"U" long:"skip-vsc-ignores" description:"Don't use VCS ignore file for ignore patterns. Still obey .ptignore"`
+	SkipVcsIgnore     func()   `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns. Still obey .ptignore"`
 	skipVcsIgnore     bool     // Skip VCS ignore file. Not user option.
 	Hidden            bool     `short:"H" long:"hidden" description:"Search hidden files and directories"`
 	Ignore            []string `long:"ignore" description:"Ignore files/directories matching pattern"`
