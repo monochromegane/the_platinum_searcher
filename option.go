@@ -29,6 +29,7 @@ type Option struct {
 	Regexp            bool     `short:"e" description:"Parse PATTERN as a regular expression (Disabled by default)"`
 	WordRegexp        bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
 	Proc              int      // Number of goroutine. Not user option.
+	Count             bool     `short:"c" long:"count" description:"Only print the number of matches in each file."`
 	Stats             bool     `long:"stats" description:"Print stats about files scanned, time taken, etc"`
 	Parallel          bool     `long:"parallel" description:"Use as many concurrent finders as possible, this will lead the result disorder"`
 	Version           bool     `long:"version" description:"Show version"`
