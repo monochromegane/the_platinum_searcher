@@ -26,7 +26,7 @@ type Option struct {
 	Context           int      `short:"C" long:"context" description:"Print lines before and after match"`
 	OutputEncode      string   `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
 	SearchStream      bool     // Input from pipe. Not user option.
-	Regexp            bool     `short:"e" description:"Parse PATTERN as a regular expression (Disabled by default)"`
+	Regexp            bool     `short:"e" description:"Parse PATTERN as a regular expression (Disabled by default). Accepted syntax is the same as https://github.com/google/re2/wiki/Syntax except from \\C"`
 	WordRegexp        bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
 	Proc              int      // Number of goroutine. Not user option.
 	Count             bool     `short:"c" long:"count" description:"Only print the number of matches in each file."`
