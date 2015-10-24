@@ -1,14 +1,27 @@
 {
 	"ImportPath": "github.com/monochromegane/the_platinum_searcher",
-	"GoVersion": "go1.4.2",
+	"GoVersion": "go1.5.1",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/BurntSushi/toml",
+			"Comment": "v0.1.0-21-g056c9bc",
+			"Rev": "056c9bc7be7190eaa7715723883caffa5f8fa3e4"
+		},
+		{
 			"ImportPath": "github.com/jessevdk/go-flags",
 			"Comment": "v1-285-g1679536",
 			"Rev": "1679536dcc895411a9f5848d9a0250be7856448c"
+		},
+		{
+			"ImportPath": "github.com/monochromegane/conflag",
+			"Rev": "27de6c14a3bd06cb8a91dddfdd6fe9aaee67cdee"
+		},
+		{
+			"ImportPath": "github.com/monochromegane/go-home",
+			"Rev": "25d9dda593924a11ea52e4ffbc8abdb0dbe96401"
 		},
 		{
 			"ImportPath": "github.com/monochromegane/terminal",
@@ -25,6 +38,10 @@
 		{
 			"ImportPath": "golang.org/x/text/transform",
 			"Rev": "c980adc4a823548817b9c47d38c6ca6b7d7d8b6a"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "c1cd2254a6dd314c9d73c338c12688c9325d85c6"
 		}
 	]
 }
