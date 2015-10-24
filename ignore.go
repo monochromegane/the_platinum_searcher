@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 	"strings"
+
+	"github.com/monochromegane/go-home"
 )
 
 type ignoreMatchers []ignoreMatcher
@@ -77,7 +78,7 @@ func (gi genericIgnore) Match(path string, isDir bool) bool {
 }
 
 func homePtIgnore() ignoreMatcher {
-	homeDir := getHomeDir()
+	homeDir := home.Dir()
 	if homeDir != "" {
 		return newIgnoreMatcher(homeDir, ".ptignore")
 	}
@@ -85,7 +86,7 @@ func homePtIgnore() ignoreMatcher {
 }
 
 func globalGitIgnore() ignoreMatcher {
-	homeDir := getHomeDir()
+	homeDir := home.Dir()
 	if homeDir != "" {
 		globalIgnore := globalGitIgnoreName()
 		if globalIgnore != "" {
@@ -93,18 +94,6 @@ func globalGitIgnore() ignoreMatcher {
 		}
 	}
 	return nil
-}
-
-func getHomeDir() string {
-	usr, err := user.Current()
-	var homeDir string
-	if err == nil {
-		homeDir = usr.HomeDir
-	} else {
-		// Maybe it's cross compilation without cgo support. (darwin, unix)
-		homeDir = os.Getenv("HOME")
-	}
-	return homeDir
 }
 
 func globalGitIgnoreName() string {

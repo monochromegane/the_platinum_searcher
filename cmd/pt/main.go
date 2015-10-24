@@ -3,11 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 
 	flags "github.com/jessevdk/go-flags"
+	"github.com/monochromegane/conflag"
+	"github.com/monochromegane/go-home"
 	"github.com/monochromegane/terminal"
 	pt "github.com/monochromegane/the_platinum_searcher"
 )
@@ -33,6 +36,14 @@ func main() {
 	parser := flags.NewParser(&opts, flags.Default)
 	parser.Name = "pt"
 	parser.Usage = "[OPTIONS] [PATTERN] [PATH]"
+
+	conflag.LongHyphen = true
+	conflag.BoolValue = false
+	for _, c := range []string{filepath.Join(home.Dir(), ".ptconfig.toml"), ".ptconfig.toml"} {
+		if args, err := conflag.ArgsFrom(c); err == nil {
+			parser.ParseArgs(args)
+		}
+	}
 
 	args, err := parser.Parse()
 	if err != nil {

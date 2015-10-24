@@ -50,6 +50,23 @@ $ # You can specified PATH and some OPTIONS.
 $ pt OPTIONS PATTERN PATH
 ```
 
+## Configuration
+
+### .ptignore
+
+If you put .ptignore on $HOME or current directory, pt ignore the files.
+The file is .gitignore format.
+
+### .ptconfig.toml
+
+If you put .ptconfig.toml on $HOME or current directory, pt use option in the file.
+The file is TOML format like the following.
+
+```toml
+color = true
+context = 3
+```
+
 ## Editor Integration
 
 ### Vim + Unite.vim
