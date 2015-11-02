@@ -1,3 +1,0 @@
-ascii.txt
-go test
-a rumba( is here
