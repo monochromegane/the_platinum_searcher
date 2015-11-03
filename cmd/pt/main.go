@@ -3,28 +3,26 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"syscall"
 )
 
 func main() {
-	grepChan := make(chan string, 32)
+
+	grepChan := make(chan string, 10000)
 	done := make(chan struct{})
 
 	go func() {
-		sem := make(chan struct{}, 16)
+		sem := make(chan struct{}, 512)
 		for path := range grepChan {
 			sem <- struct{}{}
-			go func(path string) {
-				readFromMmap(path)
-				<-sem
-			}(path)
-
+			go read(path, sem)
 		}
 		done <- struct{}{}
 	}()
@@ -90,7 +88,42 @@ func walk(path string, info os.FileInfo, walkFn WalkFunc, sem chan struct{}) err
 	return nil
 }
 
-func readFromMmap(path string) {
+func read(path string, sem chan struct{}) {
+	pattern := []byte(os.Args[2])
+
+	f, err := os.Open(path)
+	if err != nil {
+		log.Fatalf("open: %s\n", err)
+	}
+
+	buf := make([]byte, 8196)
+
+	for {
+		c, err := f.Read(buf)
+		if err != nil && err != io.EOF {
+			log.Fatalf("read: %s\n", err)
+		}
+
+		if bytes.Contains(buf[:c], pattern) {
+			f.Seek(0, 0)
+			scanner := bufio.NewScanner(f)
+			for scanner.Scan() {
+				if bytes.Contains(scanner.Bytes(), pattern) {
+					fmt.Printf("%s\n", scanner.Text())
+				}
+			}
+			break
+		}
+
+		if err == io.EOF {
+			break
+		}
+	}
+	f.Close()
+	<-sem
+}
+
+func readFromMmap(path string, sem chan struct{}) {
 	pattern := []byte(os.Args[2])
 	f, err := os.Open(path)
 	if err != nil {
@@ -112,7 +145,7 @@ func readFromMmap(path string) {
 		if bytes.Index(mem, pattern) >= 0 {
 			scanner := bufio.NewScanner(bytes.NewReader(mem))
 			for scanner.Scan() {
-				if strings.Contains(scanner.Text(), os.Args[2]) {
+				if bytes.Contains(scanner.Bytes(), pattern) {
 				}
 			}
 		}
@@ -123,5 +156,5 @@ func readFromMmap(path string) {
 		}
 	}
 	f.Close()
-
+	<-sem
 }
