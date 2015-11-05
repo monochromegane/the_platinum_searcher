@@ -10,25 +10,30 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"syscall"
 )
 
 func main() {
 
-	grepChan := make(chan string, 10000)
+	grepChan := make(chan string, 5000)
 	done := make(chan struct{})
 
+	sem := make(chan struct{}, 256)
 	go func() {
-		sem := make(chan struct{}, 512)
+		wg := &sync.WaitGroup{}
 		for path := range grepChan {
 			sem <- struct{}{}
-			go read(path, sem)
+			wg.Add(1)
+			go read(path, sem, wg)
 		}
+		wg.Wait()
 		done <- struct{}{}
 	}()
 
 	Walk(os.Args[1], func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
+			if info.Name() == ".git" {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
@@ -48,7 +53,7 @@ func Walk(root string, walkFn WalkFunc) error {
 	if err != nil {
 		return walkFn(root, nil, err)
 	}
-	sem := make(chan struct{}, 8)
+	sem := make(chan struct{}, 16)
 	return walk(root, info, walkFn, sem)
 }
 
@@ -88,7 +93,7 @@ func walk(path string, info os.FileInfo, walkFn WalkFunc, sem chan struct{}) err
 	return nil
 }
 
-func read(path string, sem chan struct{}) {
+func read(path string, sem chan struct{}, wg *sync.WaitGroup) {
 	pattern := []byte(os.Args[2])
 
 	f, err := os.Open(path)
@@ -121,40 +126,5 @@ func read(path string, sem chan struct{}) {
 	}
 	f.Close()
 	<-sem
-}
-
-func readFromMmap(path string, sem chan struct{}) {
-	pattern := []byte(os.Args[2])
-	f, err := os.Open(path)
-	if err != nil {
-		log.Fatalf("open: %s\n", err)
-	}
-
-	fi, err := f.Stat()
-	if err != nil {
-		log.Fatalf("stat: %s\n", err)
-	}
-
-	if int(fi.Size()) > 0 {
-		mem, err := syscall.Mmap(int(f.Fd()), 0, int(fi.Size()),
-			syscall.PROT_READ, syscall.MAP_SHARED)
-		if err != nil {
-			log.Fatalf("Mmap: %s %s\n", path, err)
-		}
-
-		if bytes.Index(mem, pattern) >= 0 {
-			scanner := bufio.NewScanner(bytes.NewReader(mem))
-			for scanner.Scan() {
-				if bytes.Contains(scanner.Bytes(), pattern) {
-				}
-			}
-		}
-
-		err = syscall.Munmap(mem)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	f.Close()
-	<-sem
+	wg.Done()
 }
