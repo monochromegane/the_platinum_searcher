@@ -95,6 +95,7 @@ func walk(path string, info os.FileInfo, walkFn WalkFunc, sem chan struct{}) err
 
 func read(path string, sem chan struct{}, wg *sync.WaitGroup) {
 	pattern := []byte(os.Args[2])
+	newLine := []byte("\n")
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -102,6 +103,7 @@ func read(path string, sem chan struct{}, wg *sync.WaitGroup) {
 	}
 
 	buf := make([]byte, 8196)
+	var stash []byte
 
 	for {
 		c, err := f.Read(buf)
@@ -109,22 +111,52 @@ func read(path string, sem chan struct{}, wg *sync.WaitGroup) {
 			log.Fatalf("read: %s\n", err)
 		}
 
-		if bytes.Contains(buf[:c], pattern) {
-			f.Seek(0, 0)
-			scanner := bufio.NewScanner(f)
-			for scanner.Scan() {
-				if bytes.Contains(scanner.Bytes(), pattern) {
-					fmt.Printf("%s\n", scanner.Text())
-				}
-			}
+		if err == io.EOF {
 			break
 		}
 
-		if err == io.EOF {
+		// repair first line from previous last line.
+		if len(stash) > 0 {
+			var repaired []byte
+			index := bytes.Index(buf[:c], newLine)
+			if index == -1 {
+				repaired = append(stash, buf[:c]...)
+			} else {
+				repaired = append(stash, buf[:index]...)
+			}
+			// grep from repaied line.
+			if bytes.Contains(repaired, pattern) {
+				readFromFile(f, pattern)
+				break
+			}
+		}
+
+		// grep from buffer.
+		if bytes.Contains(buf[:c], pattern) {
+			readFromFile(f, pattern)
 			break
+		}
+
+		// stash last line.
+		index := bytes.LastIndex(buf[:c], newLine)
+		if index == -1 {
+			stash = append(stash, buf[:c]...)
+		} else {
+			stash = make([]byte, c-index)
+			copy(stash, buf[index:c])
 		}
 	}
 	f.Close()
 	<-sem
 	wg.Done()
+}
+
+func readFromFile(f *os.File, pattern []byte) {
+	f.Seek(0, 0)
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if bytes.Contains(scanner.Bytes(), pattern) {
+			fmt.Printf("%s\n", scanner.Text())
+		}
+	}
 }
