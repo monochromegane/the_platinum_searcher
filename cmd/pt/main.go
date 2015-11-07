@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	pt "github.com/monochromegane/the_platinum_searcher"
 )
 
 func main() {
@@ -104,6 +106,7 @@ func read(path string, sem chan struct{}, wg *sync.WaitGroup) {
 
 	buf := make([]byte, 8196)
 	var stash []byte
+	identified := false
 
 	for {
 		c, err := f.Read(buf)
@@ -113,6 +116,15 @@ func read(path string, sem chan struct{}, wg *sync.WaitGroup) {
 
 		if err == io.EOF {
 			break
+		}
+
+		if !identified {
+			limit := c
+			if limit > 512 {
+				limit = 512
+			}
+			pt.IdentifyType(buf[:limit])
+			identified = true
 		}
 
 		// repair first line from previous last line.
