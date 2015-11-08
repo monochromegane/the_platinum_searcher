@@ -10,7 +10,7 @@ const (
 	SHIFTJIS
 )
 
-func IdentifyType(bs []byte) int {
+func detectEncoding(bs []byte) int {
 
 	var (
 		suspiciousBytes = 0
