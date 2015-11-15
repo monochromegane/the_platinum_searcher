@@ -7,24 +7,25 @@ import (
 	"sync"
 )
 
-type walkFunc func(path string, info os.FileInfo, err error) error
+type walkFunc func(path string, info os.FileInfo, ignores ignoreMatchers, err error) (ignoreMatchers, error)
 
-func concurrentWalk(root string, walkFn walkFunc) error {
+func concurrentWalk(root string, ignores ignoreMatchers, walkFn walkFunc) error {
 	info, err := os.Lstat(root)
 	if err != nil {
-		return walkFn(root, nil, err)
+		_, walkError := walkFn(root, nil, nil, err)
+		return walkError
 	}
 	sem := make(chan struct{}, 16)
-	return walk(root, info, walkFn, sem)
+	return walk(root, info, ignores, walkFn, sem)
 }
 
-func walk(path string, info os.FileInfo, walkFn walkFunc, sem chan struct{}) error {
-	err := walkFn(path, info, nil)
-	if err != nil {
-		if info.IsDir() && err == filepath.SkipDir {
+func walk(path string, info os.FileInfo, parentIgnores ignoreMatchers, walkFn walkFunc, sem chan struct{}) error {
+	ignores, walkError := walkFn(path, info, parentIgnores, nil)
+	if walkError != nil {
+		if info.IsDir() && walkError == filepath.SkipDir {
 			return nil
 		}
-		return err
+		return walkError
 	}
 
 	if !info.IsDir() {
@@ -33,7 +34,8 @@ func walk(path string, info os.FileInfo, walkFn walkFunc, sem chan struct{}) err
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		return walkFn(path, info, err)
+		_, walkError := walkFn(path, info, ignores, err)
+		return walkError
 	}
 
 	wg := &sync.WaitGroup{}
@@ -41,13 +43,13 @@ func walk(path string, info os.FileInfo, walkFn walkFunc, sem chan struct{}) err
 		select {
 		case sem <- struct{}{}:
 			wg.Add(1)
-			go func(path string, file os.FileInfo, wg *sync.WaitGroup) {
+			go func(path string, file os.FileInfo, ignores ignoreMatchers, wg *sync.WaitGroup) {
 				defer wg.Done()
 				defer func() { <-sem }()
-				walk(path, file, walkFn, sem)
-			}(filepath.Join(path, file.Name()), file, wg)
+				walk(path, file, ignores, walkFn, sem)
+			}(filepath.Join(path, file.Name()), file, ignores, wg)
 		default:
-			walk(filepath.Join(path, file.Name()), file, walkFn, sem)
+			walk(filepath.Join(path, file.Name()), file, ignores, walkFn, sem)
 		}
 	}
 	wg.Wait()

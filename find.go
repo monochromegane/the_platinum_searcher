@@ -14,18 +14,30 @@ func (f find) start(root string) {
 }
 
 func (f find) findFile(root string) {
-	concurrentWalk(root, func(path string, info os.FileInfo, err error) error {
+	var ignores ignoreMatchers
+	concurrentWalk(root, ignores, func(path string, info os.FileInfo, ignores ignoreMatchers, err error) (ignoreMatchers, error) {
 		if info.IsDir() {
 			if info.Name() == ".git" {
-				return filepath.SkipDir
+				return ignores, filepath.SkipDir
 			}
-			return nil
+
+			if ignores.Match(path, true) {
+				return ignores, filepath.SkipDir
+			}
+
+			ignores = append(ignores, newIgnoreMatchers(path, []string{".gitignore"})...)
+			return ignores, nil
 		}
 		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
-			return nil
+			return ignores, nil
 		}
+
+		if ignores.Match(path, false) {
+			return ignores, nil
+		}
+
 		f.out <- path
-		return nil
+		return ignores, nil
 	})
 	close(f.out)
 }
