@@ -15,7 +15,7 @@ func (f find) start(root string) {
 
 func (f find) findFile(root string) {
 	var ignores ignoreMatchers
-	concurrentWalk(root, ignores, func(path string, info os.FileInfo, ignores ignoreMatchers, err error) (ignoreMatchers, error) {
+	concurrentWalk(root, ignores, func(path string, info os.FileInfo, ignores ignoreMatchers) (ignoreMatchers, error) {
 		if info.IsDir() {
 			if info.Name() == ".git" {
 				return ignores, filepath.SkipDir

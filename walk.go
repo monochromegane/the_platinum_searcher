@@ -7,20 +7,19 @@ import (
 	"sync"
 )
 
-type walkFunc func(path string, info os.FileInfo, ignores ignoreMatchers, err error) (ignoreMatchers, error)
+type walkFunc func(path string, info os.FileInfo, ignores ignoreMatchers) (ignoreMatchers, error)
 
 func concurrentWalk(root string, ignores ignoreMatchers, walkFn walkFunc) error {
 	info, err := os.Lstat(root)
 	if err != nil {
-		_, walkError := walkFn(root, nil, nil, err)
-		return walkError
+		return err
 	}
 	sem := make(chan struct{}, 16)
 	return walk(root, info, ignores, walkFn, sem)
 }
 
 func walk(path string, info os.FileInfo, parentIgnores ignoreMatchers, walkFn walkFunc, sem chan struct{}) error {
-	ignores, walkError := walkFn(path, info, parentIgnores, nil)
+	ignores, walkError := walkFn(path, info, parentIgnores)
 	if walkError != nil {
 		if info.IsDir() && walkError == filepath.SkipDir {
 			return nil
@@ -34,8 +33,7 @@ func walk(path string, info os.FileInfo, parentIgnores ignoreMatchers, walkFn wa
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		_, walkError := walkFn(path, info, ignores, err)
-		return walkError
+		return err
 	}
 
 	wg := &sync.WaitGroup{}
