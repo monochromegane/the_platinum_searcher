@@ -8,6 +8,6 @@ import (
 
 func main() {
 	pt := pt.PlatinumSearcher{Out: os.Stdout, Err: os.Stderr}
-	exitCode := pt.Run(os.Args)
+	exitCode := pt.Run(os.Args[1:])
 	os.Exit(exitCode)
 }

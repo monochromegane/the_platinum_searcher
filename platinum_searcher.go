@@ -1,9 +1,6 @@
 package the_platinum_searcher
 
-import (
-	"io"
-	"os"
-)
+import "io"
 
 const (
 	ExitCodeOK = iota
@@ -15,7 +12,24 @@ type PlatinumSearcher struct {
 }
 
 func (p PlatinumSearcher) Run(args []string) int {
-	search := search{pattern: os.Args[1], root: os.Args[2]}
+	search := search{
+		pattern: p.patternFrom(args),
+		root:    p.rootFrom(args),
+	}
 	search.start()
 	return ExitCodeOK
+}
+
+func (p PlatinumSearcher) patternFrom(args []string) string {
+	return args[0]
+}
+
+func (p PlatinumSearcher) rootFrom(args []string) string {
+	var root string
+	if len(args) > 1 {
+		root = args[1]
+	} else {
+		root = "."
+	}
+	return root
 }
