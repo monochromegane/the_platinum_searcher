@@ -6,7 +6,8 @@ import (
 )
 
 type find struct {
-	out chan string
+	out  chan string
+	opts Option
 }
 
 func (f find) start(root string) {
@@ -15,8 +16,11 @@ func (f find) start(root string) {
 
 func (f find) findFile(root string) {
 	var ignores ignoreMatchers
-	concurrentWalk(root, ignores, func(path string, info os.FileInfo, ignores ignoreMatchers) (ignoreMatchers, error) {
+	concurrentWalk(root, ignores, func(path string, info os.FileInfo, depth int, ignores ignoreMatchers) (ignoreMatchers, error) {
 		if info.IsDir() {
+			if depth > f.opts.SearchOption.Depth+1 {
+				return ignores, filepath.SkipDir
+			}
 			if info.Name() == ".git" {
 				return ignores, filepath.SkipDir
 			}

@@ -12,6 +12,7 @@ type OutputOption struct {
 }
 
 type SearchOption struct {
+	Depth int `long:"depth" default:"25" description:"Search up to NUM directories deep"`
 }
 
 func newOptionParser(opts *Option) *flags.Parser {

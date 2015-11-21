@@ -39,6 +39,7 @@ func (p PlatinumSearcher) Run(args []string) int {
 		pattern: p.patternFrom(args),
 		root:    p.rootFrom(args),
 		out:     p.Out,
+		opts:    opts,
 	}
 	search.start()
 	return ExitCodeOK
