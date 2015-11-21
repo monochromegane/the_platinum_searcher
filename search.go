@@ -10,6 +10,6 @@ func (s search) start() {
 	done := make(chan struct{})
 
 	go find{out: grepChan}.start(s.root)
-	go grep{in: grepChan, done: done}.start(s.pattern)
+	go grep{in: grepChan, done: done, printer: newPrinter()}.start(s.pattern)
 	<-done
 }

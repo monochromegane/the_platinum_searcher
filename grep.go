@@ -3,7 +3,6 @@ package the_platinum_searcher
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -13,12 +12,13 @@ import (
 var newLine = []byte("\n")
 
 type grep struct {
-	in   chan string
-	done chan struct{}
+	in      chan string
+	done    chan struct{}
+	printer printer
 }
 
 func (g grep) start(pattern string) {
-	sem := make(chan struct{}, 256)
+	sem := make(chan struct{}, 208)
 	wg := &sync.WaitGroup{}
 
 	p := []byte(pattern)
@@ -98,10 +98,14 @@ func (g grep) grep(path string, pattern []byte, sem chan struct{}, wg *sync.Wait
 
 func (g grep) grepAsLines(f *os.File, pattern []byte) {
 	f.Seek(0, 0)
+	match := match{path: f.Name()}
 	scanner := bufio.NewScanner(f)
+	line := 1
 	for scanner.Scan() {
 		if bytes.Contains(scanner.Bytes(), pattern) {
-			fmt.Printf("%s\n", scanner.Text())
+			match.add(line, scanner.Text())
 		}
+		line++
 	}
+	g.printer.print(match)
 }
