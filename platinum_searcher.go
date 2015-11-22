@@ -3,6 +3,9 @@ package the_platinum_searcher
 import (
 	"fmt"
 	"io"
+	"os"
+
+	"github.com/monochromegane/terminal"
 )
 
 const (
@@ -33,6 +36,11 @@ func (p PlatinumSearcher) Run(args []string) int {
 	if len(args) == 0 {
 		parser.WriteHelp(p.Err)
 		return ExitCodeError
+	}
+
+	if !terminal.IsTerminal(os.Stdout) {
+		opts.OutputOption.EnableColor = false
+		opts.OutputOption.EnableGroup = false
 	}
 
 	search := search{
