@@ -18,6 +18,7 @@ type OutputOption struct {
 	NoGroup          func() `long:"nogroup" description:"Don't print file name at header (default: false)"`
 	EnableGroup      bool   // Enable group. Not user option.
 	FilesWithMatches bool   `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
+	Count            bool   `short:"c" long:"count" description:"Only print the number of matches in each file."`
 }
 
 func newOutputOption() *OutputOption {

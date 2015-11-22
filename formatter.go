@@ -13,6 +13,8 @@ func newFormatPrinter(w io.Writer, d decorator, opts Option) formatPrinter {
 	switch {
 	case opts.OutputOption.FilesWithMatches:
 		return fileWithMatch{writer: w, decorator: d}
+	case opts.OutputOption.Count:
+		return count{writer: w, decorator: d}
 	case opts.OutputOption.EnableGroup:
 		return group{writer: w, decorator: d}
 	default:
@@ -26,7 +28,21 @@ type fileWithMatch struct {
 }
 
 func (f fileWithMatch) print(match match) {
-	fmt.Fprintln(f.writer, f.decorator.path(match.path, SeparatorBlank))
+	fmt.Fprintln(f.writer, f.decorator.path(match.path))
+}
+
+type count struct {
+	writer    io.Writer
+	decorator decorator
+}
+
+func (f count) print(match match) {
+	count := len(match.lines)
+	fmt.Fprintln(f.writer,
+		f.decorator.path(match.path)+
+			SeparatorColon+
+			f.decorator.lineNumber(count),
+	)
 }
 
 type group struct {
@@ -35,11 +51,12 @@ type group struct {
 }
 
 func (f group) print(match match) {
-	fmt.Fprintln(f.writer, f.decorator.path(match.path, SeparatorBlank))
+	fmt.Fprintln(f.writer, f.decorator.path(match.path))
 	for _, line := range match.lines {
 		fmt.Fprintln(
 			f.writer,
 			f.decorator.lineNumber(line.num)+
+				SeparatorColon+
 				f.decorator.match(match.pattern, line.text),
 		)
 	}
@@ -52,12 +69,13 @@ type noGroup struct {
 }
 
 func (f noGroup) print(match match) {
-	path := f.decorator.path(match.path, SeparatorColon)
+	path := f.decorator.path(match.path) + SeparatorColon
 	for _, line := range match.lines {
 		fmt.Fprintln(
 			f.writer,
 			path+
 				f.decorator.lineNumber(line.num)+
+				SeparatorColon+
 				f.decorator.match(match.pattern, line.text),
 		)
 	}
