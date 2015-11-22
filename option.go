@@ -53,7 +53,8 @@ func (o *OutputOption) SetDisableGroup() {
 
 // Search options.
 type SearchOption struct {
-	Depth int `long:"depth" default:"25" description:"Search up to NUM directories deep"`
+	Depth  int  `long:"depth" default:"25" description:"Search up to NUM directories deep"`
+	Hidden bool `long:"hidden" description:"Search hidden files and directories"`
 }
 
 func newOptionParser(opts *Option) *flags.Parser {
