@@ -11,12 +11,13 @@ type Option struct {
 
 // Output options.
 type OutputOption struct {
-	Color       func() `long:"color" description:"Print color codes in results (default: true)"`
-	NoColor     func() `long:"nocolor" description:"Don't print color codes in results (default: false)"`
-	EnableColor bool   // Enable color. Not user option.
-	Group       func() `long:"group" description:"Print file name at header (default: true)"`
-	NoGroup     func() `long:"nogroup" description:"Don't print file name at header (default: false)"`
-	EnableGroup bool   // Enable group. Not user option.
+	Color            func() `long:"color" description:"Print color codes in results (default: true)"`
+	NoColor          func() `long:"nocolor" description:"Don't print color codes in results (default: false)"`
+	EnableColor      bool   // Enable color. Not user option.
+	Group            func() `long:"group" description:"Print file name at header (default: true)"`
+	NoGroup          func() `long:"nogroup" description:"Don't print file name at header (default: false)"`
+	EnableGroup      bool   // Enable group. Not user option.
+	FilesWithMatches bool   `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
 }
 
 func newOutputOption() *OutputOption {

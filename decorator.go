@@ -10,10 +10,13 @@ const (
 	ColorLineNumber = "\x1b[1;33m"  /* yellow with black background */
 	ColorPath       = "\x1b[1;32m"  /* bold green */
 	ColorMatch      = "\x1b[30;43m" /* black with yellow background */
+
+	SeparatorBlank = ""
+	SeparatorColon = ":"
 )
 
 type decorator interface {
-	path(path string) string
+	path(path string, sep string) string
 	lineNumber(lineNum int) string
 	match(pattern []byte, line string) string
 }
@@ -29,8 +32,8 @@ func newDecorator(option Option) decorator {
 type color struct {
 }
 
-func (c color) path(path string) string {
-	return ColorPath + path + ColorReset + ":"
+func (c color) path(path string, sep string) string {
+	return ColorPath + path + ColorReset + sep
 }
 
 func (c color) lineNumber(lineNum int) string {
@@ -45,8 +48,8 @@ func (c color) match(pattern []byte, line string) string {
 type plain struct {
 }
 
-func (p plain) path(path string) string {
-	return path
+func (p plain) path(path string, sep string) string {
+	return path + sep
 }
 
 func (p plain) lineNumber(lineNum int) string {
