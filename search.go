@@ -13,7 +13,16 @@ func (s search) start() {
 	grepChan := make(chan string, 5000)
 	done := make(chan struct{})
 
-	go find{out: grepChan, opts: s.opts}.start(s.root)
-	go grep{in: grepChan, done: done, printer: newPrinter(s.out)}.start(s.pattern)
+	go find{
+		out:  grepChan,
+		opts: s.opts,
+	}.start(s.root)
+
+	go grep{
+		in:      grepChan,
+		done:    done,
+		printer: newPrinter(s.out, s.opts),
+	}.start(s.pattern)
+
 	<-done
 }

@@ -1,8 +1,9 @@
 package the_platinum_searcher
 
 type match struct {
-	path  string
-	lines []line
+	pattern []byte
+	path    string
+	lines   []line
 }
 
 type line struct {

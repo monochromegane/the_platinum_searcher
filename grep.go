@@ -98,7 +98,7 @@ func (g grep) grep(path string, pattern []byte, sem chan struct{}, wg *sync.Wait
 
 func (g grep) grepAsLines(f *os.File, pattern []byte) {
 	f.Seek(0, 0)
-	match := match{path: f.Name()}
+	match := match{path: f.Name(), pattern: pattern}
 	scanner := bufio.NewScanner(f)
 	line := 1
 	for scanner.Scan() {
