@@ -4,9 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"sync"
+
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
 )
 
 var newLine = []byte("\n")
@@ -40,6 +44,7 @@ func (g grep) grep(path string, pattern []byte, sem chan struct{}, wg *sync.Wait
 	buf := make([]byte, 8196)
 	var stash []byte
 	identified := false
+	var encoding int
 
 	for {
 		c, err := f.Read(buf)
@@ -51,12 +56,21 @@ func (g grep) grep(path string, pattern []byte, sem chan struct{}, wg *sync.Wait
 			break
 		}
 
+		// detect encoding.
 		if !identified {
 			limit := c
 			if limit > 512 {
 				limit = 512
 			}
-			detectEncoding(buf[:limit])
+			encoding = detectEncoding(buf[:limit])
+			if encoding == ERROR || encoding == BINARY {
+				break
+			}
+
+			if encoder := getEncoder(encoding); encoder != nil {
+				// encode pattern to shift-jis or euc-jp.
+				pattern, _ = ioutil.ReadAll(transform.NewReader(bytes.NewReader(pattern), encoder))
+			}
 			identified = true
 		}
 
@@ -71,14 +85,14 @@ func (g grep) grep(path string, pattern []byte, sem chan struct{}, wg *sync.Wait
 			}
 			// grep from repaied line.
 			if bytes.Contains(repaired, pattern) {
-				g.grepAsLines(f, pattern)
+				g.grepAsLines(f, pattern, encoding)
 				break
 			}
 		}
 
 		// grep from buffer.
 		if bytes.Contains(buf[:c], pattern) {
-			g.grepAsLines(f, pattern)
+			g.grepAsLines(f, pattern, encoding)
 			break
 		}
 
@@ -96,9 +110,9 @@ func (g grep) grep(path string, pattern []byte, sem chan struct{}, wg *sync.Wait
 	wg.Done()
 }
 
-func (g grep) grepAsLines(f *os.File, pattern []byte) {
+func (g grep) grepAsLines(f *os.File, pattern []byte, encoding int) {
 	f.Seek(0, 0)
-	match := match{path: f.Name(), pattern: pattern}
+	match := match{path: f.Name(), pattern: pattern, encoding: encoding}
 	scanner := bufio.NewScanner(f)
 	line := 1
 	for scanner.Scan() {
@@ -108,4 +122,14 @@ func (g grep) grepAsLines(f *os.File, pattern []byte) {
 		line++
 	}
 	g.printer.print(match)
+}
+
+func getEncoder(encoding int) transform.Transformer {
+	switch encoding {
+	case EUCJP:
+		return japanese.EUCJP.NewEncoder()
+	case SHIFTJIS:
+		return japanese.ShiftJIS.NewEncoder()
+	}
+	return nil
 }
