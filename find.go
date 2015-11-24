@@ -30,7 +30,9 @@ func (f find) findFile(root string) {
 				return ignores, filepath.SkipDir
 			}
 
-			ignores = append(ignores, newIgnoreMatchers(path, []string{".gitignore"})...)
+			if !f.opts.SearchOption.SkipVcsIgnore {
+				ignores = append(ignores, newIgnoreMatchers(path, []string{".gitignore"})...)
+			}
 			return ignores, nil
 		}
 		if info.Mode()&os.ModeSymlink == os.ModeSymlink {

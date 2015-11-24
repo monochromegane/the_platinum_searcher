@@ -53,8 +53,9 @@ func (o *OutputOption) SetDisableGroup() {
 
 // Search options.
 type SearchOption struct {
-	Depth  int  `long:"depth" default:"25" description:"Search up to NUM directories deep"`
-	Hidden bool `long:"hidden" description:"Search hidden files and directories"`
+	SkipVcsIgnore bool `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns"`
+	Depth         int  `long:"depth" default:"25" description:"Search up to NUM directories deep"`
+	Hidden        bool `long:"hidden" description:"Search hidden files and directories"`
 }
 
 func newOptionParser(opts *Option) *flags.Parser {
