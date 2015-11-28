@@ -46,7 +46,6 @@ func (p PlatinumSearcher) Run(args []string) int {
 	search := search{
 		root: p.rootFrom(args),
 		out:  p.Out,
-		opts: opts,
 	}
 	if err = search.start(p.patternFrom(args)); err != nil {
 		fmt.Fprintf(p.Err, "%s\n", err)

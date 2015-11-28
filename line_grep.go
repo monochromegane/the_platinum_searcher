@@ -7,6 +7,19 @@ import (
 )
 
 type lineGrep struct {
+	before int
+	after  int
+}
+
+func newLineGrep(opts Option) lineGrep {
+	return lineGrep{
+		before: opts.OutputOption.Before,
+		after:  opts.OutputOption.After,
+	}
+}
+
+func (g lineGrep) enableContext() bool {
+	return g.before > 0 || g.after > 0
 }
 
 type matchFunc func(b []byte) bool
@@ -23,11 +36,33 @@ func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, match
 		reader = f
 	}
 
-	scanner := bufio.NewScanner(reader)
 	line := 1
+	matchState := newMatchState()
+	afterCount := 0
+
+	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		if matchFn(scanner.Bytes()) {
-			match.add(line, scanner.Text(), true)
+		if matched := matchFn(scanner.Bytes()); matched || g.enableContext() {
+			if g.enableContext() {
+				// print match and context lines.
+				matchState = matchState.transition(matched)
+
+				if matchState.isBefore() {
+				} else if matchState.isMatching() {
+					match.add(line, scanner.Text(), matched)
+					afterCount = 0
+				} else if matchState.isAfter() {
+					match.add(line, scanner.Text(), matched)
+					afterCount++
+					if afterCount >= g.after {
+						matchState = matchState.reset()
+						afterCount = 0
+					}
+				}
+			} else if matched {
+				// print only match line.
+				match.add(line, scanner.Text(), matched)
+			}
 		}
 		line++
 	}

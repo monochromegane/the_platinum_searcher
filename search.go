@@ -5,7 +5,6 @@ import "io"
 type search struct {
 	root string
 	out  io.Writer
-	opts Option
 }
 
 func (s search) start(pattern string) error {
@@ -17,14 +16,19 @@ func (s search) start(pattern string) error {
 		pattern = "\\b" + pattern + "\\b"
 	}
 
-	p, err := newPattern(pattern, s.opts)
+	p, err := newPattern(pattern, opts)
 	if err != nil {
 		return err
 	}
 
+	if opts.OutputOption.Context > 0 {
+		opts.OutputOption.Before = opts.OutputOption.Context
+		opts.OutputOption.After = opts.OutputOption.Context
+	}
+
 	go find{
 		out:  grepChan,
-		opts: s.opts,
+		opts: opts,
 	}.start(s.root)
 
 	go newGrep(
@@ -32,7 +36,7 @@ func (s search) start(pattern string) error {
 		grepChan,
 		done,
 		opts,
-		newPrinter(p, s.out, s.opts),
+		newPrinter(p, s.out, opts),
 	).start()
 
 	<-done

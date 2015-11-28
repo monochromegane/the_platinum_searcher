@@ -43,8 +43,8 @@ type grepper interface {
 
 func newGrepper(pattern pattern, printer printer, opts Option) grepper {
 	if opts.SearchOption.Regexp {
-		return extendedGrep{pattern: pattern, printer: printer}
+		return extendedGrep{pattern: pattern, printer: printer, lineGrep: newLineGrep(opts)}
 	} else {
-		return fixedGrep{pattern: pattern, printer: printer}
+		return fixedGrep{pattern: pattern, printer: printer, lineGrep: newLineGrep(opts)}
 	}
 }
