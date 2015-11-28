@@ -1,7 +1,6 @@
 package the_platinum_searcher
 
 import (
-	"bufio"
 	"io"
 	"log"
 	"os"
@@ -9,6 +8,7 @@ import (
 )
 
 type extendedGrep struct {
+	lineGrep
 	pattern pattern
 	printer printer
 }
@@ -47,24 +47,8 @@ func (g extendedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 		return
 	}
 
-	f.Seek(0, 0)
-
-	var reader io.Reader
-	if r := newDecodeReader(f, encoding); r != nil {
-		// decode file from shift-jis or euc-jp.
-		reader = r
-	} else {
-		reader = f
-	}
-
-	match := match{path: f.Name()}
-	scanner := bufio.NewScanner(reader)
-	line := 1
-	for scanner.Scan() {
-		if g.pattern.regexp.Match(scanner.Bytes()) {
-			match.add(line, scanner.Text())
-		}
-		line++
-	}
-	g.printer.print(match)
+	// grep each lines.
+	g.grepAsLines(f, encoding, g.printer, func(b []byte) bool {
+		return g.pattern.regexp.Match(b)
+	})
 }

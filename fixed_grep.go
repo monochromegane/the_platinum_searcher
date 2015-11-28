@@ -11,6 +11,7 @@ import (
 )
 
 type fixedGrep struct {
+	lineGrep
 	pattern pattern
 	printer printer
 }
@@ -73,14 +74,20 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 			}
 			// grep from repaied line.
 			if bytes.Contains(repaired, pattern) {
-				g.grepAsLines(f, pattern, encoding)
+				// grep each lines.
+				g.grepAsLines(f, encoding, g.printer, func(b []byte) bool {
+					return bytes.Contains(b, g.pattern.pattern)
+				})
 				break
 			}
 		}
 
 		// grep from buffer.
 		if bytes.Contains(buf[:c], pattern) {
-			g.grepAsLines(f, pattern, encoding)
+			// grep each lines.
+			g.grepAsLines(f, encoding, g.printer, func(b []byte) bool {
+				return bytes.Contains(b, g.pattern.pattern)
+			})
 			break
 		}
 
@@ -95,23 +102,30 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 	}
 }
 
-func (g fixedGrep) grepAsLines(f *os.File, pattern []byte, encoding int) {
+type lineGrep struct {
+}
+
+type matchFunc func(b []byte) bool
+
+func (g lineGrep) grepAsLines(f *os.File, encoding int, printer printer, matchFn matchFunc) {
 	f.Seek(0, 0)
 	match := match{path: f.Name()}
-	scanner := bufio.NewScanner(f)
+
+	var reader io.Reader
+	if r := newDecodeReader(f, encoding); r != nil {
+		// decode file from shift-jis or euc-jp.
+		reader = r
+	} else {
+		reader = f
+	}
+
+	scanner := bufio.NewScanner(reader)
 	line := 1
 	for scanner.Scan() {
-		if bytes.Contains(scanner.Bytes(), pattern) {
-			var matched []byte
-			if r := newDecodeReader(bytes.NewReader(scanner.Bytes()), encoding); r != nil {
-				// decode matched line from shift-jis or euc-jp.
-				matched, _ = ioutil.ReadAll(r)
-			} else {
-				matched = scanner.Bytes()
-			}
-			match.add(line, string(matched))
+		if matchFn(scanner.Bytes()) {
+			match.add(line, scanner.Text())
 		}
 		line++
 	}
-	g.printer.print(match)
+	printer.print(match)
 }
