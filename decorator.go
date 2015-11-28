@@ -1,6 +1,7 @@
 package the_platinum_searcher
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -17,7 +18,7 @@ const (
 type decorator interface {
 	path(path string) string
 	lineNumber(lineNum int) string
-	match(pattern []byte, line string) string
+	match(pattern []byte, regexp *regexp.Regexp, line string) string
 }
 
 func newDecorator(option Option) decorator {
@@ -39,9 +40,13 @@ func (c color) lineNumber(lineNum int) string {
 	return ColorLineNumber + strconv.Itoa(lineNum) + ColorReset
 }
 
-func (c color) match(pattern []byte, line string) string {
-	s := string(pattern)
-	return strings.Replace(line, s, ColorMatch+s+ColorReset, -1)
+func (c color) match(pattern []byte, regexp *regexp.Regexp, line string) string {
+	if regexp == nil {
+		s := string(pattern)
+		return strings.Replace(line, s, ColorMatch+s+ColorReset, -1)
+	} else {
+		return regexp.ReplaceAllString(line, ColorMatch+"${1}"+ColorReset)
+	}
 }
 
 type plain struct {
@@ -55,6 +60,6 @@ func (p plain) lineNumber(lineNum int) string {
 	return strconv.Itoa(lineNum)
 }
 
-func (p plain) match(pattern []byte, line string) string {
+func (p plain) match(pattern []byte, regexp *regexp.Regexp, line string) string {
 	return line
 }

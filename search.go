@@ -22,6 +22,7 @@ func (s search) start() {
 		in:      grepChan,
 		done:    done,
 		printer: newPrinter(s.out, s.opts),
+		opts:    s.opts,
 	}.start(s.pattern)
 
 	<-done

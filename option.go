@@ -53,6 +53,7 @@ func (o *OutputOption) SetDisableGroup() {
 
 // Search options.
 type SearchOption struct {
+	Regexp        bool `short:"e" description:"Parse PATTERN as a regular expression (default: false). Accepted syntax is the same as https://github.com/google/re2/wiki/Syntax except from \\C"`
 	SkipVcsIgnore bool `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns"`
 	Depth         int  `long:"depth" default:"25" description:"Search up to NUM directories deep"`
 	Hidden        bool `long:"hidden" description:"Search hidden files and directories"`
