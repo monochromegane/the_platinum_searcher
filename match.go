@@ -6,12 +6,17 @@ type match struct {
 }
 
 type line struct {
-	num  int
-	text string
+	num     int
+	text    string
+	matched bool
 }
 
-func (m *match) add(num int, text string) {
-	m.lines = append(m.lines, line{num, text})
+func (m *match) add(num int, text string, matched bool) {
+	m.lines = append(m.lines, line{
+		num:     num,
+		text:    text,
+		matched: matched,
+	})
 }
 
 func (m match) size() int {

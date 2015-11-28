@@ -48,7 +48,7 @@ func (g extendedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 	}
 
 	// grep each lines.
-	g.grepAsLines(f, encoding, g.printer, func(b []byte) bool {
+	g.grepEachLines(f, encoding, g.printer, func(b []byte) bool {
 		return g.pattern.regexp.Match(b)
 	})
 }

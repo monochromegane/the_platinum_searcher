@@ -1,7 +1,6 @@
 package the_platinum_searcher
 
 import (
-	"bufio"
 	"bytes"
 	"io"
 	"io/ioutil"
@@ -75,7 +74,7 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 			// grep from repaied line.
 			if bytes.Contains(repaired, pattern) {
 				// grep each lines.
-				g.grepAsLines(f, encoding, g.printer, func(b []byte) bool {
+				g.grepEachLines(f, encoding, g.printer, func(b []byte) bool {
 					return bytes.Contains(b, g.pattern.pattern)
 				})
 				break
@@ -85,7 +84,7 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 		// grep from buffer.
 		if bytes.Contains(buf[:c], pattern) {
 			// grep each lines.
-			g.grepAsLines(f, encoding, g.printer, func(b []byte) bool {
+			g.grepEachLines(f, encoding, g.printer, func(b []byte) bool {
 				return bytes.Contains(b, g.pattern.pattern)
 			})
 			break
@@ -100,32 +99,4 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 			copy(stash, buf[index:c])
 		}
 	}
-}
-
-type lineGrep struct {
-}
-
-type matchFunc func(b []byte) bool
-
-func (g lineGrep) grepAsLines(f *os.File, encoding int, printer printer, matchFn matchFunc) {
-	f.Seek(0, 0)
-	match := match{path: f.Name()}
-
-	var reader io.Reader
-	if r := newDecodeReader(f, encoding); r != nil {
-		// decode file from shift-jis or euc-jp.
-		reader = r
-	} else {
-		reader = f
-	}
-
-	scanner := bufio.NewScanner(reader)
-	line := 1
-	for scanner.Scan() {
-		if matchFn(scanner.Bytes()) {
-			match.add(line, scanner.Text())
-		}
-		line++
-	}
-	printer.print(match)
 }
