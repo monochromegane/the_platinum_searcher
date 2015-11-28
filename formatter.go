@@ -11,9 +11,9 @@ type formatPrinter interface {
 	print(match match)
 }
 
-func newFormatPrinter(pattern string, w io.Writer, opts Option) formatPrinter {
+func newFormatPrinter(pattern pattern, w io.Writer, opts Option) formatPrinter {
 	writer := newColorWriter(w, opts)
-	decorator := newDecorator([]byte(pattern), opts)
+	decorator := newDecorator(pattern, opts)
 
 	switch {
 	case opts.OutputOption.FilesWithMatches:
@@ -61,7 +61,7 @@ func (f group) print(match match) {
 		fmt.Fprintln(f.w,
 			f.decorator.lineNumber(line.num)+
 				SeparatorColon+
-				f.decorator.match(match.regexp, line.text),
+				f.decorator.match(line.text),
 		)
 	}
 	fmt.Fprintln(f.w)
@@ -79,7 +79,7 @@ func (f noGroup) print(match match) {
 			path+
 				f.decorator.lineNumber(line.num)+
 				SeparatorColon+
-				f.decorator.match(match.regexp, line.text),
+				f.decorator.match(line.text),
 		)
 	}
 }

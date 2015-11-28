@@ -18,10 +18,10 @@ const (
 type decorator interface {
 	path(path string) string
 	lineNumber(lineNum int) string
-	match(regexp *regexp.Regexp, line string) string
+	match(line string) string
 }
 
-func newDecorator(pattern []byte, option Option) decorator {
+func newDecorator(pattern pattern, option Option) decorator {
 	if option.OutputOption.EnableColor {
 		return newColor(pattern)
 	} else {
@@ -30,18 +30,20 @@ func newDecorator(pattern []byte, option Option) decorator {
 }
 
 type color struct {
-	from string
-	to   string
+	from   string
+	to     string
+	regexp *regexp.Regexp
 }
 
-func newColor(pattern []byte) color {
+func newColor(pattern pattern) color {
 	color := color{}
-	if pattern != nil {
-		p := string(pattern)
+	if pattern.regexp == nil {
+		p := string(pattern.pattern)
 		color.from = p
 		color.to = ColorMatch + p + ColorReset
 	} else {
 		color.to = ColorMatch + "${1}" + ColorReset
+		color.regexp = pattern.regexp
 	}
 	return color
 }
@@ -54,11 +56,11 @@ func (c color) lineNumber(lineNum int) string {
 	return ColorLineNumber + strconv.Itoa(lineNum) + ColorReset
 }
 
-func (c color) match(regexp *regexp.Regexp, line string) string {
-	if regexp == nil {
+func (c color) match(line string) string {
+	if c.regexp == nil {
 		return strings.Replace(line, c.from, c.to, -1)
 	} else {
-		return regexp.ReplaceAllString(line, c.to)
+		return c.regexp.ReplaceAllString(line, c.to)
 	}
 }
 
@@ -73,6 +75,6 @@ func (p plain) lineNumber(lineNum int) string {
 	return strconv.Itoa(lineNum)
 }
 
-func (p plain) match(regexp *regexp.Regexp, line string) string {
+func (p plain) match(line string) string {
 	return line
 }

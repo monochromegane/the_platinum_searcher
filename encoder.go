@@ -7,28 +7,12 @@ import (
 	"golang.org/x/text/transform"
 )
 
-type encoder struct {
-	defaultReader  io.Reader
-	eucJpReader    io.Reader
-	shiftJISReader io.Reader
-	opts           Option
-}
-
-func newEncoder(r io.Reader, opts Option) encoder {
-	return encoder{
-		defaultReader:  r,
-		eucJpReader:    transform.NewReader(r, japanese.EUCJP.NewEncoder()),
-		shiftJISReader: transform.NewReader(r, japanese.ShiftJIS.NewEncoder()),
-		opts:           opts,
-	}
-}
-
-func (e encoder) reader(encoding int) io.Reader {
+func newEncodeReader(r io.Reader, encoding int) io.Reader {
 	switch encoding {
 	case EUCJP:
-		return e.eucJpReader
+		return transform.NewReader(r, japanese.EUCJP.NewEncoder())
 	case SHIFTJIS:
-		return e.shiftJISReader
+		return transform.NewReader(r, japanese.ShiftJIS.NewEncoder())
 	}
-	return e.defaultReader
+	return nil
 }

@@ -1,11 +1,8 @@
 package the_platinum_searcher
 
-import "regexp"
-
 type match struct {
-	regexp *regexp.Regexp
-	path   string
-	lines  []line
+	path  string
+	lines []line
 }
 
 type line struct {

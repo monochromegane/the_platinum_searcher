@@ -3,15 +3,19 @@ package the_platinum_searcher
 import "io"
 
 type search struct {
-	root    string
-	pattern string
-	out     io.Writer
-	opts    Option
+	root string
+	out  io.Writer
+	opts Option
 }
 
-func (s search) start() {
+func (s search) start(pattern string) error {
 	grepChan := make(chan string, 5000)
 	done := make(chan struct{})
+
+	p, err := newPattern(pattern, s.opts)
+	if err != nil {
+		return err
+	}
 
 	go find{
 		out:  grepChan,
@@ -19,12 +23,14 @@ func (s search) start() {
 	}.start(s.root)
 
 	go newGrep(
-		s.pattern,
+		p,
 		grepChan,
 		done,
 		opts,
-		newPrinter(s.pattern, s.out, s.opts),
+		newPrinter(p, s.out, s.opts),
 	).start()
 
 	<-done
+
+	return nil
 }

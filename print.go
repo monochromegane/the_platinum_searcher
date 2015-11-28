@@ -11,7 +11,7 @@ type printer struct {
 	formatter formatPrinter
 }
 
-func newPrinter(pattern string, out io.Writer, opts Option) printer {
+func newPrinter(pattern pattern, out io.Writer, opts Option) printer {
 	return printer{
 		mu:        new(sync.Mutex),
 		opts:      opts,
@@ -22,5 +22,10 @@ func newPrinter(pattern string, out io.Writer, opts Option) printer {
 func (p printer) print(match match) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+
+	if match.size() == 0 {
+		return
+	}
+
 	p.formatter.print(match)
 }

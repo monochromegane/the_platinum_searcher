@@ -44,12 +44,14 @@ func (p PlatinumSearcher) Run(args []string) int {
 	}
 
 	search := search{
-		pattern: p.patternFrom(args),
-		root:    p.rootFrom(args),
-		out:     p.Out,
-		opts:    opts,
+		root: p.rootFrom(args),
+		out:  p.Out,
+		opts: opts,
 	}
-	search.start()
+	if err = search.start(p.patternFrom(args)); err != nil {
+		fmt.Fprintf(p.Err, "%s\n", err)
+		return ExitCodeError
+	}
 	return ExitCodeOK
 }
 
