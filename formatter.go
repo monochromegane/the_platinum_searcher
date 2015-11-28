@@ -58,10 +58,14 @@ type group struct {
 func (f group) print(match match) {
 	fmt.Fprintln(f.w, f.decorator.path(match.path))
 	for _, line := range match.lines {
+		sep := SeparatorColon
+		if !line.matched {
+			sep = SeparatorHyphen
+		}
 		fmt.Fprintln(f.w,
 			f.decorator.lineNumber(line.num)+
-				SeparatorColon+
-				f.decorator.match(line.text),
+				sep+
+				f.decorator.match(line.text, line.matched),
 		)
 	}
 	fmt.Fprintln(f.w)
@@ -75,11 +79,15 @@ type noGroup struct {
 func (f noGroup) print(match match) {
 	path := f.decorator.path(match.path) + SeparatorColon
 	for _, line := range match.lines {
+		sep := SeparatorColon
+		if !line.matched {
+			sep = SeparatorHyphen
+		}
 		fmt.Fprintln(f.w,
 			path+
 				f.decorator.lineNumber(line.num)+
-				SeparatorColon+
-				f.decorator.match(line.text),
+				sep+
+				f.decorator.match(line.text, line.matched),
 		)
 	}
 }

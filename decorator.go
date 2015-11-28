@@ -12,13 +12,14 @@ const (
 	ColorPath       = "\x1b[1;32m"  /* bold green */
 	ColorMatch      = "\x1b[30;43m" /* black with yellow background */
 
-	SeparatorColon = ":"
+	SeparatorColon  = ":"
+	SeparatorHyphen = "-"
 )
 
 type decorator interface {
 	path(path string) string
 	lineNumber(lineNum int) string
-	match(line string) string
+	match(line string, matched bool) string
 }
 
 func newDecorator(pattern pattern, option Option) decorator {
@@ -56,8 +57,10 @@ func (c color) lineNumber(lineNum int) string {
 	return ColorLineNumber + strconv.Itoa(lineNum) + ColorReset
 }
 
-func (c color) match(line string) string {
-	if c.regexp == nil {
+func (c color) match(line string, matched bool) string {
+	if !matched {
+		return line
+	} else if c.regexp == nil {
 		return strings.Replace(line, c.from, c.to, -1)
 	} else {
 		return c.regexp.ReplaceAllString(line, c.to)
@@ -75,6 +78,6 @@ func (p plain) lineNumber(lineNum int) string {
 	return strconv.Itoa(lineNum)
 }
 
-func (p plain) match(line string) string {
+func (p plain) match(line string, matched bool) string {
 	return line
 }

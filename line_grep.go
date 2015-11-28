@@ -36,9 +36,10 @@ func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, match
 		reader = f
 	}
 
-	line := 1
+	lineNum := 1
 	matchState := newMatchState()
 	afterCount := 0
+	beforeMatches := make([]line, 0, g.before)
 
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
@@ -48,23 +49,44 @@ func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, match
 				matchState = matchState.transition(matched)
 
 				if matchState.isBefore() {
-				} else if matchState.isMatching() {
-					match.add(line, scanner.Text(), matched)
-					afterCount = 0
+					// store before line.
+					beforeMatches = g.storeBeforeMatch(beforeMatches, lineNum, scanner.Text(), matched)
 				} else if matchState.isAfter() {
-					match.add(line, scanner.Text(), matched)
-					afterCount++
+					if g.after > 0 {
+						// append after line.
+						match.add(lineNum, scanner.Text(), matched)
+						afterCount++
+					}
 					if afterCount >= g.after {
+						// reset to before match
 						matchState = matchState.reset()
 						afterCount = 0
 					}
+				} else if matchState.isMatching() {
+					// append and reset before lines.
+					match.lines = append(match.lines, beforeMatches...)
+					beforeMatches = make([]line, 0, g.before)
+					// append match line.
+					match.add(lineNum, scanner.Text(), matched)
+					// reset after count.
+					afterCount = 0
 				}
 			} else if matched {
 				// print only match line.
-				match.add(line, scanner.Text(), matched)
+				match.add(lineNum, scanner.Text(), matched)
 			}
 		}
-		line++
+		lineNum++
 	}
 	printer.print(match)
+}
+
+func (g lineGrep) storeBeforeMatch(beforeMatches []line, lineNum int, text string, matched bool) []line {
+	if g.before == 0 {
+		return beforeMatches
+	}
+	if len(beforeMatches) >= g.before {
+		beforeMatches = beforeMatches[1:]
+	}
+	return append(beforeMatches, line{lineNum, text, matched})
 }
