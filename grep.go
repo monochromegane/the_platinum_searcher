@@ -7,33 +7,44 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"sync"
-
-	"golang.org/x/text/encoding/japanese"
-	"golang.org/x/text/transform"
 )
 
 var newLine = []byte("\n")
 
 type grep struct {
+	pattern string
 	in      chan string
 	done    chan struct{}
-	printer printer
+	grepper grepper
 	opts    Option
 }
 
-func (g grep) start(pattern string) {
+func newGrep(pattern string, in chan string, done chan struct{}, opts Option, printer printer) grep {
+	return grep{
+		pattern: pattern,
+		in:      in,
+		done:    done,
+		grepper: newGrepper(
+			newEncoder(strings.NewReader(pattern), opts),
+			printer,
+			opts,
+		),
+		opts: opts,
+	}
+}
+
+func (g grep) start() {
 	sem := make(chan struct{}, 208)
 	wg := &sync.WaitGroup{}
 
-	grepper := newGrepper(g.printer, opts)
-
-	p := newPattern(pattern, opts.SearchOption.Regexp)
+	p := newPattern(g.pattern, opts.SearchOption.Regexp)
 
 	for path := range g.in {
 		sem <- struct{}{}
 		wg.Add(1)
-		go grepper.grep(path, p, sem, wg)
+		go g.grepper.grep(path, p, sem, wg)
 	}
 	wg.Wait()
 	g.done <- struct{}{}
@@ -43,15 +54,16 @@ type grepper interface {
 	grep(path string, pattern pattern, sem chan struct{}, wg *sync.WaitGroup)
 }
 
-func newGrepper(printer printer, opts Option) grepper {
+func newGrepper(encoder encoder, printer printer, opts Option) grepper {
 	if opts.SearchOption.Regexp {
-		return extendedGrep{printer}
+		return extendedGrep{encoder: encoder, printer: printer}
 	} else {
-		return fixedGrep{printer}
+		return fixedGrep{encoder: encoder, printer: printer}
 	}
 }
 
 type fixedGrep struct {
+	encoder encoder
 	printer printer
 }
 
@@ -85,9 +97,19 @@ func (g fixedGrep) grep(path string, p pattern, sem chan struct{}, wg *sync.Wait
 
 		// detect encoding.
 		if !identified {
-			pattern, encoding = encodedPattern(c, buf, pattern)
-			if pattern == nil {
+			limit := c
+			if limit > 512 {
+				limit = 512
+			}
+
+			encoding := detectEncoding(buf[:limit])
+			if encoding == ERROR || encoding == BINARY {
 				break
+			}
+
+			if encoding == EUCJP || encoding == SHIFTJIS {
+				// encode pattern to shift-jis or euc-jp.
+				pattern, _ = ioutil.ReadAll(g.encoder.reader(encoding))
 			}
 			identified = true
 		}
@@ -132,7 +154,13 @@ func (g fixedGrep) grepAsLines(f *os.File, pattern []byte, encoding int) {
 	line := 1
 	for scanner.Scan() {
 		if bytes.Contains(scanner.Bytes(), pattern) {
-			match.add(line, scanner.Text())
+			var matched []byte
+			if r := newDecodeReader(bytes.NewReader(scanner.Bytes()), encoding); r != nil {
+				matched, _ = ioutil.ReadAll(r)
+			} else {
+				matched = scanner.Bytes()
+			}
+			match.add(line, string(matched))
 		}
 		line++
 	}
@@ -140,6 +168,7 @@ func (g fixedGrep) grepAsLines(f *os.File, pattern []byte, encoding int) {
 }
 
 type extendedGrep struct {
+	encoder encoder
 	printer printer
 }
 
@@ -167,11 +196,21 @@ func (g extendedGrep) grep(path string, p pattern, sem chan struct{}, wg *sync.W
 	}
 
 	// detect encoding.
-	pattern, encoding := encodedPattern(c, buf, []byte(p.pattern))
-	if pattern == nil {
+	limit := c
+	if limit > 512 {
+		limit = 512
+	}
+
+	encoding := detectEncoding(buf[:limit])
+	if encoding == ERROR || encoding == BINARY {
 		return
 	}
-	p = newPattern(string(pattern), true)
+
+	if encoding == EUCJP || encoding == SHIFTJIS {
+		// encode pattern to shift-jis or euc-jp.
+		pattern, _ := ioutil.ReadAll(g.encoder.reader(encoding))
+		p = newPattern(string(pattern), true)
+	}
 
 	f.Seek(0, 0)
 
@@ -187,34 +226,6 @@ func (g extendedGrep) grep(path string, p pattern, sem chan struct{}, wg *sync.W
 	if match.size() > 0 {
 		g.printer.print(match)
 	}
-}
-
-func encodedPattern(c int, buf []byte, pattern []byte) ([]byte, int) {
-	limit := c
-	if limit > 512 {
-		limit = 512
-	}
-	encoding := detectEncoding(buf[:limit])
-	if encoding == ERROR || encoding == BINARY {
-		return nil, encoding
-	}
-
-	if encoder := getEncoder(encoding); encoder != nil {
-		// encode pattern to shift-jis or euc-jp.
-		encoded, _ := ioutil.ReadAll(transform.NewReader(bytes.NewReader(pattern), encoder))
-		return encoded, encoding
-	}
-	return pattern, encoding
-}
-
-func getEncoder(encoding int) transform.Transformer {
-	switch encoding {
-	case EUCJP:
-		return japanese.EUCJP.NewEncoder()
-	case SHIFTJIS:
-		return japanese.ShiftJIS.NewEncoder()
-	}
-	return nil
 }
 
 // 1. grepにencoderとdecoderを保持する

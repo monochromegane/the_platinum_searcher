@@ -11,11 +11,11 @@ type printer struct {
 	formatter formatPrinter
 }
 
-func newPrinter(out io.Writer, opts Option) printer {
+func newPrinter(pattern string, out io.Writer, opts Option) printer {
 	return printer{
 		mu:        new(sync.Mutex),
 		opts:      opts,
-		formatter: newFormatPrinter(out, opts),
+		formatter: newFormatPrinter(pattern, out, opts),
 	}
 }
 

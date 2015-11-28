@@ -18,12 +18,13 @@ func (s search) start() {
 		opts: s.opts,
 	}.start(s.root)
 
-	go grep{
-		in:      grepChan,
-		done:    done,
-		printer: newPrinter(s.out, s.opts),
-		opts:    s.opts,
-	}.start(s.pattern)
+	go newGrep(
+		s.pattern,
+		grepChan,
+		done,
+		opts,
+		newPrinter(s.pattern, s.out, s.opts),
+	).start()
 
 	<-done
 }

@@ -21,15 +21,29 @@ type decorator interface {
 	match(pattern []byte, regexp *regexp.Regexp, line string) string
 }
 
-func newDecorator(option Option) decorator {
+func newDecorator(pattern []byte, option Option) decorator {
 	if option.OutputOption.EnableColor {
-		return color{}
+		return newColor(pattern)
 	} else {
 		return plain{}
 	}
 }
 
 type color struct {
+	from string
+	to   string
+}
+
+func newColor(pattern []byte) color {
+	color := color{}
+	if pattern != nil {
+		p := string(pattern)
+		color.from = p
+		color.to = ColorMatch + p + ColorReset
+	} else {
+		color.to = ColorMatch + "${1}" + ColorReset
+	}
+	return color
 }
 
 func (c color) path(path string) string {
@@ -42,10 +56,9 @@ func (c color) lineNumber(lineNum int) string {
 
 func (c color) match(pattern []byte, regexp *regexp.Regexp, line string) string {
 	if regexp == nil {
-		s := string(pattern)
-		return strings.Replace(line, s, ColorMatch+s+ColorReset, -1)
+		return strings.Replace(line, c.from, c.to, -1)
 	} else {
-		return regexp.ReplaceAllString(line, ColorMatch+"${1}"+ColorReset)
+		return regexp.ReplaceAllString(line, c.to)
 	}
 }
 
