@@ -12,6 +12,11 @@ func (s search) start(pattern string) error {
 	grepChan := make(chan string, 5000)
 	done := make(chan struct{})
 
+	if opts.SearchOption.WordRegexp {
+		opts.SearchOption.Regexp = true
+		pattern = "\\b" + pattern + "\\b"
+	}
+
 	p, err := newPattern(pattern, s.opts)
 	if err != nil {
 		return err
