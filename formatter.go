@@ -61,7 +61,7 @@ func (f group) print(match match) {
 		fmt.Fprintln(f.w,
 			f.decorator.lineNumber(line.num)+
 				SeparatorColon+
-				f.decorator.match(match.pattern, match.regexp, line.text),
+				f.decorator.match(match.regexp, line.text),
 		)
 	}
 	fmt.Fprintln(f.w)
@@ -79,7 +79,7 @@ func (f noGroup) print(match match) {
 			path+
 				f.decorator.lineNumber(line.num)+
 				SeparatorColon+
-				f.decorator.match(match.pattern, match.regexp, line.text),
+				f.decorator.match(match.regexp, line.text),
 		)
 	}
 }

@@ -3,11 +3,9 @@ package the_platinum_searcher
 import "regexp"
 
 type match struct {
-	pattern  []byte
-	regexp   *regexp.Regexp
-	path     string
-	lines    []line
-	encoding int
+	regexp *regexp.Regexp
+	path   string
+	lines  []line
 }
 
 type line struct {

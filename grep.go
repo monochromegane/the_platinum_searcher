@@ -149,7 +149,7 @@ func (g fixedGrep) grep(path string, p pattern, sem chan struct{}, wg *sync.Wait
 
 func (g fixedGrep) grepAsLines(f *os.File, pattern []byte, encoding int) {
 	f.Seek(0, 0)
-	match := match{path: f.Name(), pattern: pattern, encoding: encoding}
+	match := match{path: f.Name()}
 	scanner := bufio.NewScanner(f)
 	line := 1
 	for scanner.Scan() {
@@ -214,7 +214,7 @@ func (g extendedGrep) grep(path string, p pattern, sem chan struct{}, wg *sync.W
 
 	f.Seek(0, 0)
 
-	match := match{path: f.Name(), regexp: p.regexp, encoding: encoding}
+	match := match{path: f.Name(), regexp: p.regexp}
 	scanner := bufio.NewScanner(f)
 	line := 1
 	for scanner.Scan() {
@@ -227,9 +227,3 @@ func (g extendedGrep) grep(path string, p pattern, sem chan struct{}, wg *sync.W
 		g.printer.print(match)
 	}
 }
-
-// 1. grepにencoderとdecoderを保持する
-// 2. encoderはファイルの文字コードに従い、patternを変換する
-// 3. decoderはパターン検索で合致した文字列をファイルの文字コードからdecodeする
-// 4. printerは文字コード変換前のpatternを最初から保持しておき、置換に利用する(3.でdecode済みの文字列が返ってくるため)
-// grepは内部的に文字コードを変換するだけで最終的な出力はUTF-8で返すようにする

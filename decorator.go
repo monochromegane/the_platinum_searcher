@@ -18,7 +18,7 @@ const (
 type decorator interface {
 	path(path string) string
 	lineNumber(lineNum int) string
-	match(pattern []byte, regexp *regexp.Regexp, line string) string
+	match(regexp *regexp.Regexp, line string) string
 }
 
 func newDecorator(pattern []byte, option Option) decorator {
@@ -54,7 +54,7 @@ func (c color) lineNumber(lineNum int) string {
 	return ColorLineNumber + strconv.Itoa(lineNum) + ColorReset
 }
 
-func (c color) match(pattern []byte, regexp *regexp.Regexp, line string) string {
+func (c color) match(regexp *regexp.Regexp, line string) string {
 	if regexp == nil {
 		return strings.Replace(line, c.from, c.to, -1)
 	} else {
@@ -73,6 +73,6 @@ func (p plain) lineNumber(lineNum int) string {
 	return strconv.Itoa(lineNum)
 }
 
-func (p plain) match(pattern []byte, regexp *regexp.Regexp, line string) string {
+func (p plain) match(regexp *regexp.Regexp, line string) string {
 	return line
 }
