@@ -1,9 +1,6 @@
 package the_platinum_searcher
 
-import (
-	"os"
-	"path/filepath"
-)
+import "path/filepath"
 
 type find struct {
 	out  chan string
@@ -16,8 +13,8 @@ func (f find) start(root string) {
 
 func (f find) findFile(root string) {
 	var ignores ignoreMatchers
-	concurrentWalk(root, ignores, func(path string, info os.FileInfo, depth int, ignores ignoreMatchers) (ignoreMatchers, error) {
-		if info.IsDir() {
+	concurrentWalk(root, ignores, func(path string, info fileInfo, depth int, ignores ignoreMatchers) (ignoreMatchers, error) {
+		if info.isDir(f.opts.SearchOption.Follow) {
 			if depth > f.opts.SearchOption.Depth+1 {
 				return ignores, filepath.SkipDir
 			}
@@ -35,7 +32,7 @@ func (f find) findFile(root string) {
 			}
 			return ignores, nil
 		}
-		if !f.opts.SearchOption.Follow && info.Mode()&os.ModeSymlink == os.ModeSymlink {
+		if !f.opts.SearchOption.Follow && info.isSymlink() {
 			return ignores, nil
 		}
 
