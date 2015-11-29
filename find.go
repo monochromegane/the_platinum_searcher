@@ -2,6 +2,7 @@ package the_platinum_searcher
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/monochromegane/go-gitignore"
@@ -12,11 +13,11 @@ type find struct {
 	opts Option
 }
 
-func (f find) start(root string) {
-	f.findFile(root)
+func (f find) start(root string, regexp *regexp.Regexp) {
+	f.findFile(root, regexp)
 }
 
-func (f find) findFile(root string) {
+func (f find) findFile(root string, regexp *regexp.Regexp) {
 	var ignores ignoreMatchers
 
 	// add ignores from ignore option.
@@ -73,6 +74,10 @@ func (f find) findFile(root string) {
 		}
 
 		if ignores.Match(path, false) {
+			return ignores, nil
+		}
+
+		if regexp != nil && !regexp.MatchString(path) {
 			return ignores, nil
 		}
 

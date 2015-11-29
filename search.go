@@ -39,10 +39,18 @@ func (s search) start(pattern string) error {
 		opts.OutputOption.After = opts.OutputOption.Context
 	}
 
+	var regFile *regexp.Regexp
+	if opts.SearchOption.FileSearchRegexp != "" {
+		regFile, err = regexp.Compile(opts.SearchOption.FileSearchRegexp)
+		if err != nil {
+			return err
+		}
+	}
+
 	go find{
 		out:  grepChan,
 		opts: opts,
-	}.start(s.root)
+	}.start(s.root, regFile)
 
 	go newGrep(
 		p,
