@@ -35,7 +35,7 @@ func (f find) findFile(root string) {
 			}
 			return ignores, nil
 		}
-		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
+		if !f.opts.SearchOption.Follow && info.Mode()&os.ModeSymlink == os.ModeSymlink {
 			return ignores, nil
 		}
 
