@@ -28,7 +28,7 @@ func (f find) findFile(root string) {
 			}
 
 			if !f.opts.SearchOption.SkipVcsIgnore {
-				ignores = append(ignores, newIgnoreMatchers(path, []string{".gitignore"})...)
+				ignores = append(ignores, newIgnoreMatchers(path, f.opts.SearchOption.VcsIgnore)...)
 			}
 			return ignores, nil
 		}
