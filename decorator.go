@@ -19,6 +19,7 @@ const (
 type decorator interface {
 	path(path string) string
 	lineNumber(lineNum int) string
+	columnNumber(columnNum int) string
 	match(line string, matched bool) string
 }
 
@@ -57,6 +58,10 @@ func (c color) lineNumber(lineNum int) string {
 	return ColorLineNumber + strconv.Itoa(lineNum) + ColorReset
 }
 
+func (c color) columnNumber(columnNum int) string {
+	return strconv.Itoa(columnNum)
+}
+
 func (c color) match(line string, matched bool) string {
 	if !matched {
 		return line
@@ -76,6 +81,10 @@ func (p plain) path(path string) string {
 
 func (p plain) lineNumber(lineNum int) string {
 	return strconv.Itoa(lineNum)
+}
+
+func (p plain) columnNumber(columnNum int) string {
+	return strconv.Itoa(columnNum)
 }
 
 func (p plain) match(line string, matched bool) string {

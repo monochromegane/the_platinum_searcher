@@ -50,5 +50,7 @@ func (g extendedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 	// grep each lines.
 	g.grepEachLines(f, encoding, g.printer, func(b []byte) bool {
 		return g.pattern.regexp.Match(b)
+	}, func(b []byte) int {
+		return g.pattern.regexp.FindIndex(b)[0] + 1
 	})
 }

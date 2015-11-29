@@ -17,6 +17,7 @@ type OutputOption struct {
 	Group            func() `long:"group" description:"Print file name at header (default: true)"`
 	NoGroup          func() `long:"nogroup" description:"Don't print file name at header (default: false)"`
 	EnableGroup      bool   // Enable group. Not user option.
+	Column           bool   `long:"column" description:"Print column (default: false)"`
 	After            int    `short:"A" long:"after" description:"Print lines after match"`
 	Before           int    `short:"B" long:"before" description:"Print lines before match"`
 	Context          int    `short:"C" long:"context" description:"Print lines before and after match"`

@@ -62,9 +62,14 @@ func (f group) print(match match) {
 		if !line.matched {
 			sep = SeparatorHyphen
 		}
+		column := ""
+		if line.matched && line.column > 0 {
+			column = f.decorator.columnNumber(line.column) + SeparatorColon
+		}
 		fmt.Fprintln(f.w,
 			f.decorator.lineNumber(line.num)+
 				sep+
+				column+
 				f.decorator.match(line.text, line.matched),
 		)
 	}
@@ -83,10 +88,15 @@ func (f noGroup) print(match match) {
 		if !line.matched {
 			sep = SeparatorHyphen
 		}
+		column := ""
+		if line.matched && line.column > 0 {
+			column = f.decorator.columnNumber(line.column) + SeparatorColon
+		}
 		fmt.Fprintln(f.w,
 			path+
 				f.decorator.lineNumber(line.num)+
 				sep+
+				column+
 				f.decorator.match(line.text, line.matched),
 		)
 	}

@@ -76,6 +76,8 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 				// grep each lines.
 				g.grepEachLines(f, encoding, g.printer, func(b []byte) bool {
 					return bytes.Contains(b, g.pattern.pattern)
+				}, func(b []byte) int {
+					return bytes.Index(b, g.pattern.pattern) + 1
 				})
 				break
 			}
@@ -86,6 +88,8 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 			// grep each lines.
 			g.grepEachLines(f, encoding, g.printer, func(b []byte) bool {
 				return bytes.Contains(b, g.pattern.pattern)
+			}, func(b []byte) int {
+				return bytes.Index(b, g.pattern.pattern) + 1
 			})
 			break
 		}

@@ -9,12 +9,14 @@ import (
 type lineGrep struct {
 	before int
 	after  int
+	column bool
 }
 
 func newLineGrep(opts Option) lineGrep {
 	return lineGrep{
 		before: opts.OutputOption.Before,
 		after:  opts.OutputOption.After,
+		column: opts.OutputOption.Column,
 	}
 }
 
@@ -23,8 +25,9 @@ func (g lineGrep) enableContext() bool {
 }
 
 type matchFunc func(b []byte) bool
+type countFunc func(b []byte) int
 
-func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, matchFn matchFunc) {
+func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, matchFn matchFunc, countFn countFunc) {
 	f.Seek(0, 0)
 	match := match{path: f.Name()}
 
@@ -54,7 +57,7 @@ func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, match
 				} else if matchState.isAfter() {
 					if g.after > 0 {
 						// append after line.
-						match.add(lineNum, scanner.Text(), matched)
+						match.add(lineNum, 0, scanner.Text(), matched)
 						afterCount++
 					}
 					if afterCount >= g.after {
@@ -67,13 +70,21 @@ func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, match
 					match.lines = append(match.lines, beforeMatches...)
 					beforeMatches = make([]line, 0, g.before)
 					// append match line.
-					match.add(lineNum, scanner.Text(), matched)
+					column := 0
+					if g.column {
+						column = countFn(scanner.Bytes())
+					}
+					match.add(lineNum, column, scanner.Text(), matched)
 					// reset after count.
 					afterCount = 0
 				}
 			} else if matched {
 				// print only match line.
-				match.add(lineNum, scanner.Text(), matched)
+				column := 0
+				if g.column {
+					column = countFn(scanner.Bytes())
+				}
+				match.add(lineNum, column, scanner.Text(), matched)
 			}
 		}
 		lineNum++
@@ -88,5 +99,10 @@ func (g lineGrep) storeBeforeMatch(beforeMatches []line, lineNum int, text strin
 	if len(beforeMatches) >= g.before {
 		beforeMatches = beforeMatches[1:]
 	}
-	return append(beforeMatches, line{lineNum, text, matched})
+	return append(beforeMatches, line{
+		num:     lineNum,
+		column:  0,
+		text:    text,
+		matched: matched,
+	})
 }
