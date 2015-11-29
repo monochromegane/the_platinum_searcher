@@ -57,6 +57,8 @@ func (o *OutputOption) SetDisableGroup() {
 // Search options.
 type SearchOption struct {
 	Regexp        bool `short:"e" description:"Parse PATTERN as a regular expression (default: false). Accepted syntax is the same as https://github.com/google/re2/wiki/Syntax except from \\C"`
+	IgnoreCase    bool `short:"i" long:"ignore-case" description:"Match case insensitively"`
+	SmartCase     bool `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
 	WordRegexp    bool `short:"w" long:"word-regexp" description:"Only match whole words"`
 	SkipVcsIgnore bool `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns"`
 	Depth         int  `long:"depth" default:"25" description:"Search up to NUM directories deep"`

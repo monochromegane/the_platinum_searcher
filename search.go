@@ -1,6 +1,9 @@
 package the_platinum_searcher
 
-import "io"
+import (
+	"io"
+	"regexp"
+)
 
 type search struct {
 	root string
@@ -14,6 +17,16 @@ func (s search) start(pattern string) error {
 	if opts.SearchOption.WordRegexp {
 		opts.SearchOption.Regexp = true
 		pattern = "\\b" + pattern + "\\b"
+	}
+
+	if opts.SearchOption.SmartCase {
+		if !regexp.MustCompile(`[[:upper:]]`).MatchString(pattern) {
+			opts.SearchOption.IgnoreCase = true
+		}
+	}
+
+	if opts.SearchOption.IgnoreCase {
+		opts.SearchOption.Regexp = true
 	}
 
 	p, err := newPattern(pattern, opts)
