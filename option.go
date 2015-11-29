@@ -60,6 +60,7 @@ type SearchOption struct {
 	IgnoreCase    bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
 	SmartCase     bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
 	WordRegexp    bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
+	Ignore        []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 	VcsIgnore     []string `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore"`
 	SkipVcsIgnore bool     `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns"`
 	Depth         int      `long:"depth" default:"25" description:"Search up to NUM directories deep"`

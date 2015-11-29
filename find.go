@@ -1,6 +1,11 @@
 package the_platinum_searcher
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"strings"
+
+	"github.com/monochromegane/go-gitignore"
+)
 
 type find struct {
 	out  chan string
@@ -13,6 +18,15 @@ func (f find) start(root string) {
 
 func (f find) findFile(root string) {
 	var ignores ignoreMatchers
+
+	// add ignores from ignore option.
+	if len(f.opts.SearchOption.Ignore) > 0 {
+		ignores = append(ignores, gitignore.NewGitIgnoreFromReader(
+			root,
+			strings.NewReader(strings.Join(f.opts.SearchOption.Ignore, "\n")),
+		))
+	}
+
 	concurrentWalk(root, ignores, func(path string, info fileInfo, depth int, ignores ignoreMatchers) (ignoreMatchers, error) {
 		if info.isDir(f.opts.SearchOption.Follow) {
 			if depth > f.opts.SearchOption.Depth+1 {
