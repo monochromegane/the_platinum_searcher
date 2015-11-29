@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/monochromegane/go-gitignore"
+	"github.com/monochromegane/go-home"
 )
 
 type ignoreMatchers []gitignore.IgnoreMatcher
@@ -28,4 +29,13 @@ func newIgnoreMatchers(path string, ignores []string) ignoreMatchers {
 		}
 	}
 	return matchers
+}
+
+func homePtIgnore(base string) gitignore.IgnoreMatcher {
+	if homeDir := home.Dir(); homeDir != "" {
+		if matcher, err := gitignore.NewGitIgnore(filepath.Join(homeDir, ".ptignore"), base); err == nil {
+			return matcher
+		}
+	}
+	return nil
 }

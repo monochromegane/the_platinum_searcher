@@ -27,6 +27,13 @@ func (f find) findFile(root string) {
 		))
 	}
 
+	// add home ptignore
+	if f.opts.SearchOption.HomePtIgnore {
+		if ignore := homePtIgnore(root); ignore != nil {
+			ignores = append(ignores, ignore)
+		}
+	}
+
 	concurrentWalk(root, ignores, func(path string, info fileInfo, depth int, ignores ignoreMatchers) (ignoreMatchers, error) {
 		if info.isDir(f.opts.SearchOption.Follow) {
 			if depth > f.opts.SearchOption.Depth+1 {

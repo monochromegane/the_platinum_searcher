@@ -62,6 +62,7 @@ type SearchOption struct {
 	WordRegexp    bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
 	Ignore        []string `long:"ignore" description:"Ignore files/directories matching pattern"`
 	VcsIgnore     []string `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore"`
+	HomePtIgnore  bool     `long:"home-ptignore" description:"Use $Home/.ptignore file for ignore patterns"`
 	SkipVcsIgnore bool     `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns"`
 	Depth         int      `long:"depth" default:"25" description:"Search up to NUM directories deep"`
 	Follow        bool     `short:"f" long:"follow" description:"Follow symlinks"`
