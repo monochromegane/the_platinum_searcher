@@ -36,6 +36,10 @@ func (f find) findFile(root string) {
 			return ignores, nil
 		}
 
+		if info.isNamedPipe() {
+			return ignores, nil
+		}
+
 		if !f.opts.SearchOption.Hidden && isHidden(info.Name()) {
 			return ignores, filepath.SkipDir
 		}
