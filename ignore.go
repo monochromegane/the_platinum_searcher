@@ -1,7 +1,9 @@
 package the_platinum_searcher
 
 import (
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/monochromegane/go-gitignore"
 	"github.com/monochromegane/go-home"
@@ -29,6 +31,31 @@ func newIgnoreMatchers(path string, ignores []string) ignoreMatchers {
 		}
 	}
 	return matchers
+}
+
+func globalGitIgnore(base string) gitignore.IgnoreMatcher {
+	if homeDir := home.Dir(); homeDir != "" {
+		globalIgnore := globalGitIgnoreName()
+		if globalIgnore != "" {
+			if matcher, err := gitignore.NewGitIgnore(filepath.Join(homeDir, globalIgnore), base); err == nil {
+				return matcher
+			}
+		}
+	}
+	return nil
+}
+
+func globalGitIgnoreName() string {
+	gitCmd, err := exec.LookPath("git")
+	if err != nil {
+		return ""
+	}
+
+	file, err := exec.Command(gitCmd, "config", "--get", "core.excludesfile").Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(filepath.Base(string(file)))
 }
 
 func homePtIgnore(base string) gitignore.IgnoreMatcher {

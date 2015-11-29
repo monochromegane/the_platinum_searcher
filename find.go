@@ -27,7 +27,14 @@ func (f find) findFile(root string) {
 		))
 	}
 
-	// add home ptignore
+	// add global gitignore.
+	if f.opts.SearchOption.GlobalGitIgnore {
+		if ignore := globalGitIgnore(root); ignore != nil {
+			ignores = append(ignores, ignore)
+		}
+	}
+
+	// add home ptignore.
 	if f.opts.SearchOption.HomePtIgnore {
 		if ignore := homePtIgnore(root); ignore != nil {
 			ignores = append(ignores, ignore)
