@@ -65,6 +65,7 @@ The file is TOML format like the following.
 ```toml
 color = true
 context = 3
+ignore = ["dir1", "dir2"]
 ```
 
 ## Editor Integration
