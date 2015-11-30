@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
+	"github.com/monochromegane/conflag"
+	"github.com/monochromegane/go-home"
 	"github.com/monochromegane/terminal"
 )
 
@@ -22,6 +25,15 @@ type PlatinumSearcher struct {
 func (p PlatinumSearcher) Run(args []string) int {
 
 	parser := newOptionParser(&opts)
+
+	conflag.LongHyphen = true
+	conflag.BoolValue = false
+	for _, c := range []string{filepath.Join(home.Dir(), ".ptconfig.toml"), ".ptconfig.toml"} {
+		if args, err := conflag.ArgsFrom(c); err == nil {
+			parser.ParseArgs(args)
+		}
+	}
+
 	args, err := parser.ParseArgs(args)
 	if err != nil {
 		fmt.Fprintf(p.Err, "%s\n", err)
