@@ -6,8 +6,8 @@ import (
 )
 
 type search struct {
-	root string
-	out  io.Writer
+	roots []string
+	out   io.Writer
 }
 
 func (s search) start(pattern string) error {
@@ -50,7 +50,7 @@ func (s search) start(pattern string) error {
 	go find{
 		out:  grepChan,
 		opts: opts,
-	}.start(s.root, regFile)
+	}.start(s.roots, regFile)
 
 	go newGrep(
 		p,

@@ -56,8 +56,8 @@ func (p PlatinumSearcher) Run(args []string) int {
 	}
 
 	search := search{
-		root: p.rootFrom(args),
-		out:  p.Out,
+		roots: p.rootsFrom(args),
+		out:   p.Out,
 	}
 	if err = search.start(p.patternFrom(args)); err != nil {
 		fmt.Fprintf(p.Err, "%s\n", err)
@@ -70,12 +70,10 @@ func (p PlatinumSearcher) patternFrom(args []string) string {
 	return args[0]
 }
 
-func (p PlatinumSearcher) rootFrom(args []string) string {
-	var root string
+func (p PlatinumSearcher) rootsFrom(args []string) []string {
 	if len(args) > 1 {
-		root = args[1]
+		return args[1:]
 	} else {
-		root = "."
+		return []string{"."}
 	}
-	return root
 }

@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/monochromegane/go-gitignore"
 )
@@ -13,8 +14,26 @@ type find struct {
 	opts Option
 }
 
-func (f find) start(root string, regexp *regexp.Regexp) {
-	f.findFile(root, regexp)
+func (f find) start(roots []string, regexp *regexp.Regexp) {
+	defer close(f.out)
+
+	if len(roots) == 1 {
+		f.findFile(roots[0], regexp)
+	} else {
+		f.findFiles(roots, regexp)
+	}
+}
+
+func (f find) findFiles(roots []string, reg *regexp.Regexp) {
+	wg := &sync.WaitGroup{}
+	wg.Add(len(roots))
+	for _, r := range roots {
+		go func(root string, reg *regexp.Regexp, wg *sync.WaitGroup) {
+			defer wg.Done()
+			f.findFile(root, reg)
+		}(r, reg, wg)
+	}
+	wg.Wait()
 }
 
 func (f find) findFile(root string, regexp *regexp.Regexp) {
@@ -84,7 +103,6 @@ func (f find) findFile(root string, regexp *regexp.Regexp) {
 		f.out <- path
 		return ignores, nil
 	})
-	close(f.out)
 }
 
 func isHidden(name string) bool {
