@@ -5,6 +5,8 @@ import (
 	"io"
 
 	"github.com/shiena/ansicolor"
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
 )
 
 type formatPrinter interface {
@@ -12,7 +14,7 @@ type formatPrinter interface {
 }
 
 func newFormatPrinter(pattern pattern, w io.Writer, opts Option) formatPrinter {
-	writer := newColorWriter(w, opts)
+	writer := newWriter(w, opts)
 	decorator := newDecorator(pattern, opts)
 
 	switch {
@@ -102,9 +104,21 @@ func (f noGroup) print(match match) {
 	}
 }
 
-func newColorWriter(out io.Writer, opts Option) io.Writer {
+func newWriter(out io.Writer, opts Option) io.Writer {
+	encoder := func() io.Writer {
+		switch opts.OutputOption.OutputEncode {
+		case "sjis":
+			return transform.NewWriter(out, japanese.ShiftJIS.NewEncoder())
+		case "euc":
+			return transform.NewWriter(out, japanese.EUCJP.NewEncoder())
+		case "jis":
+			return transform.NewWriter(out, japanese.ISO2022JP.NewEncoder())
+		default:
+			return out
+		}
+	}()
 	if opts.OutputOption.EnableColor {
-		return ansicolor.NewAnsiColorWriter(out)
+		return ansicolor.NewAnsiColorWriter(encoder)
 	}
-	return out
+	return encoder
 }
