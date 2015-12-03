@@ -2,6 +2,7 @@ package the_platinum_searcher
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -88,26 +89,44 @@ func homePtIgnore() ignoreMatcher {
 func globalGitIgnore() ignoreMatcher {
 	homeDir := home.Dir()
 	if homeDir != "" {
-		globalIgnore := globalGitIgnoreName()
+		path, globalIgnore := globalGitIgnorePath()
 		if globalIgnore != "" {
-			return newIgnoreMatcher(homeDir, globalIgnore)
+			return newIgnoreMatcher(path, globalIgnore)
 		}
 	}
 	return nil
 }
 
-func globalGitIgnoreName() string {
+func globalGitIgnorePath() (string, string) {
 	gitCmd, err := exec.LookPath("git")
 	if err != nil {
-		return ""
+		return "", ""
 	}
 
 	file, err := exec.Command(gitCmd, "config", "--get", "core.excludesfile").Output()
 	var filename string
+	var path string
 	if err != nil {
-		filename = ""
+		path, filename = defaultGitIgnorePath()
 	} else {
+		path = home.Dir()
 		filename = strings.TrimSpace(filepath.Base(string(file)))
 	}
-	return filename
+	return path, filename
+}
+
+func defaultGitIgnorePath() (string, string) {
+	file_exists := func(path string) bool {
+		_, err := os.Stat(path)
+		return err == nil
+	}
+
+	if path := os.Getenv("XDG_CONFIG_HOME"); path != "" && file_exists(fmt.Sprintf("%s/git/ignore", path)) {
+		return fmt.Sprintf("%s/git", path), "ignore"
+	} else if path := fmt.Sprintf("%s/.config/git", home.Dir()); file_exists(fmt.Sprintf("%s/ignore", path)) {
+		return path, "ignore"
+	} else if path := home.Dir(); file_exists(fmt.Sprintf("%s/.gitignore", path)) {
+		return path, ".gitignore"
+	}
+	return "", ""
 }
