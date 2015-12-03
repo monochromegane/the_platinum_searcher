@@ -1,0 +1,2 @@
+file_2.txt
+go test
