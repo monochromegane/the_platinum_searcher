@@ -1,0 +1,2 @@
+euc-jp.txt
+go ¥Æ¥¹¥È
