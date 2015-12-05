@@ -39,6 +39,25 @@ func TestFixedGrep(t *testing.T) {
 
 }
 
+func TestFixedGrepLargeFile(t *testing.T) {
+	opts := defaultOption()
+	opts.OutputOption.EnableColor = false
+	opts.OutputOption.EnableGroup = false
+
+	pattern, _ := newPattern("This is a large file.", opts)
+
+	paths := []string{"large/large.txt"}
+
+	asserts := []string{
+		"large/large.txt:10:This is a large file.",
+	}
+
+	if !assertGrep(pattern, opts, paths, asserts) {
+		t.Errorf("Grep result should contain assserts.")
+	}
+
+}
+
 func TestExtendedGrep(t *testing.T) {
 	opts := defaultOption()
 	opts.OutputOption.EnableColor = false
