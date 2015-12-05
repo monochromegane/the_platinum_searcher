@@ -7,16 +7,18 @@ import (
 )
 
 type lineGrep struct {
-	before int
-	after  int
-	column bool
+	printer printer
+	before  int
+	after   int
+	column  bool
 }
 
-func newLineGrep(opts Option) lineGrep {
+func newLineGrep(printer printer, opts Option) lineGrep {
 	return lineGrep{
-		before: opts.OutputOption.Before,
-		after:  opts.OutputOption.After,
-		column: opts.OutputOption.Column,
+		printer: printer,
+		before:  opts.OutputOption.Before,
+		after:   opts.OutputOption.After,
+		column:  opts.OutputOption.Column,
 	}
 }
 
@@ -27,7 +29,7 @@ func (g lineGrep) enableContext() bool {
 type matchFunc func(b []byte) bool
 type countFunc func(b []byte) int
 
-func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, matchFn matchFunc, countFn countFunc) {
+func (g lineGrep) grepEachLines(f *os.File, encoding int, matchFn matchFunc, countFn countFunc) {
 	f.Seek(0, 0)
 	match := match{path: f.Name()}
 
@@ -89,7 +91,7 @@ func (g lineGrep) grepEachLines(f *os.File, encoding int, printer printer, match
 		}
 		lineNum++
 	}
-	printer.print(match)
+	g.printer.print(match)
 }
 
 func (g lineGrep) storeBeforeMatch(beforeMatches []line, lineNum int, text string, matched bool) []line {

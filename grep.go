@@ -45,14 +45,12 @@ func newGrepper(pattern pattern, printer printer, opts Option) grepper {
 	if opts.SearchOption.Regexp {
 		return extendedGrep{
 			pattern:  pattern,
-			printer:  printer,
-			lineGrep: newLineGrep(opts),
+			lineGrep: newLineGrep(printer, opts),
 		}
 	} else {
 		return fixedGrep{
 			pattern:  pattern,
-			printer:  printer,
-			lineGrep: newLineGrep(opts),
+			lineGrep: newLineGrep(printer, opts),
 		}
 	}
 }

@@ -12,7 +12,6 @@ import (
 type fixedGrep struct {
 	lineGrep
 	pattern pattern
-	printer printer
 }
 
 func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
@@ -74,7 +73,7 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 			// grep from repaied line.
 			if bytes.Contains(repaired, pattern) {
 				// grep each lines.
-				g.grepEachLines(f, encoding, g.printer, func(b []byte) bool {
+				g.grepEachLines(f, encoding, func(b []byte) bool {
 					return bytes.Contains(b, g.pattern.pattern)
 				}, func(b []byte) int {
 					return bytes.Index(b, g.pattern.pattern) + 1
@@ -86,7 +85,7 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 		// grep from buffer.
 		if bytes.Contains(buf[:c], pattern) {
 			// grep each lines.
-			g.grepEachLines(f, encoding, g.printer, func(b []byte) bool {
+			g.grepEachLines(f, encoding, func(b []byte) bool {
 				return bytes.Contains(b, g.pattern.pattern)
 			}, func(b []byte) int {
 				return bytes.Index(b, g.pattern.pattern) + 1

@@ -40,11 +40,11 @@ files/context/context.txt:8-after
 func assertLineGrep(opts Option, path string, expect string) bool {
 	buf := new(bytes.Buffer)
 	printer := newPrinter(pattern{}, buf, opts)
-	grep := newLineGrep(opts)
+	grep := newLineGrep(printer, opts)
 
 	f, _ := os.Open(path)
 
-	grep.grepEachLines(f, ASCII, printer, func(b []byte) bool {
+	grep.grepEachLines(f, ASCII, func(b []byte) bool {
 		return bytes.Contains(b, []byte("go"))
 	}, func(b []byte) int { return 0 })
 
