@@ -1,4 +1,4 @@
-# The Platinum Searcher
+# The Platinum Searcher [![Build Status](https://travis-ci.org/monochromegane/the_platinum_searcher.svg?branch=master)](https://travis-ci.org/monochromegane/the_platinum_searcher) [![wercker status](https://app.wercker.com/status/59ef90ac217537abc0994546958037f3/s/master "wercker status")](https://app.wercker.com/project/bykey/59ef90ac217537abc0994546958037f3)
 
 A code search tool similar to `ack` and `the_silver_searcher(ag)`. It supports multi platforms and multi encodings.
 
@@ -87,12 +87,6 @@ endif
 ### Emacs + pt.el
 
 You can use pt with [pt.el](https://github.com/bling/pt.el), which can be installed from [MELPA](http://melpa.milkbox.net/).
-
-## Code Status
-
-[![wercker status](https://app.wercker.com/status/59ef90ac217537abc0994546958037f3/m/master "wercker status")](https://app.wercker.com/project/bykey/59ef90ac217537abc0994546958037f3)
-
-[![Build Status](https://travis-ci.org/monochromegane/the_platinum_searcher.svg?branch=master)](https://travis-ci.org/monochromegane/the_platinum_searcher)
 
 ## Contributing
 
