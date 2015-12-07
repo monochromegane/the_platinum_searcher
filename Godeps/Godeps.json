@@ -1,0 +1,51 @@
+{
+	"ImportPath": "github.com/monochromegane/the_platinum_searcher",
+	"GoVersion": "go1.5.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/BurntSushi/toml",
+			"Comment": "v0.1.0-21-g056c9bc",
+			"Rev": "056c9bc7be7190eaa7715723883caffa5f8fa3e4"
+		},
+		{
+			"ImportPath": "github.com/jessevdk/go-flags",
+			"Comment": "v1-324-g0a28dbe",
+			"Rev": "0a28dbe50f23d8fce6b016975b964cfe7b97a20a"
+		},
+		{
+			"ImportPath": "github.com/monochromegane/conflag",
+			"Rev": "6d68c9aa4183844ddc1655481798fe4d90d483e9"
+		},
+		{
+			"ImportPath": "github.com/monochromegane/go-gitignore",
+			"Rev": "1ffeeb6761d4574b515b2cfede9073d2eac5fbfc"
+		},
+		{
+			"ImportPath": "github.com/monochromegane/go-home",
+			"Rev": "25d9dda593924a11ea52e4ffbc8abdb0dbe96401"
+		},
+		{
+			"ImportPath": "github.com/monochromegane/terminal",
+			"Rev": "6d255869fb99937f1f287bd1fe3a034c6c4f68f6"
+		},
+		{
+			"ImportPath": "github.com/shiena/ansicolor",
+			"Rev": "691ac7d4ac14053de3cbe16e07b79246300db97d"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding",
+			"Rev": "c980adc4a823548817b9c47d38c6ca6b7d7d8b6a"
+		},
+		{
+			"ImportPath": "golang.org/x/text/transform",
+			"Rev": "c980adc4a823548817b9c47d38c6ca6b7d7d8b6a"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "c1cd2254a6dd314c9d73c338c12688c9325d85c6"
+		}
+	]
+}
