@@ -26,7 +26,7 @@ func (im ignoreMatchers) Match(path string, isDir bool) bool {
 func newIgnoreMatchers(path string, ignores []string) ignoreMatchers {
 	var matchers ignoreMatchers
 	for _, i := range ignores {
-		if matcher, err := gitignore.NewGitIgnore(filepath.Join(path, i)); err == nil {
+		if matcher, err := gitignore.NewGitIgnore(filepath.Join(path, i), path); err == nil {
 			matchers = append(matchers, matcher)
 		}
 	}
