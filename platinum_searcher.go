@@ -11,6 +11,8 @@ import (
 	"github.com/monochromegane/terminal"
 )
 
+const version = "2.0.0"
+
 const (
 	ExitCodeOK = iota
 	ExitCodeError
@@ -41,7 +43,7 @@ func (p PlatinumSearcher) Run(args []string) int {
 	}
 
 	if opts.Version {
-		fmt.Printf("pt version %s\n", "2.0.0")
+		fmt.Printf("pt version %s\n", version)
 		return ExitCodeOK
 	}
 
