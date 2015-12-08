@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/monochromegane/the_platinum_searcher",
-	"GoVersion": "go1.5.1",
+	"GoVersion": "go1.5.2",
 	"Packages": [
 		"./..."
 	],
@@ -12,12 +12,16 @@
 		},
 		{
 			"ImportPath": "github.com/jessevdk/go-flags",
-			"Comment": "v1-285-g1679536",
-			"Rev": "1679536dcc895411a9f5848d9a0250be7856448c"
+			"Comment": "v1-324-g0a28dbe",
+			"Rev": "0a28dbe50f23d8fce6b016975b964cfe7b97a20a"
 		},
 		{
 			"ImportPath": "github.com/monochromegane/conflag",
-			"Rev": "27de6c14a3bd06cb8a91dddfdd6fe9aaee67cdee"
+			"Rev": "6d68c9aa4183844ddc1655481798fe4d90d483e9"
+		},
+		{
+			"ImportPath": "github.com/monochromegane/go-gitignore",
+			"Rev": "1ffeeb6761d4574b515b2cfede9073d2eac5fbfc"
 		},
 		{
 			"ImportPath": "github.com/monochromegane/go-home",
@@ -29,7 +33,7 @@
 		},
 		{
 			"ImportPath": "github.com/shiena/ansicolor",
-			"Rev": "6046e7d18a7698e98846e5d25842e9cf15aecf2c"
+			"Rev": "691ac7d4ac14053de3cbe16e07b79246300db97d"
 		},
 		{
 			"ImportPath": "golang.org/x/text/encoding",

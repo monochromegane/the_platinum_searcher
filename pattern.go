@@ -1,62 +1,29 @@
 package the_platinum_searcher
 
-import (
-	"regexp"
-)
+import "regexp"
 
-type Pattern struct {
-	Pattern    string
-	Regexp     *regexp.Regexp
-	FileRegexp *regexp.Regexp
-	IgnoreCase bool
-	UseRegexp  bool
+// pattern should be interface, but match(large []byte) method called through interface is too slow.
+type pattern struct {
+	pattern []byte
+	regexp  *regexp.Regexp
+	opts    Option
 }
 
-func NewPattern(pattern, filePattern string, smartCase, ignoreCase, useRegexp bool) (*Pattern, error) {
+func newPattern(p string, opts Option) (pattern, error) {
+	pattern := pattern{pattern: []byte(p), opts: opts}
 
-	if smartCase {
-		if regexp.MustCompile(`[[:upper:]]`).MatchString(pattern) {
-			ignoreCase = false
+	if opts.SearchOption.Regexp {
+		var reg *regexp.Regexp
+		var err error
+		if opts.SearchOption.IgnoreCase {
+			reg, err = regexp.Compile(`(?i)(` + p + `)`)
 		} else {
-			ignoreCase = true
+			reg, err = regexp.Compile(`(` + p + `)`)
 		}
-	}
-
-	var regPattern *regexp.Regexp
-	var patternErr error
-	if useRegexp {
-		if ignoreCase {
-			regPattern, patternErr = regexp.Compile(`(?i)(` + pattern + `)`)
-		} else {
-			regPattern, patternErr = regexp.Compile(`(` + pattern + `)`)
+		if err != nil {
+			return pattern, err
 		}
-	} else if ignoreCase {
-		// not used during matching but used to simplify highlighting in decorator.go
-		regPattern, patternErr = regexp.Compile(`(?i)(` + regexp.QuoteMeta(pattern) + `)`)
+		pattern.regexp = reg
 	}
-
-	var regFile *regexp.Regexp
-	var fileErr error
-	if filePattern != "" {
-		regFile, fileErr = regexp.Compile(filePattern)
-	}
-
-	var err error
-	switch {
-	case patternErr != nil:
-		err = patternErr
-	case fileErr != nil:
-		err = fileErr
-	default:
-		err = nil
-	}
-
-	return &Pattern{
-		Pattern:    pattern,
-		Regexp:     regPattern,
-		FileRegexp: regFile,
-		IgnoreCase: ignoreCase,
-		UseRegexp:  useRegexp,
-	}, err
-
+	return pattern, nil
 }

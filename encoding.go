@@ -1,9 +1,5 @@
 package the_platinum_searcher
 
-import (
-	"os"
-)
-
 const (
 	UNKNOWN = iota
 	ERROR
@@ -14,7 +10,7 @@ const (
 	SHIFTJIS
 )
 
-func IdentifyType(path string) int {
+func detectEncoding(bs []byte) int {
 
 	var (
 		suspiciousBytes = 0
@@ -23,19 +19,7 @@ func IdentifyType(path string) int {
 		likelyShiftjis  = 0
 	)
 
-	file, err := os.Open(path)
-	if err != nil {
-		return ERROR
-	}
-	defer file.Close()
-
-	stat, _ := file.Stat()
-	length := int(stat.Size())
-	if length > 512 {
-		length = 512
-	}
-	bs := make([]byte, length)
-	file.Read(bs)
+	length := len(bs)
 
 	if length == 0 {
 		return ASCII

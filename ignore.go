@@ -1,19 +1,21 @@
 package the_platinum_searcher
 
 import (
-	"bufio"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/monochromegane/go-gitignore"
 	"github.com/monochromegane/go-home"
 )
 
-type ignoreMatchers []ignoreMatcher
+type ignoreMatchers []gitignore.IgnoreMatcher
 
 func (im ignoreMatchers) Match(path string, isDir bool) bool {
 	for _, ig := range im {
+		if ig == nil {
+			return false
+		}
 		if ig.Match(path, isDir) {
 			return true
 		}
@@ -24,73 +26,20 @@ func (im ignoreMatchers) Match(path string, isDir bool) bool {
 func newIgnoreMatchers(path string, ignores []string) ignoreMatchers {
 	var matchers ignoreMatchers
 	for _, i := range ignores {
-		if matcher := newIgnoreMatcher(path, i); matcher != nil {
+		if matcher, err := gitignore.NewGitIgnore(filepath.Join(path, i), path); err == nil {
 			matchers = append(matchers, matcher)
 		}
 	}
 	return matchers
 }
 
-type ignoreMatcher interface {
-	Match(path string, isDir bool) bool
-}
-
-func newIgnoreMatcher(path string, ignore string) ignoreMatcher {
-
-	file, err := os.Open(filepath.Join(path, ignore))
-	if err != nil {
-		return nil
-	}
-
-	defer file.Close()
-	reader := bufio.NewReader(file)
-
-	var patterns []string
-	for {
-		buf, _, err := reader.ReadLine()
-		if err != nil {
-			break
-		}
-		line := strings.Trim(string(buf), " ")
-		if len(line) == 0 {
-			continue
-		}
-		patterns = append(patterns, line)
-	}
-
-	if ignore == ".ptignore" || ignore == ".gitignore" {
-		return newGitIgnore(path, patterns)
-	} else {
-		return genericIgnore(patterns)
-	}
-}
-
-type genericIgnore []string
-
-func (gi genericIgnore) Match(path string, isDir bool) bool {
-	for _, p := range gi {
-		val, _ := filepath.Match(p, filepath.Base(path))
-		if val {
-			return true
-		}
-	}
-	return false
-}
-
-func homePtIgnore() ignoreMatcher {
-	homeDir := home.Dir()
-	if homeDir != "" {
-		return newIgnoreMatcher(homeDir, ".ptignore")
-	}
-	return nil
-}
-
-func globalGitIgnore() ignoreMatcher {
-	homeDir := home.Dir()
-	if homeDir != "" {
+func globalGitIgnore(base string) gitignore.IgnoreMatcher {
+	if homeDir := home.Dir(); homeDir != "" {
 		globalIgnore := globalGitIgnoreName()
 		if globalIgnore != "" {
-			return newIgnoreMatcher(homeDir, globalIgnore)
+			if matcher, err := gitignore.NewGitIgnore(filepath.Join(homeDir, globalIgnore), base); err == nil {
+				return matcher
+			}
 		}
 	}
 	return nil
@@ -103,11 +52,17 @@ func globalGitIgnoreName() string {
 	}
 
 	file, err := exec.Command(gitCmd, "config", "--get", "core.excludesfile").Output()
-	var filename string
 	if err != nil {
-		filename = ""
-	} else {
-		filename = strings.TrimSpace(filepath.Base(string(file)))
+		return ""
 	}
-	return filename
+	return strings.TrimSpace(filepath.Base(string(file)))
+}
+
+func homePtIgnore(base string) gitignore.IgnoreMatcher {
+	if homeDir := home.Dir(); homeDir != "" {
+		if matcher, err := gitignore.NewGitIgnore(filepath.Join(homeDir, ".ptignore"), base); err == nil {
+			return matcher
+		}
+	}
+	return nil
 }

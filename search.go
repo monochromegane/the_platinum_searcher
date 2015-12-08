@@ -1,48 +1,66 @@
 package the_platinum_searcher
 
-type PlatinumSearcher struct {
-	Roots   []string
-	Pattern string
-	Option  *Option
+import (
+	"io"
+	"regexp"
+)
+
+type search struct {
+	roots []string
+	out   io.Writer
 }
 
-func (p *PlatinumSearcher) Search() error {
-	pattern, err := p.pattern()
+func (s search) start(pattern string) error {
+	grepChan := make(chan string, 5000)
+	done := make(chan struct{})
+
+	if opts.SearchOption.WordRegexp {
+		opts.SearchOption.Regexp = true
+		pattern = "\\b" + pattern + "\\b"
+	}
+
+	if opts.SearchOption.SmartCase {
+		if !regexp.MustCompile(`[[:upper:]]`).MatchString(pattern) {
+			opts.SearchOption.IgnoreCase = true
+		}
+	}
+
+	if opts.SearchOption.IgnoreCase {
+		opts.SearchOption.Regexp = true
+	}
+
+	p, err := newPattern(pattern, opts)
 	if err != nil {
 		return err
 	}
-	grep := make(chan *GrepParams, p.Option.Proc)
-	match := make(chan *PrintParams, p.Option.Proc)
-	done := make(chan struct{})
-	go p.find(grep, pattern)
-	go p.grep(grep, match)
-	go p.print(match, done)
-	<-done
-	return nil
-}
 
-func (p *PlatinumSearcher) pattern() (*Pattern, error) {
-	fileRegexp := p.Option.FileSearchRegexp
-	if p.Option.FilesWithRegexp != "" {
-		fileRegexp = p.Option.FilesWithRegexp
+	if opts.OutputOption.Context > 0 {
+		opts.OutputOption.Before = opts.OutputOption.Context
+		opts.OutputOption.After = opts.OutputOption.Context
 	}
-	return NewPattern(
-		p.Pattern,
-		fileRegexp,
-		p.Option.SmartCase,
-		p.Option.IgnoreCase,
-		p.Option.Regexp,
-	)
-}
 
-func (p *PlatinumSearcher) find(out chan *GrepParams, pattern *Pattern) {
-	Find(p.Roots, pattern, out, p.Option)
-}
+	var regFile *regexp.Regexp
+	if opts.SearchOption.FileSearchRegexp != "" {
+		regFile, err = regexp.Compile(opts.SearchOption.FileSearchRegexp)
+		if err != nil {
+			return err
+		}
+	}
 
-func (p *PlatinumSearcher) grep(in chan *GrepParams, out chan *PrintParams) {
-	Grep(in, out, p.Option)
-}
+	go find{
+		out:  grepChan,
+		opts: opts,
+	}.start(s.roots, regFile)
 
-func (p *PlatinumSearcher) print(in chan *PrintParams, done chan struct{}) {
-	Print(in, done, p.Option)
+	go newGrep(
+		p,
+		grepChan,
+		done,
+		opts,
+		newPrinter(p, s.out, opts),
+	).start()
+
+	<-done
+
+	return nil
 }

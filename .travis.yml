@@ -1,12 +1,22 @@
 sudo: false
 language: go
 go:
-  - 1.5.1
+  - 1.5.2
   - 1.4.2
-  - 1.3.3
   - release
   - tip
 env:
   CGO_ENABLED=0
+install:
+  - go get github.com/BurntSushi/toml
+  - go get github.com/jessevdk/go-flags
+  - go get github.com/monochromegane/conflag
+  - go get github.com/monochromegane/go-gitignore
+  - go get github.com/monochromegane/go-home
+  - go get github.com/monochromegane/terminal
+  - go get github.com/shiena/ansicolor
+  - go get golang.org/x/text/encoding
+  - go get golang.org/x/text/transform
+  - go get gopkg.in/yaml.v2
 script:
   - go test -v ./...

@@ -1,57 +1,89 @@
 package the_platinum_searcher
 
+import "github.com/jessevdk/go-flags"
+
+// Top level options
 type Option struct {
-	Color             func()   `long:"color" description:"Print color codes in results (Enabled by default)"`
-	NoColor           func()   `long:"nocolor" description:"Don't print color codes in results (Disabled by default)"`
-	ForceColor        bool     // Force color.  Not user option.
-	EnableColor       bool     // Enable color. Not user option.
-	NoGroup           bool     `long:"nogroup" description:"Don't print file name at header (Disabled by default)"`
-	Column            bool     `long:"column" description:"Print column (Disabled by default)"`
-	FilesWithMatches  bool     `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
-	VcsIgnore         []string `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore" default:".hgignore" default:".ptignore"`
-	NoPtIgnore        bool     `long:"noptignore" description:"Don't use default ($Home/.ptignore) file for ignore patterns"`
-	NoGlobalGitIgnore bool     `long:"noglobal-gitignore" description:"Don't use git's global gitignore file for ignore patterns"`
-	SkipVcsIgnore     func()   `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns. Still obey .ptignore"`
-	skipVcsIgnore     bool     // Skip VCS ignore file. Not user option.
-	Hidden            bool     `short:"H" long:"hidden" description:"Search hidden files and directories"`
-	Ignore            []string `long:"ignore" description:"Ignore files/directories matching pattern"`
-	IgnoreCase        bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
-	SmartCase         bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
-	FilesWithRegexp   string   `short:"g" description:"Print filenames matching PATTERN"`
-	FileSearchRegexp  string   `short:"G" long:"file-search-regexp" description:"PATTERN Limit search to filenames matching PATTERN"`
-	Depth             int      `long:"depth" default:"25" default-mask:"-" description:"Search up to NUM directories deep (Default: 25)"`
-	Follow            bool     `short:"f" long:"follow" description:"Follow symlinks"`
-	After             int      `short:"A" long:"after" description:"Print lines after match"`
-	Before            int      `short:"B" long:"before" description:"Print lines before match"`
-	Context           int      `short:"C" long:"context" description:"Print lines before and after match"`
-	OutputEncode      string   `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
-	SearchStream      bool     // Input from pipe. Not user option.
-	Regexp            bool     `short:"e" description:"Parse PATTERN as a regular expression (Disabled by default). Accepted syntax is the same as https://github.com/google/re2/wiki/Syntax except from \\C"`
-	WordRegexp        bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
-	Proc              int      // Number of goroutine. Not user option.
-	Count             bool     `short:"c" long:"count" description:"Only print the number of matches in each file."`
-	Stats             bool     `long:"stats" description:"Print stats about files scanned, time taken, etc"`
-	Parallel          bool     `long:"parallel" description:"Use as many concurrent finders as possible, this will lead the result disorder"`
-	Version           bool     `long:"version" description:"Show version"`
+	Version      bool          `long:"version" description:"Show version"`
+	OutputOption *OutputOption `group:"Output Options"`
+	SearchOption *SearchOption `group:"Search Options"`
 }
 
-func (o *Option) VcsIgnores() []string {
-	if o.skipVcsIgnore {
-		return []string{}
-	}
-	return o.VcsIgnore
+// Output options.
+type OutputOption struct {
+	Color            func() `long:"color" description:"Print color codes in results (default: true)"`
+	NoColor          func() `long:"nocolor" description:"Don't print color codes in results (default: false)"`
+	EnableColor      bool   // Enable color. Not user option.
+	Group            func() `long:"group" description:"Print file name at header (default: true)"`
+	NoGroup          func() `long:"nogroup" description:"Don't print file name at header (default: false)"`
+	EnableGroup      bool   // Enable group. Not user option.
+	Column           bool   `long:"column" description:"Print column (default: false)"`
+	After            int    `short:"A" long:"after" description:"Print lines after match"`
+	Before           int    `short:"B" long:"before" description:"Print lines before match"`
+	Context          int    `short:"C" long:"context" description:"Print lines before and after match"`
+	FilesWithMatches bool   `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
+	Count            bool   `short:"c" long:"count" description:"Only print the number of matches in each file."`
+	OutputEncode     string `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
 }
 
-func (o *Option) SkipVcsIgnores() {
-	o.skipVcsIgnore = true
-	o.NoGlobalGitIgnore = true
+func newOutputOption() *OutputOption {
+	opt := &OutputOption{}
+
+	opt.Color = opt.SetEnableColor
+	opt.NoColor = opt.SetDisableColor
+	opt.EnableColor = true
+
+	opt.Group = opt.SetEnableGroup
+	opt.NoGroup = opt.SetDisableGroup
+	opt.EnableGroup = true
+
+	return opt
 }
 
-func (o *Option) SetEnableColor() {
-	o.ForceColor = true
+func (o *OutputOption) SetEnableColor() {
 	o.EnableColor = true
 }
 
-func (o *Option) SetDisableColor() {
+func (o *OutputOption) SetDisableColor() {
 	o.EnableColor = false
+}
+
+func (o *OutputOption) SetEnableGroup() {
+	o.EnableGroup = true
+}
+
+func (o *OutputOption) SetDisableGroup() {
+	o.EnableGroup = false
+}
+
+// Search options.
+type SearchOption struct {
+	Regexp           bool     `short:"e" description:"Parse PATTERN as a regular expression (default: false). Accepted syntax is the same as https://github.com/google/re2/wiki/Syntax except from \\C"`
+	IgnoreCase       bool     `short:"i" long:"ignore-case" description:"Match case insensitively"`
+	SmartCase        bool     `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
+	WordRegexp       bool     `short:"w" long:"word-regexp" description:"Only match whole words"`
+	Ignore           []string `long:"ignore" description:"Ignore files/directories matching pattern"`
+	VcsIgnore        []string `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore"`
+	GlobalGitIgnore  bool     `long:"global-gitignore" description:"Use git's global gitignore file for ignore patterns"`
+	HomePtIgnore     bool     `long:"home-ptignore" description:"Use $Home/.ptignore file for ignore patterns"`
+	SkipVcsIgnore    bool     `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns"`
+	FileSearchRegexp string   `short:"G" long:"file-search-regexp" description:"PATTERN Limit search to filenames matching PATTERN"`
+	Depth            int      `long:"depth" default:"25" description:"Search up to NUM directories deep"`
+	Follow           bool     `short:"f" long:"follow" description:"Follow symlinks"`
+	Hidden           bool     `long:"hidden" description:"Search hidden files and directories"`
+}
+
+func newOptionParser(opts *Option) *flags.Parser {
+	output := flags.NewNamedParser("pt", flags.Default)
+	output.AddGroup("Output Options", "", &OutputOption{})
+
+	search := flags.NewNamedParser("pt", flags.Default)
+	search.AddGroup("Search Options", "", &SearchOption{})
+
+	opts.OutputOption = newOutputOption()
+
+	parser := flags.NewParser(opts, flags.Default)
+	parser.Name = "pt"
+	parser.Usage = "[OPTIONS] PATTERN [PATH]"
+	return parser
 }

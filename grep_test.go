@@ -1,74 +1,117 @@
 package the_platinum_searcher
 
 import (
-	"os"
+	"bytes"
+	"strings"
 	"testing"
 )
 
-type GrepAssert struct {
-	path, pattern string
-	fileType      int
-	match         string
+func TestFixedGrep(t *testing.T) {
+	opts := defaultOption()
+	opts.OutputOption.EnableColor = false
+	opts.OutputOption.EnableGroup = false
+
+	pattern, _ := newPattern("go", opts)
+
+	paths := []string{
+		"ascii.txt",
+		"ja/utf8.txt",
+		"ja/euc-jp.txt",
+		"ja/shift_jis.txt",
+		"ja/broken_utf8.txt",
+		"ja/broken_euc-jp.txt",
+		"ja/broken_shift_jis.txt",
+	}
+
+	asserts := []string{
+		"ascii.txt:2:go test",
+		"ja/utf8.txt:2:go テスト",
+		"ja/euc-jp.txt:2:go テスト",
+		"ja/shift_jis.txt:2:go テスト",
+		"ja/broken_utf8.txt:2:go テスト",
+		"ja/broken_euc-jp.txt:2:go テスト",
+		"ja/broken_shift_jis.txt:2:go テスト",
+	}
+
+	if !assertGrep(pattern, opts, paths, asserts) {
+		t.Errorf("Grep result should contain assserts.")
+	}
+
 }
 
-var GrepAsserts = []GrepAssert{
-	GrepAssert{"ascii.txt", "go", ASCII, "go test"},
-	GrepAssert{"ja/euc-jp.txt", "go", EUCJP, "go テスト"},
-	GrepAssert{"ja/shift_jis.txt", "go", SHIFTJIS, "go テスト"},
-	GrepAssert{"ja/utf8.txt", "go", UTF8, "go テスト"},
-	GrepAssert{"ja/broken_euc-jp.txt", "go", EUCJP, "go テスト"},
-	GrepAssert{"ja/broken_shift_jis.txt", "go", SHIFTJIS, "go テスト"},
-	GrepAssert{"ja/broken_utf8.txt", "go", UTF8, "go テスト"},
+func TestFixedGrepLargeFile(t *testing.T) {
+	opts := defaultOption()
+	opts.OutputOption.EnableColor = false
+	opts.OutputOption.EnableGroup = false
+
+	pattern, _ := newPattern("This is a large file.", opts)
+
+	paths := []string{"large/large.txt"}
+
+	asserts := []string{
+		"large/large.txt:10:This is a large file.",
+	}
+
+	if !assertGrep(pattern, opts, paths, asserts) {
+		t.Errorf("Grep result should contain assserts.")
+	}
+
 }
 
-func TestGrep(t *testing.T) {
+func TestExtendedGrep(t *testing.T) {
+	opts := defaultOption()
+	opts.OutputOption.EnableColor = false
+	opts.OutputOption.EnableGroup = false
+	opts.SearchOption.Regexp = true
 
-	for _, g := range GrepAsserts {
-		in := make(chan *GrepParams)
-		out := make(chan *PrintParams)
-		grep := grep{in, out, &Option{Proc: 1}}
+	pattern, _ := newPattern("g.*", opts)
 
-		pattern, _ := NewPattern(g.pattern, "", false, false, false)
-		sem := make(chan struct{}, 1)
-		sem <- struct{}{}
-		go grep.Start("files/"+g.path, g.fileType, pattern, sem)
-		o := <-out
-		if o.Path != "files/"+g.path {
-			t.Errorf("It should be equal files/%s.", g.path)
-		}
-		if o.Matches[0].Match() != g.match {
-			t.Errorf("%s should be equal %s", g.path, g.match)
-		}
+	paths := []string{
+		"ascii.txt",
+		"ja/utf8.txt",
+		"ja/euc-jp.txt",
+		"ja/shift_jis.txt",
+		"ja/broken_utf8.txt",
+		"ja/broken_euc-jp.txt",
+		"ja/broken_shift_jis.txt",
 	}
+
+	asserts := []string{
+		"ascii.txt:2:go test",
+		"ja/utf8.txt:2:go テスト",
+		"ja/euc-jp.txt:2:go テスト",
+		"ja/shift_jis.txt:2:go テスト",
+		"ja/broken_utf8.txt:2:go テスト",
+		"ja/broken_euc-jp.txt:2:go テスト",
+		"ja/broken_shift_jis.txt:2:go テスト",
+	}
+
+	if !assertGrep(pattern, opts, paths, asserts) {
+		t.Errorf("Grep result should contain assserts.")
+	}
+
 }
 
-func TestGrepWithStream(t *testing.T) {
-	fh, err := os.Open("files/ascii.txt")
-	if err != nil {
-		panic(err)
-	}
-	tempStdin := os.Stdin
-	os.Stdin = fh
-	defer func() { os.Stdin = tempStdin }()
-	g := GrepAssert{"", "go", ASCII, "go test"}
-	in := make(chan *GrepParams)
-	out := make(chan *PrintParams)
-	grep := grep{in, out, &Option{Proc: 1, SearchStream: true}}
+func assertGrep(pattern pattern, opts Option, paths, asserts []string) bool {
+	buf := new(bytes.Buffer)
+	printer := newPrinter(pattern, buf, opts)
 
-	pattern, _ := NewPattern(g.pattern, "", false, false, false)
-	sem := make(chan struct{}, 1)
-	sem <- struct{}{}
-	go grep.Start(g.path, g.fileType, pattern, sem)
-	o := <-out
-	if o.Path != g.path {
-		t.Errorf("It should be equal %s.", g.path)
-	}
-	if o.Matches[0].Match() != g.match {
-		t.Errorf("%s should be equal %s", g.path, g.match)
-	}
-}
+	in := make(chan string)
+	done := make(chan struct{})
+	grep := newGrep(pattern, in, done, opts, printer)
+	go grep.start()
 
-func receive(in chan *GrepParams, params *GrepParams) {
-	in <- params
+	for _, path := range paths {
+		in <- "files/" + path
+	}
 	close(in)
+	<-done
+
+	result := buf.String()
+	for _, assert := range asserts {
+		if !strings.Contains(result, assert) {
+			return false
+		}
+	}
+	return true
 }

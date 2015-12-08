@@ -1,110 +1,56 @@
 package the_platinum_searcher
 
-import (
-	"bufio"
-	"os"
-	"sync"
+import "sync"
 
-	"golang.org/x/text/encoding/japanese"
-	"golang.org/x/text/transform"
-)
-
-type GrepParams struct {
-	Path    string
-	Encode  int
-	Pattern *Pattern
-}
+var newLine = []byte("\n")
 
 type grep struct {
-	In     chan *GrepParams
-	Out    chan *PrintParams
-	Option *Option
+	in      chan string
+	done    chan struct{}
+	grepper grepper
+	opts    Option
 }
 
-func Grep(in chan *GrepParams, out chan *PrintParams, option *Option) {
-	grep := grep{
-		In:     in,
-		Out:    out,
-		Option: option,
+func newGrep(pattern pattern, in chan string, done chan struct{}, opts Option, printer printer) grep {
+	return grep{
+		in:   in,
+		done: done,
+		grepper: newGrepper(
+			pattern,
+			printer,
+			opts,
+		),
+		opts: opts,
 	}
-	grep.ConcurrentStart()
 }
 
-var FilesSearched uint
+func (g grep) start() {
+	sem := make(chan struct{}, 208)
+	wg := &sync.WaitGroup{}
 
-func (g *grep) ConcurrentStart() {
-	var wg sync.WaitGroup
-	FilesSearched = 0
-	sem := make(chan struct{}, g.Option.Proc)
-	for arg := range g.In {
+	for path := range g.in {
 		sem <- struct{}{}
 		wg.Add(1)
-		FilesSearched++
-		go func(g *grep, arg *GrepParams, sem chan struct{}) {
-			defer wg.Done()
-			g.Start(arg.Path, arg.Encode, arg.Pattern, sem)
-		}(g, arg, sem)
+		go g.grepper.grep(path, sem, wg)
 	}
 	wg.Wait()
-	close(g.Out)
+	g.done <- struct{}{}
 }
 
-func (g *grep) Start(path string, encode int, pattern *Pattern, sem chan struct{}) {
-	if g.Option.FilesWithRegexp != "" {
-		g.Out <- &PrintParams{pattern, path, nil}
-		<-sem
-		return
-	}
+type grepper interface {
+	grep(path string, sem chan struct{}, wg *sync.WaitGroup)
+}
 
-	fh, err := getFileHandler(path, g.Option)
-	if err != nil {
-		panic(err)
-	}
-
-	var f *bufio.Reader
-	if dec := getDecoder(encode); dec != nil {
-		f = bufio.NewReader(transform.NewReader(fh, dec))
-	} else {
-		f = bufio.NewReader(fh)
-	}
-
-	var buf []byte
-	matches := make([]*Match, 0)
-	m := NewMatch(g.Option.Before, g.Option.After, g.Option.Column)
-	var lineNum = 1
-	for {
-		buf, _, err = f.ReadLine()
-		if err != nil {
-			break
+func newGrepper(pattern pattern, printer printer, opts Option) grepper {
+	if opts.SearchOption.Regexp {
+		return extendedGrep{
+			pattern:  pattern,
+			lineGrep: newLineGrep(printer, opts),
 		}
-		if newMatch, ok := m.IsMatch(pattern, lineNum, string(buf)); ok {
-			matches = append(matches, m)
-			m = newMatch
-		}
-		lineNum++
-	}
-	if m.Matched {
-		matches = append(matches, m)
-	}
-	g.Out <- &PrintParams{pattern, path, matches}
-	fh.Close()
-	<-sem
-}
-
-func getDecoder(encode int) transform.Transformer {
-	switch encode {
-	case EUCJP:
-		return japanese.EUCJP.NewDecoder()
-	case SHIFTJIS:
-		return japanese.ShiftJIS.NewDecoder()
-	}
-	return nil
-}
-
-func getFileHandler(path string, opt *Option) (*os.File, error) {
-	if opt.SearchStream {
-		return os.Stdin, nil
 	} else {
-		return os.Open(path)
+		return fixedGrep{
+			pattern:  pattern,
+			lineGrep: newLineGrep(printer, opts),
+		}
 	}
 }

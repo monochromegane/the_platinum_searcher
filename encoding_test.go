@@ -1,6 +1,8 @@
 package the_platinum_searcher
 
 import (
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 )
 
@@ -22,9 +24,10 @@ var Asserts = []Assert{
 
 func TestIdentifyType(t *testing.T) {
 	for _, f := range Asserts {
-		fileType := IdentifyType("files/" + f.path)
+		b, _ := ioutil.ReadFile(filepath.Join("files", f.path))
+		fileType := detectEncoding(b)
 		if fileType != f.fileType {
-			t.Errorf("%s should be %s.", f.path, f.fileType)
+			t.Errorf("%s should be %d.", f.path, f.fileType)
 		}
 	}
 }
