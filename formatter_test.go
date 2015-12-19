@@ -115,3 +115,43 @@ func ExampleFormatNoGroupWithColumn() {
 	// filename:2:1:go test
 	// filename:3-after
 }
+
+func ExampleFormatMatchLine() {
+	opts := defaultOption()
+	opts.OutputOption.EnableColor = false
+	opts.SearchOption.SearchStream = true
+
+	match := match{path: "/dev/stdin"}
+	match.add(1, 0, "before", false) // before
+	match.add(2, 0, "go test", true) // no column
+	match.add(3, 0, "after", false)  // after
+
+	pattern, _ := newPattern("go", opts)
+	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p.print(match)
+
+	// Output:
+	// before
+	// go test
+	// after
+}
+
+func ExampleFormatMatchLineWithColumn() {
+	opts := defaultOption()
+	opts.OutputOption.EnableColor = false
+	opts.SearchOption.SearchStream = true
+
+	match := match{path: "/dev/stdin"}
+	match.add(1, 0, "before", false) // before
+	match.add(2, 1, "go test", true) // no column
+	match.add(3, 0, "after", false)  // after
+
+	pattern, _ := newPattern("go", opts)
+	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p.print(match)
+
+	// Output:
+	// before
+	// 1:go test
+	// after
+}

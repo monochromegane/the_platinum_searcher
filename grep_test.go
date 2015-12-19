@@ -2,6 +2,7 @@ package the_platinum_searcher
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 )
@@ -92,6 +93,30 @@ func TestExtendedGrep(t *testing.T) {
 
 }
 
+func TestStdinGrep(t *testing.T) {
+	// emulate stdin
+	stashStdin := os.Stdin
+	fh, _ := os.Open("files/ascii.txt")
+	os.Stdin = fh
+	defer func() { os.Stdin = stashStdin }()
+
+	opts := defaultOption()
+	opts.OutputOption.EnableColor = false
+	opts.SearchOption.SearchStream = true
+
+	pattern, _ := newPattern("go", opts)
+
+	paths := []string{""} // from stdin
+
+	asserts := []string{
+		"go test",
+	}
+
+	if !assertGrep(pattern, opts, paths, asserts) {
+		t.Errorf("Grep result should contain assserts.")
+	}
+}
+
 func assertGrep(pattern pattern, opts Option, paths, asserts []string) bool {
 	buf := new(bytes.Buffer)
 	printer := newPrinter(pattern, buf, opts)
@@ -102,7 +127,11 @@ func assertGrep(pattern pattern, opts Option, paths, asserts []string) bool {
 	go grep.start()
 
 	for _, path := range paths {
-		in <- "files/" + path
+		if path == "" {
+			in <- path
+		} else {
+			in <- "files/" + path
+		}
 	}
 	close(in)
 	<-done

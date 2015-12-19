@@ -17,7 +17,9 @@ type find struct {
 func (f find) start(roots []string, regexp *regexp.Regexp) {
 	defer close(f.out)
 
-	if len(roots) == 1 {
+	if f.opts.SearchOption.SearchStream {
+		f.out <- ""
+	} else if len(roots) == 1 {
 		f.findFile(roots[0], regexp)
 	} else {
 		f.findFiles(roots, regexp)

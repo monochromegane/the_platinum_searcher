@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/monochromegane/conflag"
 	"github.com/monochromegane/go-home"
@@ -47,7 +48,7 @@ func (p PlatinumSearcher) Run(args []string) int {
 		return ExitCodeOK
 	}
 
-	if len(args) == 0 {
+	if len(args) == 0 && !opts.SearchOption.EnableFilesWithRegexp {
 		parser.WriteHelp(p.Err)
 		return ExitCodeError
 	}
@@ -55,6 +56,14 @@ func (p PlatinumSearcher) Run(args []string) int {
 	if !terminal.IsTerminal(os.Stdout) {
 		opts.OutputOption.EnableColor = false
 		opts.OutputOption.EnableGroup = false
+	}
+
+	if p.givenStdin() {
+		opts.SearchOption.SearchStream = true
+	}
+
+	if opts.SearchOption.EnableFilesWithRegexp {
+		args = append([]string{""}, args...)
 	}
 
 	search := search{
@@ -78,4 +87,23 @@ func (p PlatinumSearcher) rootsFrom(args []string) []string {
 	} else {
 		return []string{"."}
 	}
+}
+
+func (p PlatinumSearcher) givenStdin() bool {
+	fi, err := os.Stdin.Stat()
+	if runtime.GOOS == "windows" {
+		if err == nil {
+			return true
+		}
+	} else {
+		if err != nil {
+			return false
+		}
+
+		mode := fi.Mode()
+		if (mode&os.ModeNamedPipe != 0) || mode.IsRegular() {
+			return true
+		}
+	}
+	return false
 }

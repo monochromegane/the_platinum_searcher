@@ -15,7 +15,7 @@ type fixedGrep struct {
 }
 
 func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
-	f, err := os.Open(path)
+	f, err := getFileHandler(path)
 	if err != nil {
 		log.Fatalf("open: %s\n", err)
 	}
@@ -25,6 +25,16 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 		<-sem
 		wg.Done()
 	}()
+
+	if f == os.Stdin {
+		// TODO: File type is fixed in ASCII because it can not determine the character code.
+		g.grepEachLines(f, ASCII, func(b []byte) bool {
+			return bytes.Contains(b, g.pattern.pattern)
+		}, func(b []byte) int {
+			return bytes.Index(b, g.pattern.pattern) + 1
+		})
+		return
+	}
 
 	buf := make([]byte, 8196)
 	var stash []byte

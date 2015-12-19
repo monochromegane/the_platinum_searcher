@@ -42,7 +42,11 @@ type grepper interface {
 }
 
 func newGrepper(pattern pattern, printer printer, opts Option) grepper {
-	if opts.SearchOption.Regexp {
+	if opts.SearchOption.EnableFilesWithRegexp {
+		return passthroughGrep{
+			printer: printer,
+		}
+	} else if opts.SearchOption.Regexp {
 		return extendedGrep{
 			pattern:  pattern,
 			lineGrep: newLineGrep(printer, opts),
