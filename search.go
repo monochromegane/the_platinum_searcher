@@ -46,6 +46,15 @@ func (s search) start(pattern string) error {
 			return err
 		}
 	}
+	if opts.SearchOption.EnableFilesWithRegexp {
+		opts.OutputOption.FilesWithMatches = true
+		if opts.SearchOption.PatternFilesWithRegexp != "" {
+			regFile, err = regexp.Compile(opts.SearchOption.PatternFilesWithRegexp)
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	go find{
 		out:  grepChan,

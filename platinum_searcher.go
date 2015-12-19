@@ -48,7 +48,7 @@ func (p PlatinumSearcher) Run(args []string) int {
 		return ExitCodeOK
 	}
 
-	if len(args) == 0 {
+	if len(args) == 0 && !opts.SearchOption.EnableFilesWithRegexp {
 		parser.WriteHelp(p.Err)
 		return ExitCodeError
 	}
@@ -60,6 +60,10 @@ func (p PlatinumSearcher) Run(args []string) int {
 
 	if p.givenStdin() {
 		opts.SearchOption.SearchStream = true
+	}
+
+	if opts.SearchOption.EnableFilesWithRegexp {
+		args = append([]string{""}, args...)
 	}
 
 	search := search{
