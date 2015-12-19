@@ -18,6 +18,8 @@ func newFormatPrinter(pattern pattern, w io.Writer, opts Option) formatPrinter {
 	decorator := newDecorator(pattern, opts)
 
 	switch {
+	case opts.SearchOption.SearchStream:
+		return matchLine{decorator: decorator, w: writer}
 	case opts.OutputOption.FilesWithMatches:
 		return fileWithMatch{decorator: decorator, w: writer}
 	case opts.OutputOption.Count:
@@ -26,6 +28,24 @@ func newFormatPrinter(pattern pattern, w io.Writer, opts Option) formatPrinter {
 		return group{decorator: decorator, w: writer}
 	default:
 		return noGroup{decorator: decorator, w: writer}
+	}
+}
+
+type matchLine struct {
+	w         io.Writer
+	decorator decorator
+}
+
+func (f matchLine) print(match match) {
+	for _, line := range match.lines {
+		column := ""
+		if line.matched && line.column > 0 {
+			column = f.decorator.columnNumber(line.column) + SeparatorColon
+		}
+		fmt.Fprintln(f.w,
+			column+
+				f.decorator.match(line.text, line.matched),
+		)
 	}
 }
 

@@ -71,6 +71,7 @@ type SearchOption struct {
 	Depth            int      `long:"depth" default:"25" description:"Search up to NUM directories deep"`
 	Follow           bool     `short:"f" long:"follow" description:"Follow symlinks"`
 	Hidden           bool     `long:"hidden" description:"Search hidden files and directories"`
+	SearchStream     bool     // Input from pipe. Not user option.
 }
 
 func newOptionParser(opts *Option) *flags.Parser {

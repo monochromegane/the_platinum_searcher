@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/monochromegane/conflag"
 	"github.com/monochromegane/go-home"
@@ -57,6 +58,10 @@ func (p PlatinumSearcher) Run(args []string) int {
 		opts.OutputOption.EnableGroup = false
 	}
 
+	if p.givenStdin() {
+		opts.SearchOption.SearchStream = true
+	}
+
 	search := search{
 		roots: p.rootsFrom(args),
 		out:   p.Out,
@@ -78,4 +83,23 @@ func (p PlatinumSearcher) rootsFrom(args []string) []string {
 	} else {
 		return []string{"."}
 	}
+}
+
+func (p PlatinumSearcher) givenStdin() bool {
+	fi, err := os.Stdin.Stat()
+	if runtime.GOOS == "windows" {
+		if err == nil {
+			return true
+		}
+	} else {
+		if err != nil {
+			return false
+		}
+
+		mode := fi.Mode()
+		if (mode&os.ModeNamedPipe != 0) || mode.IsRegular() {
+			return true
+		}
+	}
+	return false
 }
