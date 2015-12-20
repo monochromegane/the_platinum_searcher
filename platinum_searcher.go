@@ -39,7 +39,6 @@ func (p PlatinumSearcher) Run(args []string) int {
 
 	args, err := parser.ParseArgs(args)
 	if err != nil {
-		fmt.Fprintf(p.Err, "%s\n", err)
 		return ExitCodeError
 	}
 
