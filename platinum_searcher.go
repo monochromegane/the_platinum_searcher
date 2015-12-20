@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/monochromegane/conflag"
 	"github.com/monochromegane/go-home"
@@ -39,7 +40,9 @@ func (p PlatinumSearcher) Run(args []string) int {
 
 	args, err := parser.ParseArgs(args)
 	if err != nil {
-		fmt.Fprintf(p.Err, "%s\n", err)
+		if !strings.Contains(err.Error(), "Usage:") {
+			fmt.Fprintf(p.Err, "%s\n", err)
+		}
 		return ExitCodeError
 	}
 
