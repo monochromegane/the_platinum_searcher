@@ -65,6 +65,12 @@ func (p PlatinumSearcher) Run(args []string) int {
 		args = append([]string{""}, args...)
 	}
 
+	if opts.OutputOption.Count {
+		opts.OutputOption.Before = 0
+		opts.OutputOption.After = 0
+		opts.OutputOption.Context = 0
+	}
+
 	search := search{
 		roots: p.rootsFrom(args),
 		out:   p.Out,
