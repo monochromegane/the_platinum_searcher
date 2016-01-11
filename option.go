@@ -22,7 +22,7 @@ type OutputOption struct {
 	Before           int    `short:"B" long:"before" description:"Print lines before match"`
 	Context          int    `short:"C" long:"context" description:"Print lines before and after match"`
 	FilesWithMatches bool   `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
-	Count            bool   `short:"c" long:"count" description:"Only print the number of matches in each file."`
+	Count            bool   `short:"c" long:"count" description:"Only print the number of matching lines for each input file."`
 	OutputEncode     string `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
 }
 
