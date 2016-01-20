@@ -57,7 +57,7 @@ func (p PlatinumSearcher) Run(args []string) int {
 		opts.OutputOption.EnableGroup = false
 	}
 
-	if p.givenStdin() {
+	if p.givenStdin() && p.noRootPathIn(args) {
 		opts.SearchOption.SearchStream = true
 	}
 
@@ -111,4 +111,8 @@ func (p PlatinumSearcher) givenStdin() bool {
 		}
 	}
 	return false
+}
+
+func (p PlatinumSearcher) noRootPathIn(args []string) bool {
+	return len(args) == 1
 }
