@@ -56,7 +56,12 @@ func newColor(pattern pattern, option Option) color {
 }
 
 func ansiEscape(code string) string {
-	return "\x1b[" + code + "m"
+	re := regexp.MustCompile("[^0-9;]")
+	sanitized := re.ReplaceAllString(code, "")
+	if sanitized == "" {
+		sanitized = "0" // all attributes off
+	}
+	return "\x1b[" + sanitized + "m"
 }
 
 func (c color) path(path string) string {
