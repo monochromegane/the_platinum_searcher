@@ -11,19 +11,25 @@ type Option struct {
 
 // Output options.
 type OutputOption struct {
-	Color            func() `long:"color" description:"Print color codes in results (default: true)"`
-	NoColor          func() `long:"nocolor" description:"Don't print color codes in results (default: false)"`
-	EnableColor      bool   // Enable color. Not user option.
-	Group            func() `long:"group" description:"Print file name at header (default: true)"`
-	NoGroup          func() `long:"nogroup" description:"Don't print file name at header (default: false)"`
-	EnableGroup      bool   // Enable group. Not user option.
-	Column           bool   `long:"column" description:"Print column (default: false)"`
-	After            int    `short:"A" long:"after" description:"Print lines after match"`
-	Before           int    `short:"B" long:"before" description:"Print lines before match"`
-	Context          int    `short:"C" long:"context" description:"Print lines before and after match"`
-	FilesWithMatches bool   `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
-	Count            bool   `short:"c" long:"count" description:"Only print the number of matching lines for each input file."`
-	OutputEncode     string `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
+	Color               func()       `long:"color" description:"Print color codes in results (default: true)"`
+	NoColor             func()       `long:"nocolor" description:"Don't print color codes in results (default: false)"`
+	EnableColor         bool         // Enable color. Not user option.
+	ColorLineNumber     func(string) `long:"color-line-number" description:"Color codes for line numbers (default: 1;33)"`
+	ColorPath           func(string) `long:"color-path" description:"Color codes for path names (default: 1;32)"`
+	ColorMatch          func(string) `long:"color-match" description:"Color codes for result matches (default: 30;43)"`
+	ColorCodeLineNumber string       // Color line numbers. Not user option.
+	ColorCodePath       string       // Color path names. Not user option.
+	ColorCodeMatch      string       // Color result matches. Not user option.
+	Group               func()       `long:"group" description:"Print file name at header (default: true)"`
+	NoGroup             func()       `long:"nogroup" description:"Don't print file name at header (default: false)"`
+	EnableGroup         bool         // Enable group. Not user option.
+	Column              bool         `long:"column" description:"Print column (default: false)"`
+	After               int          `short:"A" long:"after" description:"Print lines after match"`
+	Before              int          `short:"B" long:"before" description:"Print lines before match"`
+	Context             int          `short:"C" long:"context" description:"Print lines before and after match"`
+	FilesWithMatches    bool         `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
+	Count               bool         `short:"c" long:"count" description:"Only print the number of matching lines for each input file."`
+	OutputEncode        string       `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
 }
 
 func newOutputOption() *OutputOption {
@@ -36,6 +42,13 @@ func newOutputOption() *OutputOption {
 	opt.Group = opt.SetEnableGroup
 	opt.NoGroup = opt.SetDisableGroup
 	opt.EnableGroup = true
+
+	opt.ColorLineNumber = opt.SetColorLineNumber
+	opt.ColorPath = opt.SetColorPath
+	opt.ColorMatch = opt.SetColorMatch
+	opt.ColorCodeLineNumber = "1;33" // yellow with black background
+	opt.ColorCodePath = "1;32"       // bold green
+	opt.ColorCodeMatch = "30;43"     // black with yellow background
 
 	return opt
 }
@@ -54,6 +67,18 @@ func (o *OutputOption) SetEnableGroup() {
 
 func (o *OutputOption) SetDisableGroup() {
 	o.EnableGroup = false
+}
+
+func (o *OutputOption) SetColorLineNumber(code string) {
+	o.ColorCodeLineNumber = code
+}
+
+func (o *OutputOption) SetColorPath(code string) {
+	o.ColorCodePath = code
+}
+
+func (o *OutputOption) SetColorMatch(code string) {
+	o.ColorCodeMatch = code
 }
 
 // Search options.
