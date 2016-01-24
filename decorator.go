@@ -7,10 +7,7 @@ import (
 )
 
 const (
-	ColorReset      = "\x1b[0m\x1b[K"
-	ColorLineNumber = "\x1b[1;33m"  /* yellow with black background */
-	ColorPath       = "\x1b[1;32m"  /* bold green */
-	ColorMatch      = "\x1b[30;43m" /* black with yellow background */
+	ColorReset = "\x1b[0m\x1b[K"
 
 	SeparatorColon  = ":"
 	SeparatorHyphen = "-"
@@ -25,7 +22,7 @@ type decorator interface {
 
 func newDecorator(pattern pattern, option Option) decorator {
 	if option.OutputOption.EnableColor {
-		return newColor(pattern)
+		return newColor(pattern, option)
 	} else {
 		return plain{}
 	}
@@ -35,27 +32,44 @@ type color struct {
 	from   string
 	to     string
 	regexp *regexp.Regexp
+
+	colorLineNumber string
+	colorPath       string
+	colorMatch      string
 }
 
-func newColor(pattern pattern) color {
-	color := color{}
+func newColor(pattern pattern, option Option) color {
+	color := color{
+		colorLineNumber: ansiEscape(option.OutputOption.ColorCodeLineNumber),
+		colorPath:       ansiEscape(option.OutputOption.ColorCodePath),
+		colorMatch:      ansiEscape(option.OutputOption.ColorCodeMatch),
+	}
 	if pattern.regexp == nil {
 		p := string(pattern.pattern)
 		color.from = p
-		color.to = ColorMatch + p + ColorReset
+		color.to = color.colorMatch + p + ColorReset
 	} else {
-		color.to = ColorMatch + "${1}" + ColorReset
+		color.to = color.colorMatch + "${1}" + ColorReset
 		color.regexp = pattern.regexp
 	}
 	return color
 }
 
+func ansiEscape(code string) string {
+	re := regexp.MustCompile("[^0-9;]")
+	sanitized := re.ReplaceAllString(code, "")
+	if sanitized == "" {
+		sanitized = "0" // all attributes off
+	}
+	return "\x1b[" + sanitized + "m"
+}
+
 func (c color) path(path string) string {
-	return ColorPath + path + ColorReset
+	return c.colorPath + path + ColorReset
 }
 
 func (c color) lineNumber(lineNum int) string {
-	return ColorLineNumber + strconv.Itoa(lineNum) + ColorReset
+	return c.colorLineNumber + strconv.Itoa(lineNum) + ColorReset
 }
 
 func (c color) columnNumber(columnNum int) string {
