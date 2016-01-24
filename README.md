@@ -40,6 +40,7 @@ The file is TOML format like the following.
 color = true
 context = 3
 ignore = ["dir1", "dir2"]
+color-path = "1;34"
 ```
 
 The options are same as command line options.
