@@ -109,5 +109,8 @@ func (f find) findFile(root string, regexp *regexp.Regexp) {
 }
 
 func isHidden(name string) bool {
+	if name == "." || name == ".." {
+		return false
+	}
 	return len(name) > 1 && name[0] == '.'
 }
