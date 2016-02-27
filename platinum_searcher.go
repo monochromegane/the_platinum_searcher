@@ -53,8 +53,12 @@ func (p PlatinumSearcher) Run(args []string) int {
 	}
 
 	if !terminal.IsTerminal(os.Stdout) {
-		opts.OutputOption.EnableColor = false
-		opts.OutputOption.EnableGroup = false
+		if !opts.OutputOption.ForceColor {
+			opts.OutputOption.EnableColor = false
+		}
+		if !opts.OutputOption.ForceGroup {
+			opts.OutputOption.EnableGroup = false
+		}
 	}
 
 	if p.givenStdin() && p.noRootPathIn(args) {
