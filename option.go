@@ -13,6 +13,7 @@ type Option struct {
 type OutputOption struct {
 	Color               func()       `long:"color" description:"Print color codes in results (default: true)"`
 	NoColor             func()       `long:"nocolor" description:"Don't print color codes in results (default: false)"`
+	ForceColor          bool         // Force color. Not user option.
 	EnableColor         bool         // Enable color. Not user option.
 	ColorLineNumber     func(string) `long:"color-line-number" description:"Color codes for line numbers (default: 1;33)"`
 	ColorPath           func(string) `long:"color-path" description:"Color codes for path names (default: 1;32)"`
@@ -22,6 +23,7 @@ type OutputOption struct {
 	ColorCodeMatch      string       // Color result matches. Not user option.
 	Group               func()       `long:"group" description:"Print file name at header (default: true)"`
 	NoGroup             func()       `long:"nogroup" description:"Don't print file name at header (default: false)"`
+	ForceGroup          bool         // Force group. Not user option.
 	EnableGroup         bool         // Enable group. Not user option.
 	Column              bool         `long:"column" description:"Print column (default: false)"`
 	After               int          `short:"A" long:"after" description:"Print lines after match"`
@@ -54,6 +56,7 @@ func newOutputOption() *OutputOption {
 }
 
 func (o *OutputOption) SetEnableColor() {
+	o.ForceColor = true
 	o.EnableColor = true
 }
 
@@ -62,6 +65,7 @@ func (o *OutputOption) SetDisableColor() {
 }
 
 func (o *OutputOption) SetEnableGroup() {
+	o.ForceGroup = true
 	o.EnableGroup = true
 }
 
