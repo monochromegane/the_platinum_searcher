@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"sync"
 )
 
 type fixedGrep struct {
@@ -14,7 +13,7 @@ type fixedGrep struct {
 	pattern pattern
 }
 
-func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
+func (g fixedGrep) grep(path string) {
 	f, err := getFileHandler(path)
 	if err != nil {
 		log.Fatalf("open: %s\n", err)
@@ -22,8 +21,6 @@ func (g fixedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 
 	defer func() {
 		f.Close()
-		<-sem
-		wg.Done()
 	}()
 
 	if f == os.Stdin {

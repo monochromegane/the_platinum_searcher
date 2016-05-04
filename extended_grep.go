@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"sync"
 )
 
 type extendedGrep struct {
@@ -12,7 +11,7 @@ type extendedGrep struct {
 	pattern pattern
 }
 
-func (g extendedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
+func (g extendedGrep) grep(path string) {
 	f, err := getFileHandler(path)
 	if err != nil {
 		log.Fatalf("open: %s\n", err)
@@ -20,8 +19,6 @@ func (g extendedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
 
 	defer func() {
 		f.Close()
-		<-sem
-		wg.Done()
 	}()
 
 	if f == os.Stdin {
