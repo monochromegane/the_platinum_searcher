@@ -16,10 +16,7 @@ func (g extendedGrep) grep(path string) {
 	if err != nil {
 		log.Fatalf("open: %s\n", err)
 	}
-
-	defer func() {
-		f.Close()
-	}()
+	defer f.Close()
 
 	if f == os.Stdin {
 		// TODO: File type is fixed in ASCII because it can not determine the character code.
