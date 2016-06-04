@@ -31,9 +31,12 @@ $ pt OPTIONS PATTERN PATH
 
 ## Configuration
 
-### .ptconfig.toml
+If you put configuration file on the following directories, pt use option in the file.
 
-If you put .ptconfig.toml on $HOME or current directory, pt use option in the file.
+- $XDG\_CONFIG\_HOME/pt/config.toml
+- $HOME/.ptconfig.toml
+- .ptconfig.toml (current directory)
+
 The file is TOML format like the following.
 
 ```toml
