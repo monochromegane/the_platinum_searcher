@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"sync"
 )
 
 type extendedGrep struct {
@@ -12,17 +11,12 @@ type extendedGrep struct {
 	pattern pattern
 }
 
-func (g extendedGrep) grep(path string, sem chan struct{}, wg *sync.WaitGroup) {
+func (g extendedGrep) grep(path string) {
 	f, err := getFileHandler(path)
 	if err != nil {
 		log.Fatalf("open: %s\n", err)
 	}
-
-	defer func() {
-		f.Close()
-		<-sem
-		wg.Done()
-	}()
+	defer f.Close()
 
 	if f == os.Stdin {
 		// TODO: File type is fixed in ASCII because it can not determine the character code.

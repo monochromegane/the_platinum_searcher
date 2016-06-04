@@ -31,14 +31,18 @@ func (g grep) start() {
 	for path := range g.in {
 		sem <- struct{}{}
 		wg.Add(1)
-		go g.grepper.grep(path, sem, wg)
+		go func(path string) {
+			defer wg.Done()
+			defer func() { <-sem }()
+			g.grepper.grep(path)
+		}(path)
 	}
 	wg.Wait()
 	g.done <- struct{}{}
 }
 
 type grepper interface {
-	grep(path string, sem chan struct{}, wg *sync.WaitGroup)
+	grep(path string)
 }
 
 func newGrepper(pattern pattern, printer printer, opts Option) grepper {
