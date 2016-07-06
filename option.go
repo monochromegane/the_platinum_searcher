@@ -22,6 +22,8 @@ type OutputOption struct {
 	ColorCodePath       string       // Color path names. Not user option.
 	ColorCodeMatch      string       // Color result matches. Not user option.
 	Group               func()       `long:"group" description:"Print file name at header (default: true)"`
+	Null                func()       `long:"null" description:"Separate filenames with null (for 'xargs -0') (default: false)"`
+	EnableNull          bool         // Enable null. Not user option.
 	NoGroup             func()       `long:"nogroup" description:"Don't print file name at header (default: false)"`
 	ForceGroup          bool         // Force group. Not user option.
 	EnableGroup         bool         // Enable group. Not user option.
@@ -51,8 +53,14 @@ func newOutputOption() *OutputOption {
 	opt.ColorCodeLineNumber = "1;33" // yellow with black background
 	opt.ColorCodePath = "1;32"       // bold green
 	opt.ColorCodeMatch = "30;43"     // black with yellow background
+	opt.Null = opt.SetNull
+	opt.EnableNull = false
 
 	return opt
+}
+
+func (o *OutputOption) SetNull() {
+	o.EnableNull = true
 }
 
 func (o *OutputOption) SetEnableColor() {
