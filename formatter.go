@@ -21,11 +21,11 @@ func newFormatPrinter(pattern pattern, w io.Writer, opts Option) formatPrinter {
 	case opts.SearchOption.SearchStream:
 		return matchLine{decorator: decorator, w: writer}
 	case opts.OutputOption.FilesWithMatches:
-		return fileWithMatch{decorator: decorator, w: writer}
+		return fileWithMatch{decorator: decorator, w: writer, useNull: opts.OutputOption.Null}
 	case opts.OutputOption.Count:
 		return count{decorator: decorator, w: writer}
 	case opts.OutputOption.EnableGroup:
-		return group{decorator: decorator, w: writer, useNull: opts.OutputOption.EnableNull}
+		return group{decorator: decorator, w: writer, useNull: opts.OutputOption.Null}
 	default:
 		return noGroup{decorator: decorator, w: writer}
 	}
@@ -52,10 +52,16 @@ func (f matchLine) print(match match) {
 type fileWithMatch struct {
 	w         io.Writer
 	decorator decorator
+	useNull   bool
 }
 
 func (f fileWithMatch) print(match match) {
-	fmt.Fprintln(f.w, f.decorator.path(match.path))
+	if f.useNull {
+		fmt.Fprint(f.w, f.decorator.path(match.path))
+		fmt.Fprint(f.w, "\x00")
+	} else {
+		fmt.Fprintln(f.w, f.decorator.path(match.path))
+	}
 }
 
 type count struct {
