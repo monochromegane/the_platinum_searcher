@@ -25,7 +25,7 @@ func newFormatPrinter(pattern pattern, w io.Writer, opts Option) formatPrinter {
 	case opts.OutputOption.Count:
 		return count{decorator: decorator, w: writer}
 	case opts.OutputOption.EnableGroup:
-		return group{decorator: decorator, w: writer, useNull: opts.OutputOption.Null}
+		return group{decorator: decorator, w: writer, useNull: opts.OutputOption.Null, hideLineNumber: opts.OutputOption.NoLineNumber}
 	default:
 		return noGroup{decorator: decorator, w: writer}
 	}
@@ -79,9 +79,10 @@ func (f count) print(match match) {
 }
 
 type group struct {
-	w         io.Writer
-	decorator decorator
-	useNull   bool
+	w              io.Writer
+	decorator      decorator
+	useNull        bool
+	hideLineNumber bool
 }
 
 func (f group) print(match match) {
@@ -101,9 +102,12 @@ func (f group) print(match match) {
 		if line.matched && line.column > 0 {
 			column = f.decorator.columnNumber(line.column) + SeparatorColon
 		}
+		lineNum := ""
+		if !f.hideLineNumber {
+			lineNum = f.decorator.lineNumber(line.num) + sep
+		}
 		fmt.Fprintln(f.w,
-			f.decorator.lineNumber(line.num)+
-				sep+
+			lineNum+
 				column+
 				f.decorator.match(line.text, line.matched),
 		)
