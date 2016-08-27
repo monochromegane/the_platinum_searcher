@@ -12,7 +12,7 @@ import (
 	"github.com/monochromegane/terminal"
 )
 
-const version = "2.1.3"
+const version = "2.1.4"
 
 const (
 	ExitCodeOK = iota
