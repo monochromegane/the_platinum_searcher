@@ -22,18 +22,21 @@ type OutputOption struct {
 	ColorCodePath       string       // Color path names. Not user option.
 	ColorCodeMatch      string       // Color result matches. Not user option.
 	Group               func()       `long:"group" description:"Print file name at header (default: true)"`
-	Null                bool         `short:"0" long:"null" description:"Separate filenames with null (for 'xargs -0') (default: false)"`
 	NoGroup             func()       `long:"nogroup" description:"Don't print file name at header (default: false)"`
 	ForceGroup          bool         // Force group. Not user option.
 	EnableGroup         bool         // Enable group. Not user option.
+	Null                bool         `short:"0" long:"null" description:"Separate filenames with null (for 'xargs -0') (default: false)"`
 	Column              bool         `long:"column" description:"Print column (default: false)"`
+	LineNumber          func()       `long:"numbers" description:"Print Line number. (default: true)"`
+	NoLineNumber        func()       `short:"N" long:"nonumbers" description:"Omit Line number. (default: false)"`
+	ForceLineNumber     bool         // Force line number. Not user option.
+	EnableLineNumber    bool         // Enable line number. Not user option.
 	After               int          `short:"A" long:"after" description:"Print lines after match"`
 	Before              int          `short:"B" long:"before" description:"Print lines before match"`
 	Context             int          `short:"C" long:"context" description:"Print lines before and after match"`
 	FilesWithMatches    bool         `short:"l" long:"files-with-matches" description:"Only print filenames that contain matches"`
 	Count               bool         `short:"c" long:"count" description:"Only print the number of matching lines for each input file."`
 	OutputEncode        string       `short:"o" long:"output-encode" description:"Specify output encoding (none, jis, sjis, euc)"`
-	NoLineNumber        bool         `short:"N" long:"no-line-number" description:"Omit Line number."`
 }
 
 func newOutputOption() *OutputOption {
@@ -46,6 +49,10 @@ func newOutputOption() *OutputOption {
 	opt.Group = opt.SetEnableGroup
 	opt.NoGroup = opt.SetDisableGroup
 	opt.EnableGroup = true
+
+	opt.LineNumber = opt.SetEnableLineNumber
+	opt.NoLineNumber = opt.SetDisableLineNumber
+	opt.EnableLineNumber = true
 
 	opt.ColorLineNumber = opt.SetColorLineNumber
 	opt.ColorPath = opt.SetColorPath
@@ -64,6 +71,15 @@ func (o *OutputOption) SetEnableColor() {
 
 func (o *OutputOption) SetDisableColor() {
 	o.EnableColor = false
+}
+
+func (o *OutputOption) SetEnableLineNumber() {
+	o.ForceLineNumber = true
+	o.EnableLineNumber = true
+}
+
+func (o *OutputOption) SetDisableLineNumber() {
+	o.EnableLineNumber = false
 }
 
 func (o *OutputOption) SetEnableGroup() {

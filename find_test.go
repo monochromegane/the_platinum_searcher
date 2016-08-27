@@ -113,7 +113,9 @@ func makeAssertPaths(ch chan string) func(f string) bool {
 
 func defaultOption() Option {
 	return Option{
-		OutputOption: &OutputOption{},
+		OutputOption: &OutputOption{
+			EnableLineNumber: true,
+		},
 		SearchOption: &SearchOption{
 			Depth: 25,
 		},
