@@ -14,7 +14,7 @@ build:
     - script:
         name: goxc build & archive
         code: |
-          export GO15VENDOREXPERIMENT=0
+          mkdir Godeps/_workspace
           GODEPPATH=`godep path`
           export GOPATH="$GODEPPATH:$GOPATH"
           goxc -tasks='xc archive' -bc 'linux windows darwin' -d $WERCKER_OUTPUT_DIR/ -resources-include='README*' -n pt
