@@ -1,0 +1,24 @@
+name: pt
+version: v2.1.4
+summary: The Platinum Searcher
+description: |
+  A code search tool similar to ack and the_silver_searcher(ag). It supports multi platforms and multi encodings.
+
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: strict # use 'strict' once you have the right plugs and slots
+
+apps:
+    pt:
+        command: bin/pt
+        plugs:
+            - home
+
+parts:
+  gobuild:
+    # See 'snapcraft plugins'
+    plugin: go
+    source: https://github.com/monochromegane/the_platinum_searcher
+    source-type: git
+    source-tag: v2.1.4
+    go-packages:
+        - github.com/monochromegane/the_platinum_searcher/cmd/pt
