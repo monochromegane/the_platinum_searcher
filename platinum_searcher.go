@@ -32,7 +32,7 @@ func (p PlatinumSearcher) Run(args []string) int {
 	conflag.LongHyphen = true
 	conflag.BoolValue = false
 	for _, c := range []string{
-		filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "pt", "config.toml"),
+		filepath.Join(xdgConfigHomeDir(), "pt", "config.toml"),
 		filepath.Join(home.Dir(), ".ptconfig.toml"),
 		".ptconfig.toml",
 	} {
@@ -123,4 +123,12 @@ func (p PlatinumSearcher) givenStdin() bool {
 
 func (p PlatinumSearcher) noRootPathIn(args []string) bool {
 	return len(args) == 1
+}
+
+func xdgConfigHomeDir() string {
+	xdgConfigHome := os.Getenv("XDG_CONFIG_HOME")
+	if xdgConfigHome == "" {
+		xdgConfigHome = filepath.Join(home.Dir(), ".config")
+	}
+	return xdgConfigHome
 }
