@@ -1,6 +1,7 @@
 package the_platinum_searcher
 
 import (
+	"path/filepath"
 	"regexp"
 	"testing"
 )
@@ -99,7 +100,7 @@ func TestFindWithFileSearchPattern(t *testing.T) {
 func makeAssertPaths(ch chan string) func(f string) bool {
 	var list []string
 	for path := range ch {
-		list = append(list, path)
+		list = append(list, filepath.ToSlash(path))
 	}
 	return func(m string) bool {
 		for _, s := range list {
