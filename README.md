@@ -8,7 +8,7 @@ A code search tool similar to `ack` and `the_silver_searcher(ag)`. It supports m
 - It searches code as fast as `the_silver_searcher(ag)`.
 - It ignores file patterns from your `.gitignore`.
 - It searches `UTF-8`, `EUC-JP` and `Shift_JIS` files.
-- It provides binaries for multi platform (Mac OS X, Windows, Linux).
+- It provides binaries for multi platform (macOS, Windows, Linux).
 
 ### Benchmarks
 
@@ -22,10 +22,10 @@ pt  EXPORT_SYMBOL_GPL  2.29s user 1.26s system 358% cpu  0.991 total # pt: It's 
 ## Usage
 
 ```sh
-$ # Recursively searchs for PATTERN in current directory.
+$ # Recursively searches for PATTERN in current directory.
 $ pt PATTERN
 
-$ # You can specified PATH and some OPTIONS.
+$ # You can specify PATH and some OPTIONS.
 $ pt OPTIONS PATTERN PATH
 ```
 
@@ -82,7 +82,7 @@ Download from the following url.
 
 - [https://github.com/monochromegane/the_platinum_searcher/releases](https://github.com/monochromegane/the_platinum_searcher/releases)
 
-Or, you can use Homebrew (Only MacOSX).
+Or, you can use Homebrew (Only macOS).
 
 ```sh
 $ brew install pt
