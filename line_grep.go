@@ -61,6 +61,8 @@ func (g lineGrep) grepEachLines(f *os.File, encoding int, matchFn matchFunc, cou
 						// append after line.
 						match.add(lineNum, 0, scanner.Text(), matched)
 						afterCount++
+					} else if g.before > 0 && g.after == 0 {
+						beforeMatches = g.storeBeforeMatch(beforeMatches, lineNum, scanner.Text(), matched)
 					}
 					if afterCount >= g.after {
 						// reset to before match
