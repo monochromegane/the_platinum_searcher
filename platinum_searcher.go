@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/jessevdk/go-flags"
 	"github.com/monochromegane/conflag"
 	"github.com/monochromegane/go-home"
 	"github.com/monochromegane/terminal"
@@ -43,6 +44,9 @@ func (p PlatinumSearcher) Run(args []string) int {
 
 	args, err := parser.ParseArgs(args)
 	if err != nil {
+		if ferr, ok := err.(*flags.Error); ok && ferr.Type == flags.ErrHelp {
+			return ExitCodeOK
+		}
 		return ExitCodeError
 	}
 
