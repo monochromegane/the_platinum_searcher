@@ -31,7 +31,7 @@ func (p PlatinumSearcher) Run(args []string) int {
 
 	conflag.LongHyphen = true
 	conflag.BoolValue = false
-	for _, c := range []string{
+	for _, c := range [...]string{
 		filepath.Join(xdgConfigHomeDir(), "pt", "config.toml"),
 		filepath.Join(home.Dir(), ".ptconfig.toml"),
 		".ptconfig.toml",
