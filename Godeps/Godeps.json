@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/monochromegane/the_platinum_searcher",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.7.4",
 	"Packages": [
 		"./..."
 	],
