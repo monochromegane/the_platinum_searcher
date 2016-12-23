@@ -7,13 +7,13 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
-			"Comment": "v0.1.0-21-g056c9bc",
-			"Rev": "056c9bc7be7190eaa7715723883caffa5f8fa3e4"
+			"Comment": "v0.2.0-21-g9906417",
+			"Rev": "99064174e013895bbd9b025c31100bd1d9b590ca"
 		},
 		{
 			"ImportPath": "github.com/jessevdk/go-flags",
-			"Comment": "v1-324-g0a28dbe",
-			"Rev": "0a28dbe50f23d8fce6b016975b964cfe7b97a20a"
+			"Comment": "v1.1-5-g4e64e4a",
+			"Rev": "4e64e4a4e2552194cf594243e23aa9baf3b4297e"
 		},
 		{
 			"ImportPath": "github.com/monochromegane/conflag",
@@ -33,19 +33,19 @@
 		},
 		{
 			"ImportPath": "github.com/shiena/ansicolor",
-			"Rev": "691ac7d4ac14053de3cbe16e07b79246300db97d"
+			"Rev": "a422bbe96644373c5753384a59d678f7d261ff10"
 		},
 		{
 			"ImportPath": "golang.org/x/text/encoding",
-			"Rev": "c980adc4a823548817b9c47d38c6ca6b7d7d8b6a"
+			"Rev": "a49bea13b776691cb1b49873e5d8df96ec74831a"
 		},
 		{
 			"ImportPath": "golang.org/x/text/transform",
-			"Rev": "c980adc4a823548817b9c47d38c6ca6b7d7d8b6a"
+			"Rev": "a49bea13b776691cb1b49873e5d8df96ec74831a"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
-			"Rev": "c1cd2254a6dd314c9d73c338c12688c9325d85c6"
+			"Rev": "a5b47d31c556af34a302ce5d659e6fea44d90de0"
 		}
 	]
 }
