@@ -1,6 +1,8 @@
 package the_platinum_searcher
 
-import "regexp"
+import (
+	"regexp"
+)
 
 // pattern should be interface, but match(large []byte) method called through interface is too slow.
 type pattern struct {
@@ -26,4 +28,15 @@ func newPattern(p string, opts Option) (pattern, error) {
 		pattern.regexp = reg
 	}
 	return pattern, nil
+}
+
+func newPathPattern(p string) (reg *regexp.Regexp, err error) {
+	if p != "" {
+		if opts.SearchOption.IgnoreCaseFilesWithRegexp {
+			reg, err = regexp.Compile(`(?i)(` + p + `)`)
+		} else {
+			reg, err = regexp.Compile(`(` + p + `)`)
+		}
+	}
+	return
 }

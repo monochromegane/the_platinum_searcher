@@ -1,6 +1,8 @@
 package the_platinum_searcher
 
-import "github.com/jessevdk/go-flags"
+import (
+	"github.com/jessevdk/go-flags"
+)
 
 // Top level options
 type Option struct {
@@ -105,23 +107,24 @@ func (o *OutputOption) SetColorMatch(code string) {
 
 // Search options.
 type SearchOption struct {
-	Regexp                 bool         `short:"e" description:"Parse PATTERN as a regular expression (default: false). Accepted syntax is the same as https://github.com/google/re2/wiki/Syntax except from \\C"`
-	IgnoreCase             bool         `short:"i" long:"ignore-case" description:"Match case insensitively"`
-	SmartCase              bool         `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
-	WordRegexp             bool         `short:"w" long:"word-regexp" description:"Only match whole words"`
-	Ignore                 []string     `long:"ignore" description:"Ignore files/directories matching pattern"`
-	VcsIgnore              []string     `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore"`
-	GlobalGitIgnore        bool         `long:"global-gitignore" description:"Use git's global gitignore file for ignore patterns"`
-	HomePtIgnore           bool         `long:"home-ptignore" description:"Use $Home/.ptignore file for ignore patterns"`
-	SkipVcsIgnore          bool         `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns"`
-	FilesWithRegexp        func(string) `short:"g" description:"Print filenames matching PATTERN"`
-	EnableFilesWithRegexp  bool         // Enable files with regexp. Not user option.
-	PatternFilesWithRegexp string       // Pattern files with regexp. Not user option.
-	FileSearchRegexp       string       `short:"G" long:"file-search-regexp" description:"PATTERN Limit search to filenames matching PATTERN"`
-	Depth                  int          `long:"depth" default:"25" description:"Search up to NUM directories deep"`
-	Follow                 bool         `short:"f" long:"follow" description:"Follow symlinks"`
-	Hidden                 bool         `long:"hidden" description:"Search hidden files and directories"`
-	SearchStream           bool         // Input from pipe. Not user option.
+	Regexp                    bool         `short:"e" description:"Parse PATTERN as a regular expression (default: false). Accepted syntax is the same as https://github.com/google/re2/wiki/Syntax except from \\C"`
+	IgnoreCase                bool         `short:"i" long:"ignore-case" description:"Match case insensitively"`
+	SmartCase                 bool         `short:"S" long:"smart-case" description:"Match case insensitively unless PATTERN contains uppercase characters"`
+	WordRegexp                bool         `short:"w" long:"word-regexp" description:"Only match whole words"`
+	Ignore                    []string     `long:"ignore" description:"Ignore files/directories matching pattern"`
+	VcsIgnore                 []string     `long:"vcs-ignore" description:"VCS ignore files" default:".gitignore"`
+	GlobalGitIgnore           bool         `long:"global-gitignore" description:"Use git's global gitignore file for ignore patterns"`
+	HomePtIgnore              bool         `long:"home-ptignore" description:"Use $Home/.ptignore file for ignore patterns"`
+	SkipVcsIgnore             bool         `short:"U" long:"skip-vcs-ignores" description:"Don't use VCS ignore file for ignore patterns"`
+	FilesWithRegexp           func(string) `short:"g" description:"Print filenames matching PATTERN"`
+	EnableFilesWithRegexp     bool         // Enable files with regexp. Not user option.
+	IgnoreCaseFilesWithRegexp bool         // Ignore case in path pattern of g option.
+	PatternFilesWithRegexp    string       // Pattern files with regexp. Not user option.
+	FileSearchRegexp          string       `short:"G" long:"file-search-regexp" description:"PATTERN Limit search to filenames matching PATTERN"`
+	Depth                     int          `long:"depth" default:"25" description:"Search up to NUM directories deep"`
+	Follow                    bool         `short:"f" long:"follow" description:"Follow symlinks"`
+	Hidden                    bool         `long:"hidden" description:"Search hidden files and directories"`
+	SearchStream              bool         // Input from pipe. Not user option.
 }
 
 func (o *SearchOption) SetFilesWithRegexp(p string) {
