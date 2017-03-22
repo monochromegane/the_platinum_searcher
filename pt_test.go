@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	pt "github.com/monochromegane/the_platinum_searcher"
 )
@@ -70,59 +71,48 @@ func TestSmallG(t *testing.T) {
 
 func TestBigG(t *testing.T) {
 	tests := []struct {
-		args              []string
-		want              []string
-		skipLastLineTimes int
+		args []string
+		want string
 	}{
 		{
 			[]string{"--nocolor", "-G", "Context", "Capital", "files"},
-			[]string{"files/depth/Context.txt", "1:Capital test"},
-			2,
+			"files/depth/Context.txt:1:Capital test",
 		},
 		{
 			[]string{"--nocolor", "-G", "Context", "capital", "files"},
-			[]string{""},
-			0,
+			"",
 		},
 		{
 			[]string{"--nocolor", "-G", "context", "Capital", "files"},
-			[]string{""},
-			0,
+			"",
 		},
 		{
 			[]string{"--nocolor", "-iG", "Context", "capital", "files"},
-			[]string{"files/depth/Context.txt", "1:Capital test"},
-			2,
+			"files/depth/Context.txt:1:Capital test",
 		},
 		{
 			[]string{"--nocolor", "-iG", "Context", "Capital", "files"},
-			[]string{"files/depth/Context.txt", "1:Capital test"},
-			2,
+			"files/depth/Context.txt:1:Capital test",
 		},
 		{
 			[]string{"--nocolor", "-iG", "Context", "capitaL", "files"},
-			[]string{"files/depth/Context.txt", "1:Capital test"},
-			2,
+			"files/depth/Context.txt:1:Capital test",
 		},
 		{
 			[]string{"--nocolor", "-iG", "context", "Capital", "files"},
-			[]string{""},
-			0,
+			"",
 		},
 		{
 			[]string{"--nocolor", "-SG", "Context", "capital", "files"},
-			[]string{"files/depth/Context.txt", "1:Capital test"},
-			2,
+			"files/depth/Context.txt:1:Capital test",
 		},
 		{
 			[]string{"--nocolor", "-SG", "Context", "Capital", "files"},
-			[]string{"files/depth/Context.txt", "1:Capital test"},
-			2,
+			"files/depth/Context.txt:1:Capital test",
 		},
 		{
 			[]string{"--nocolor", "-SG", "Context", "capitaL", "files"},
-			[]string{""},
-			0,
+			"",
 		},
 	}
 
@@ -130,11 +120,15 @@ func TestBigG(t *testing.T) {
 	for _, test := range tests {
 		pt := pt.PlatinumSearcher{Out: &buf, Err: os.Stderr}
 		pt.Run(test.args)
-		got := strings.Split(buf.String(), "\n")
-		if len(got) > 0 {
-			got = got[:len(got)-test.skipLastLineTimes]
+		got := buf.String()
+		raw := strings.Split(got, "\n")
+		if len(raw) > 0 {
+			got = strings.Join(raw, ":")
+			for r, n := utf8.DecodeLastRuneInString(got); r == ':'; r, n = utf8.DecodeLastRuneInString(got) {
+				got = got[:len(got)-n]
+			}
 		}
-		if !compareIgnoringOrder(test.want, got) {
+		if test.want != got {
 			t.Errorf("Args: %q, Want: %q, Got: %q\n", test.args, test.want, got)
 		}
 		buf.Reset()
