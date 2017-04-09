@@ -2,7 +2,4 @@
 the_platinum_searcher
 pt
 !cmd/pt
-libpt.so
-libpt.h
-!lib/pt
 Godeps/_workspace/
