@@ -45,6 +45,11 @@ func (s search) start(pattern string) error {
 		if err != nil {
 			return err
 		}
+	} else if pattern := fileTypeSearchPattern(); pattern != "" {
+		regFile, err = regexp.Compile(pattern)
+		if err != nil {
+			return err
+		}
 	}
 	if opts.SearchOption.EnableFilesWithRegexp {
 		opts.OutputOption.FilesWithMatches = true

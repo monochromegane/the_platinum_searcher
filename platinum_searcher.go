@@ -55,6 +55,11 @@ func (p PlatinumSearcher) Run(args []string) int {
 		return ExitCodeOK
 	}
 
+	if opts.FileTypeOption.ListFileTypes {
+		printFileTypeOptions()
+		return ExitCodeOK
+	}
+
 	if len(args) == 0 && !opts.SearchOption.EnableFilesWithRegexp {
 		parser.WriteHelp(p.Err)
 		return ExitCodeError
