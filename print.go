@@ -2,30 +2,41 @@ package the_platinum_searcher
 
 import (
 	"io"
-	"sync"
 )
 
 type printer struct {
-	mu        *sync.Mutex
+	in        chan match
 	opts      Option
 	formatter formatPrinter
+	done      chan struct{}
 }
 
 func newPrinter(pattern pattern, out io.Writer, opts Option) printer {
-	return printer{
-		mu:        new(sync.Mutex),
+	p := printer{
+		in:        make(chan match, 200),
 		opts:      opts,
 		formatter: newFormatPrinter(pattern, out, opts),
+		done:      make(chan struct{}),
 	}
+
+	go p.loop()
+	return p
 }
 
 func (p printer) print(match match) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
 	if match.size() == 0 {
 		return
 	}
 
-	p.formatter.print(match)
+	p.in <- match
+}
+
+func (p printer) loop() {
+	defer func() {
+		p.done <- struct{}{}
+	}()
+
+	for match := range p.in {
+		p.formatter.print(match)
+	}
 }

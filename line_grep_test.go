@@ -63,5 +63,8 @@ func assertLineGrep(opts Option, path string, expect string) bool {
 		return bytes.Contains(b, []byte("go"))
 	}, func(b []byte) int { return 0 })
 
+	close(printer.in)
+	<-printer.done
+
 	return buf.String() == expect
 }
