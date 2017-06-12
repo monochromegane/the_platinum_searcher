@@ -34,12 +34,14 @@ func newIgnoreMatchers(path string, ignores []string) ignoreMatchers {
 }
 
 func globalGitIgnore(base string) gitignore.IgnoreMatcher {
-	if homeDir := home.Dir(); homeDir != "" {
-		globalIgnore := globalGitIgnoreName()
-		if globalIgnore != "" {
-			if matcher, err := gitignore.NewGitIgnore(filepath.Join(homeDir, globalIgnore), base); err == nil {
-				return matcher
-			}
+	homeDir := home.Dir()
+	if homeDir == "" {
+		return nil
+	}
+	globalIgnore := globalGitIgnoreName()
+	if globalIgnore != "" {
+		if matcher, err := gitignore.NewGitIgnore(filepath.Join(homeDir, globalIgnore), base); err == nil {
+			return matcher
 		}
 	}
 	return nil
@@ -59,10 +61,12 @@ func globalGitIgnoreName() string {
 }
 
 func homePtIgnore(base string) gitignore.IgnoreMatcher {
-	if homeDir := home.Dir(); homeDir != "" {
-		if matcher, err := gitignore.NewGitIgnore(filepath.Join(homeDir, ".ptignore"), base); err == nil {
-			return matcher
-		}
+	homeDir := home.Dir()
+	if homeDir == "" {
+		return nil
+	}
+	if matcher, err := gitignore.NewGitIgnore(filepath.Join(homeDir, ".ptignore"), base); err == nil {
+		return matcher
 	}
 	return nil
 }

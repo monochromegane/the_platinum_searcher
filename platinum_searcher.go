@@ -101,9 +101,8 @@ func (p PlatinumSearcher) patternFrom(args []string) string {
 func (p PlatinumSearcher) rootsFrom(args []string) []string {
 	if len(args) > 1 {
 		return args[1:]
-	} else {
-		return []string{"."}
 	}
+	return []string{"."}
 }
 
 func (p PlatinumSearcher) givenStdin() bool {
