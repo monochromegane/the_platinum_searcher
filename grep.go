@@ -50,15 +50,15 @@ func newGrepper(pattern pattern, printer printer, opts Option) grepper {
 		return passthroughGrep{
 			printer: printer,
 		}
-	} else if opts.SearchOption.Regexp {
+	}
+	if opts.SearchOption.Regexp {
 		return extendedGrep{
 			pattern:  pattern,
 			lineGrep: newLineGrep(printer, opts),
 		}
-	} else {
-		return fixedGrep{
-			pattern:  pattern,
-			lineGrep: newLineGrep(printer, opts),
-		}
+	}
+	return fixedGrep{
+		pattern:  pattern,
+		lineGrep: newLineGrep(printer, opts),
 	}
 }

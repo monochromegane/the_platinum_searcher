@@ -17,9 +17,8 @@ type stateBeforeMatch struct{}
 func (s stateBeforeMatch) transition(matched bool) matchState {
 	if matched {
 		return stateMatching{}
-	} else {
-		return s
 	}
+	return s
 }
 
 func (s stateBeforeMatch) reset() matchState {
@@ -43,9 +42,8 @@ type stateMatching struct{}
 func (s stateMatching) transition(matched bool) matchState {
 	if matched {
 		return s
-	} else {
-		return stateAfterMatch{}
 	}
+	return stateAfterMatch{}
 }
 
 func (s stateMatching) reset() matchState {
@@ -69,9 +67,8 @@ type stateAfterMatch struct{}
 func (s stateAfterMatch) transition(matched bool) matchState {
 	if matched {
 		return stateMatching{}
-	} else {
-		return s
 	}
+	return s
 }
 
 func (s stateAfterMatch) reset() matchState {

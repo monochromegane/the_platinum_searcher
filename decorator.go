@@ -23,9 +23,8 @@ type decorator interface {
 func newDecorator(pattern pattern, option Option) decorator {
 	if option.OutputOption.EnableColor {
 		return newColor(pattern, option)
-	} else {
-		return plain{}
 	}
+	return plain{}
 }
 
 type color struct {
@@ -79,11 +78,11 @@ func (c color) columnNumber(columnNum int) string {
 func (c color) match(line string, matched bool) string {
 	if !matched {
 		return line
-	} else if c.regexp == nil {
-		return strings.Replace(line, c.from, c.to, -1)
-	} else {
-		return c.regexp.ReplaceAllString(line, c.to)
 	}
+	if c.regexp == nil {
+		return strings.Replace(line, c.from, c.to, -1)
+	}
+	return c.regexp.ReplaceAllString(line, c.to)
 }
 
 type plain struct {

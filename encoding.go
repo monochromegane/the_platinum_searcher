@@ -100,14 +100,15 @@ func detectEncoding(bs []byte) int {
 
 	if likelyUtf8 == 0 && likelyEucjp == 0 && likelyShiftjis == 0 {
 		return ASCII
-	} else if likelyUtf8 >= likelyEucjp && likelyUtf8 >= likelyShiftjis {
+	}
+	if likelyUtf8 >= likelyEucjp && likelyUtf8 >= likelyShiftjis {
 		return UTF8
-	} else if likelyEucjp >= likelyUtf8 && likelyEucjp >= likelyShiftjis {
+	}
+	if likelyEucjp >= likelyUtf8 && likelyEucjp >= likelyShiftjis {
 		return EUCJP
-	} else if likelyShiftjis >= likelyUtf8 && likelyShiftjis >= likelyEucjp {
+	}
+	if likelyShiftjis >= likelyUtf8 && likelyShiftjis >= likelyEucjp {
 		return SHIFTJIS
 	}
-
 	return ASCII
-
 }
