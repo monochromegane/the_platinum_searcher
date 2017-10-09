@@ -11,7 +11,7 @@ func ExampleFormatPrinterFileWithMatch() {
 	match.add(1, 0, "go test", true)
 
 	pattern, _ := newPattern("go", opts)
-	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p := newFormatPrinter(pattern, os.Stdout, os.Stderr, opts)
 	p.print(match)
 
 	// Output:
@@ -27,7 +27,7 @@ func ExampleFormatPrinterCount() {
 	match.add(1, 0, "go test", true)
 
 	pattern, _ := newPattern("go", opts)
-	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p := newFormatPrinter(pattern, os.Stdout, os.Stderr, opts)
 	p.print(match)
 
 	// Output:
@@ -45,7 +45,7 @@ func ExampleFormatEnableGroup() {
 	match.add(3, 0, "after", false)  // after
 
 	pattern, _ := newPattern("go", opts)
-	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p := newFormatPrinter(pattern, os.Stdout, os.Stderr, opts)
 	p.print(match)
 
 	// Output:
@@ -66,7 +66,7 @@ func ExampleFormatEnableGroupWithColumn() {
 	match.add(3, 0, "after", false)  // after
 
 	pattern, _ := newPattern("go", opts)
-	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p := newFormatPrinter(pattern, os.Stdout, os.Stderr, opts)
 	p.print(match)
 
 	// Output:
@@ -87,7 +87,7 @@ func ExampleFormatNoGroup() {
 	match.add(3, 0, "after", false)  // after
 
 	pattern, _ := newPattern("go", opts)
-	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p := newFormatPrinter(pattern, os.Stdout, os.Stderr, opts)
 	p.print(match)
 
 	// Output:
@@ -107,7 +107,7 @@ func ExampleFormatNoGroupWithColumn() {
 	match.add(3, 0, "after", false)  // after
 
 	pattern, _ := newPattern("go", opts)
-	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p := newFormatPrinter(pattern, os.Stdout, os.Stderr, opts)
 	p.print(match)
 
 	// Output:
@@ -127,7 +127,7 @@ func ExampleFormatMatchLine() {
 	match.add(3, 0, "after", false)  // after
 
 	pattern, _ := newPattern("go", opts)
-	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p := newFormatPrinter(pattern, os.Stdout, os.Stderr, opts)
 	p.print(match)
 
 	// Output:
@@ -147,7 +147,7 @@ func ExampleFormatMatchLineWithColumn() {
 	match.add(3, 0, "after", false)  // after
 
 	pattern, _ := newPattern("go", opts)
-	p := newFormatPrinter(pattern, os.Stdout, opts)
+	p := newFormatPrinter(pattern, os.Stdout, os.Stderr, opts)
 	p.print(match)
 
 	// Output:

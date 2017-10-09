@@ -119,7 +119,8 @@ func TestStdinGrep(t *testing.T) {
 
 func assertGrep(pattern pattern, opts Option, paths, asserts []string) bool {
 	buf := new(bytes.Buffer)
-	printer := newPrinter(pattern, buf, opts)
+	errBuf := new(bytes.Buffer)
+	printer := newPrinter(pattern, buf, errBuf, opts)
 
 	in := make(chan string)
 	done := make(chan struct{})

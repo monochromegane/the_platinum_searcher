@@ -16,6 +16,10 @@ type fixedGrep struct {
 func (g fixedGrep) grep(path string) {
 	f, err := getFileHandler(path)
 	if err != nil {
+		if os.IsPermission(err) {
+			g.printer.printError(err)
+			return
+		}
 		log.Fatalf("open: %s\n", err)
 	}
 	defer f.Close()

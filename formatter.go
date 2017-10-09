@@ -11,29 +11,37 @@ import (
 
 type formatPrinter interface {
 	print(match match)
+	printError(err error)
 }
 
-func newFormatPrinter(pattern pattern, w io.Writer, opts Option) formatPrinter {
+func newFormatPrinter(
+	pattern pattern,
+	w,
+	outErr io.Writer,
+	opts Option,
+) formatPrinter {
 	writer := newWriter(w, opts)
+	errorWriter := newWriter(outErr, opts)
 	decorator := newDecorator(pattern, opts)
 
 	switch {
 	case opts.SearchOption.SearchStream:
-		return matchLine{decorator: decorator, w: writer}
+		return matchLine{decorator: decorator, w: writer, errorWriter: errorWriter}
 	case opts.OutputOption.FilesWithMatches:
-		return fileWithMatch{decorator: decorator, w: writer, useNull: opts.OutputOption.Null}
+		return fileWithMatch{decorator: decorator, w: writer, errorWriter: errorWriter, useNull: opts.OutputOption.Null}
 	case opts.OutputOption.Count:
 		return count{decorator: decorator, w: writer}
 	case opts.OutputOption.EnableGroup:
-		return group{decorator: decorator, w: writer, useNull: opts.OutputOption.Null, enableLineNumber: opts.OutputOption.EnableLineNumber}
+		return group{decorator: decorator, w: writer, errorWriter: errorWriter, useNull: opts.OutputOption.Null, enableLineNumber: opts.OutputOption.EnableLineNumber}
 	default:
-		return noGroup{decorator: decorator, w: writer, enableLineNumber: opts.OutputOption.EnableLineNumber}
+		return noGroup{decorator: decorator, w: writer, errorWriter: errorWriter, enableLineNumber: opts.OutputOption.EnableLineNumber}
 	}
 }
 
 type matchLine struct {
-	w         io.Writer
-	decorator decorator
+	w           io.Writer
+	errorWriter io.Writer
+	decorator   decorator
 }
 
 func (f matchLine) print(match match) {
@@ -49,10 +57,15 @@ func (f matchLine) print(match match) {
 	}
 }
 
+func (f matchLine) printError(err error) {
+	fmt.Fprintln(f.errorWriter, f.decorator.error(err))
+}
+
 type fileWithMatch struct {
-	w         io.Writer
-	decorator decorator
-	useNull   bool
+	w           io.Writer
+	errorWriter io.Writer
+	decorator   decorator
+	useNull     bool
 }
 
 func (f fileWithMatch) print(match match) {
@@ -64,9 +77,14 @@ func (f fileWithMatch) print(match match) {
 	}
 }
 
+func (f fileWithMatch) printError(err error) {
+	fmt.Fprintln(f.errorWriter, f.decorator.error(err))
+}
+
 type count struct {
-	w         io.Writer
-	decorator decorator
+	w           io.Writer
+	errorWriter io.Writer
+	decorator   decorator
 }
 
 func (f count) print(match match) {
@@ -78,8 +96,13 @@ func (f count) print(match match) {
 	)
 }
 
+func (f count) printError(err error) {
+	fmt.Fprintln(f.errorWriter, f.decorator.error(err))
+}
+
 type group struct {
 	w                io.Writer
+	errorWriter      io.Writer
 	decorator        decorator
 	useNull          bool
 	enableLineNumber bool
@@ -115,8 +138,13 @@ func (f group) print(match match) {
 	fmt.Fprintln(f.w)
 }
 
+func (f group) printError(err error) {
+	fmt.Fprintln(f.errorWriter, f.decorator.error(err))
+}
+
 type noGroup struct {
 	w                io.Writer
+	errorWriter      io.Writer
 	decorator        decorator
 	enableLineNumber bool
 }
@@ -143,6 +171,10 @@ func (f noGroup) print(match match) {
 				f.decorator.match(line.text, line.matched),
 		)
 	}
+}
+
+func (f noGroup) printError(err error) {
+	fmt.Fprintln(f.errorWriter, f.decorator.error(err))
 }
 
 func newWriter(out io.Writer, opts Option) io.Writer {
