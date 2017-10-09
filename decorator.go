@@ -18,6 +18,7 @@ type decorator interface {
 	lineNumber(lineNum int) string
 	columnNumber(columnNum int) string
 	match(line string, matched bool) string
+	error(err error) string
 }
 
 func newDecorator(pattern pattern, option Option) decorator {
@@ -36,6 +37,7 @@ type color struct {
 	colorLineNumber string
 	colorPath       string
 	colorMatch      string
+	colorError      string
 }
 
 func newColor(pattern pattern, option Option) color {
@@ -43,6 +45,7 @@ func newColor(pattern pattern, option Option) color {
 		colorLineNumber: ansiEscape(option.OutputOption.ColorCodeLineNumber),
 		colorPath:       ansiEscape(option.OutputOption.ColorCodePath),
 		colorMatch:      ansiEscape(option.OutputOption.ColorCodeMatch),
+		colorError:      ansiEscape(option.OutputOption.ColorCodeError),
 	}
 	if pattern.regexp == nil {
 		p := string(pattern.pattern)
@@ -86,6 +89,10 @@ func (c color) match(line string, matched bool) string {
 	}
 }
 
+func (c color) error(err error) string {
+	return c.colorError + err.Error() + ColorReset + "\n"
+}
+
 type plain struct {
 }
 
@@ -103,4 +110,8 @@ func (p plain) columnNumber(columnNum int) string {
 
 func (p plain) match(line string, matched bool) string {
 	return line
+}
+
+func (c plain) error(err error) string {
+	return err.Error()
 }

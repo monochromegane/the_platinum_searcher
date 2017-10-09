@@ -6,8 +6,9 @@ import (
 )
 
 type search struct {
-	roots []string
-	out   io.Writer
+	roots       []string
+	out         io.Writer
+	errorWriter io.Writer
 }
 
 func (s search) start(pattern string) error {
@@ -66,7 +67,7 @@ func (s search) start(pattern string) error {
 		grepChan,
 		done,
 		opts,
-		newPrinter(p, s.out, opts),
+		newPrinter(p, s.out, s.errorWriter, opts),
 	).start()
 
 	<-done

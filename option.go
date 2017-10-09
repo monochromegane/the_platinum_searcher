@@ -18,9 +18,11 @@ type OutputOption struct {
 	ColorLineNumber     func(string) `long:"color-line-number" description:"Color codes for line numbers (default: 1;33)"`
 	ColorPath           func(string) `long:"color-path" description:"Color codes for path names (default: 1;32)"`
 	ColorMatch          func(string) `long:"color-match" description:"Color codes for result matches (default: 30;43)"`
+	ColorError          func(string) `long:"color-error" description:"Color codes for errors (default: 1;31)"`
 	ColorCodeLineNumber string       // Color line numbers. Not user option.
 	ColorCodePath       string       // Color path names. Not user option.
 	ColorCodeMatch      string       // Color result matches. Not user option.
+	ColorCodeError      string       // Color errors. Not user option.
 	Group               func()       `long:"group" description:"Print file name at header (default: true)"`
 	NoGroup             func()       `long:"nogroup" description:"Don't print file name at header (default: false)"`
 	ForceGroup          bool         // Force group. Not user option.
@@ -57,9 +59,11 @@ func newOutputOption() *OutputOption {
 	opt.ColorLineNumber = opt.SetColorLineNumber
 	opt.ColorPath = opt.SetColorPath
 	opt.ColorMatch = opt.SetColorMatch
+	opt.ColorError = opt.SetColorError
 	opt.ColorCodeLineNumber = "1;33" // yellow with black background
 	opt.ColorCodePath = "1;32"       // bold green
 	opt.ColorCodeMatch = "30;43"     // black with yellow background
+	opt.ColorCodeError = "1;31"      // bold red
 
 	return opt
 }
@@ -101,6 +105,10 @@ func (o *OutputOption) SetColorPath(code string) {
 
 func (o *OutputOption) SetColorMatch(code string) {
 	o.ColorCodeMatch = code
+}
+
+func (o *OutputOption) SetColorError(code string) {
+	o.ColorCodeError = code
 }
 
 // Search options.
