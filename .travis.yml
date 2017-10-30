@@ -1,8 +1,10 @@
 sudo: false
 language: go
 go:
-  - 1.7.4
-  - 1.6.3
+  - 1.9.x
+  - 1.8.x
+  - 1.7.x
+  - 1.6.x
   - tip
 env:
   CGO_ENABLED=0
