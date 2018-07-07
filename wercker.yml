@@ -1,6 +1,7 @@
-box: golang:1.10.3
+box: golang
 build:
   steps:
+    - setup-go-workspace
     - script:
         name: install packages
         code: |
