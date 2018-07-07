@@ -1,7 +1,11 @@
-box: monochromegane/golang-xc
+box: golang:1.10.3
 build:
   steps:
-    - setup-go-workspace
+    - script:
+        name: install packages
+        code: |
+          go get -u -v github.com/laher/goxc
+          go get -u -v github.com/tools/godep
     - script:
         name: go get
         code: |
