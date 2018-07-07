@@ -9,6 +9,8 @@ build:
           apt-get install -y file
           go get -u -v github.com/laher/goxc
           go get -u -v github.com/tools/godep
+          which file
+          echo $PATH
     - script:
         name: go get
         code: |
