@@ -5,7 +5,7 @@ build:
     - script:
         name: install packages
         code: |
-          apt-get install file
+          apt-get install coreutils
           go get -u -v github.com/laher/goxc
           go get -u -v github.com/tools/godep
     - script:
