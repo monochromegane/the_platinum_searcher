@@ -5,12 +5,8 @@ build:
     - script:
         name: install packages
         code: |
-          apt-get update -y
-          apt-get install -y file
           go get -u -v github.com/laher/goxc
           go get -u -v github.com/tools/godep
-          which file
-          echo $PATH
     - script:
         name: go get
         code: |
@@ -33,6 +29,11 @@ build:
           git describe --tags --exact --match 'v*' > $WERCKER_OUTPUT_DIR/.release_tag || true
 deploy:
   steps:
+    - script:
+        name: install packages
+        code: |
+          apt-get update -y
+          apt-get install -y file
     - script:
         name: restore release tag
         code: |
