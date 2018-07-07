@@ -1,9 +1,7 @@
 sudo: false
 language: go
 go:
-  - 1.7.4
-  - 1.6.3
-  - tip
+  - master
 env:
   CGO_ENABLED=0
 install:
