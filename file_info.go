@@ -7,30 +7,34 @@ import (
 )
 
 type fileInfo struct {
-	path string
-	os.FileInfo
+	path, name string
+	typ        os.FileMode
 }
 
-func (f fileInfo) isDir(follow bool) bool {
+func (f *fileInfo) isDir(follow bool) bool {
 	if follow && f.isSymlink() {
-		if _, err := ioutil.ReadDir(filepath.Join(f.path, f.FileInfo.Name())); err == nil {
+		if _, err := ioutil.ReadDir(filepath.Join(f.path, f.name)); err == nil {
 			return true
 		} else {
 			return false
 		}
 	} else {
-		return f.FileInfo.IsDir()
+		return f.typ&os.ModeDir == os.ModeDir
 	}
 }
 
-func (f fileInfo) isSymlink() bool {
-	return f.FileInfo.Mode()&os.ModeSymlink == os.ModeSymlink
+func (f *fileInfo) isSymlink() bool {
+	return f.typ&os.ModeSymlink == os.ModeSymlink
 }
 
-func (f fileInfo) isNamedPipe() bool {
-	return f.FileInfo.Mode()&os.ModeNamedPipe == os.ModeNamedPipe
+func (f *fileInfo) isNamedPipe() bool {
+	return f.typ&os.ModeNamedPipe == os.ModeNamedPipe
 }
 
-func newFileInfo(path string, info os.FileInfo) fileInfo {
-	return fileInfo{path, info}
+func newFileInfo(path, name string, typ os.FileMode) *fileInfo {
+	return &fileInfo{
+		path: path,
+		name: name,
+		typ:  typ,
+	}
 }

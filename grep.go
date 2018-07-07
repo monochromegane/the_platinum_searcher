@@ -8,6 +8,7 @@ type grep struct {
 	in      chan string
 	done    chan struct{}
 	grepper grepper
+	printer printer
 	opts    Option
 }
 
@@ -20,7 +21,8 @@ func newGrep(pattern pattern, in chan string, done chan struct{}, opts Option, p
 			printer,
 			opts,
 		),
-		opts: opts,
+		printer: printer,
+		opts:    opts,
 	}
 }
 
@@ -38,7 +40,8 @@ func (g grep) start() {
 		}(path)
 	}
 	wg.Wait()
-	g.done <- struct{}{}
+	close(g.printer.in)
+	g.done <- <-g.printer.done
 }
 
 type grepper interface {
