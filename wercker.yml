@@ -6,7 +6,7 @@ build:
         name: install packages
         code: |
           apt-get update -y
-          apt-get install file
+          apt-get install -y file
           go get -u -v github.com/laher/goxc
           go get -u -v github.com/tools/godep
     - script:
