@@ -5,6 +5,7 @@ build:
     - script:
         name: install packages
         code: |
+          apt-get install file
           go get -u -v github.com/laher/goxc
           go get -u -v github.com/tools/godep
     - script:
