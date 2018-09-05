@@ -65,9 +65,15 @@ func newGrepper(pattern pattern, printer printer, opts Option) grepper {
 			lineGrep: newLineGrep(printer, opts),
 		}
 	} else {
-		return fixedGrep{
-			pattern:  pattern,
-			lineGrep: newLineGrep(printer, opts),
+		if opts.OutputOption.Before > 0 || opts.OutputOption.After > 0 {
+			return fixedGrep{
+				pattern:  pattern,
+				lineGrep: newLineGrep(printer, opts),
+			}
+		}
+		return bufferGrep{
+			pattern: pattern,
+			printer: printer,
 		}
 	}
 }
