@@ -64,7 +64,7 @@ func (f find) findFile(root string, regexp *regexp.Regexp) {
 	}
 
 	followed := f.opts.SearchOption.Follow
-	concurrentWalk(root, ignores, followed, func(path string, info *fileInfo, depth int, ignores ignoreMatchers) (ignoreMatchers, error) {
+	walkIn(root, ignores, followed, func(path string, info *fileInfo, depth int, ignores ignoreMatchers) (ignoreMatchers, error) {
 		if info.isDir(followed) {
 			if depth > f.opts.SearchOption.Depth+1 {
 				return ignores, filepath.SkipDir
