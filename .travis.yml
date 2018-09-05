@@ -1,6 +1,7 @@
 sudo: false
 language: go
 go:
+  - "1.11.x"
   - master
 env:
   CGO_ENABLED=0
