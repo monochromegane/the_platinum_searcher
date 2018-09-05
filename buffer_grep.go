@@ -11,6 +11,7 @@ import (
 type bufferGrep struct {
 	printer
 	pattern pattern
+	column  bool
 }
 
 func (g bufferGrep) grep(path string, buf []byte) {
@@ -64,7 +65,7 @@ loop:
 		newLine := bytes.LastIndexByte(cbuf, '\n')
 		// fmt.Printf("offset: %d, newLine: %d\n", offset, newLine)
 		if newLine >= 0 {
-			c := scan(&match, cbuf[0:newLine], pattern, read, encoding)
+			c := scan(&match, cbuf[0:newLine], pattern, read, encoding, g.column)
 			// matchLines = append(matchLines, m...)
 			offset = len(cbuf[newLine+1:])
 			for i, _ := range cbuf[newLine+1:] {
@@ -88,7 +89,7 @@ func scanNewLine(buf []byte) int {
 	return bytes.Count(buf, NewLineBytes)
 }
 
-func scan(match *match, buf, pattern []byte, base, encoding int) int {
+func scan(match *match, buf, pattern []byte, base, encoding int, column bool) int {
 	offset, newLineCount := 0, 0
 	for {
 		if offset > len(buf) {
@@ -119,8 +120,15 @@ func scan(match *match, buf, pattern []byte, base, encoding int) int {
 		if r := newDecodeReader(bytes.NewReader(line), encoding); r != nil {
 			line, _ = ioutil.ReadAll(r)
 		}
-
-		match.add(num, 0, string(line), true)
+		c := 0
+		if column {
+			if beforeNewLine == -1 {
+				c = idx + 1
+			} else {
+				c = idx - beforeNewLine
+			}
+		}
+		match.add(num, c, string(line), true)
 		offset += idx + len(pattern) + afterNewLine + 1
 	}
 	return newLineCount + 1

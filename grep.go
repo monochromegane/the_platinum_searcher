@@ -74,6 +74,7 @@ func newGrepper(pattern pattern, printer printer, opts Option) grepper {
 		return bufferGrep{
 			pattern: pattern,
 			printer: printer,
+			column:  opts.OutputOption.Column,
 		}
 	}
 }
