@@ -1,6 +1,10 @@
 package the_platinum_searcher
 
-import "sync"
+import (
+	"math"
+	"runtime"
+	"sync"
+)
 
 var newLine = []byte("\n")
 
@@ -27,25 +31,27 @@ func newGrep(pattern pattern, in chan string, done chan struct{}, opts Option, p
 }
 
 func (g grep) start() {
-	sem := make(chan struct{}, 208)
 	wg := &sync.WaitGroup{}
-
-	for path := range g.in {
-		sem <- struct{}{}
-		wg.Add(1)
-		go func(path string) {
-			defer wg.Done()
-			defer func() { <-sem }()
-			g.grepper.grep(path)
-		}(path)
+	worker := func() {
+		defer wg.Done()
+		buf := make([]byte, 16384)
+		for path := range g.in {
+			g.grepper.grep(path, buf)
+		}
 	}
+	num := int(math.Max(float64(runtime.NumCPU()), 2.0))
+	for i := 0; i < num; i++ {
+		wg.Add(1)
+		go worker()
+	}
+
 	wg.Wait()
 	close(g.printer.in)
 	g.done <- <-g.printer.done
 }
 
 type grepper interface {
-	grep(path string)
+	grep(path string, buf []byte)
 }
 
 func newGrepper(pattern pattern, printer printer, opts Option) grepper {
@@ -59,9 +65,16 @@ func newGrepper(pattern pattern, printer printer, opts Option) grepper {
 			lineGrep: newLineGrep(printer, opts),
 		}
 	} else {
-		return fixedGrep{
-			pattern:  pattern,
-			lineGrep: newLineGrep(printer, opts),
+		if opts.OutputOption.Before > 0 || opts.OutputOption.After > 0 {
+			return fixedGrep{
+				pattern:  pattern,
+				lineGrep: newLineGrep(printer, opts),
+			}
+		}
+		return bufferGrep{
+			pattern: pattern,
+			printer: printer,
+			column:  opts.OutputOption.Column,
 		}
 	}
 }

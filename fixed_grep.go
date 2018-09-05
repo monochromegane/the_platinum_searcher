@@ -13,7 +13,7 @@ type fixedGrep struct {
 	pattern pattern
 }
 
-func (g fixedGrep) grep(path string) {
+func (g fixedGrep) grep(path string, buf []byte) {
 	f, err := getFileHandler(path)
 	if err != nil {
 		log.Fatalf("open: %s\n", err)
@@ -30,7 +30,6 @@ func (g fixedGrep) grep(path string) {
 		return
 	}
 
-	buf := make([]byte, 8196)
 	var stash []byte
 	identified := false
 	var encoding int

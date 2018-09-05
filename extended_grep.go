@@ -11,7 +11,7 @@ type extendedGrep struct {
 	pattern pattern
 }
 
-func (g extendedGrep) grep(path string) {
+func (g extendedGrep) grep(path string, buf []byte) {
 	f, err := getFileHandler(path)
 	if err != nil {
 		log.Fatalf("open: %s\n", err)
@@ -27,8 +27,6 @@ func (g extendedGrep) grep(path string) {
 		})
 		return
 	}
-
-	buf := make([]byte, 512)
 
 	c, err := f.Read(buf)
 	if err != nil && err != io.EOF {
