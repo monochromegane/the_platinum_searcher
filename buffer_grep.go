@@ -31,6 +31,8 @@ loop:
 	for {
 		n, err := f.Read(buf[offset:])
 		if err == io.EOF {
+			// Scan remain (For last line without new line.)
+			scan(&match, buf[:offset], pattern, read, encoding, g.column)
 			break
 		}
 		if err != nil {
