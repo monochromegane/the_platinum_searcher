@@ -34,8 +34,9 @@ func (g grep) start() {
 	wg := &sync.WaitGroup{}
 	worker := func() {
 		defer wg.Done()
+		buf := make([]byte, 16384)
 		for path := range g.in {
-			g.grepper.grep(path)
+			g.grepper.grep(path, buf)
 		}
 	}
 	num := int(math.Max(float64(runtime.NumCPU()), 2.0))
@@ -50,7 +51,7 @@ func (g grep) start() {
 }
 
 type grepper interface {
-	grep(path string)
+	grep(path string, buf []byte)
 }
 
 func newGrepper(pattern pattern, printer printer, opts Option) grepper {
