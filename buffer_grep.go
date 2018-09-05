@@ -64,7 +64,7 @@ loop:
 		newLine := bytes.LastIndexByte(cbuf, '\n')
 		// fmt.Printf("offset: %d, newLine: %d\n", offset, newLine)
 		if newLine >= 0 {
-			c := scan(&match, cbuf[0:newLine], pattern, read)
+			c := scan(&match, cbuf[0:newLine], pattern, read, encoding)
 			// matchLines = append(matchLines, m...)
 			offset = len(cbuf[newLine+1:])
 			for i, _ := range cbuf[newLine+1:] {
@@ -88,7 +88,7 @@ func scanNewLine(buf []byte) int {
 	return bytes.Count(buf, NewLineBytes)
 }
 
-func scan(match *match, buf, pattern []byte, base int) int {
+func scan(match *match, buf, pattern []byte, base, encoding int) int {
 	offset, newLineCount := 0, 0
 	for {
 		if offset > len(buf) {
@@ -114,6 +114,12 @@ func scan(match *match, buf, pattern []byte, base int) int {
 		mbuf := cbuf[beforeNewLine+1 : idx+len(pattern)+afterNewLine]
 		line := make([]byte, len(mbuf))
 		copy(line, mbuf)
+
+		// decode bytes from shift-jis or euc-jp.
+		if r := newDecodeReader(bytes.NewReader(line), encoding); r != nil {
+			line, _ = ioutil.ReadAll(r)
+		}
+
 		match.add(num, 0, string(line), true)
 		offset += idx + len(pattern) + afterNewLine + 1
 	}
