@@ -1,6 +1,10 @@
 package the_platinum_searcher
 
-import "sync"
+import (
+	"math"
+	"runtime"
+	"sync"
+)
 
 var newLine = []byte("\n")
 
@@ -27,18 +31,19 @@ func newGrep(pattern pattern, in chan string, done chan struct{}, opts Option, p
 }
 
 func (g grep) start() {
-	sem := make(chan struct{}, 208)
 	wg := &sync.WaitGroup{}
-
-	for path := range g.in {
-		sem <- struct{}{}
-		wg.Add(1)
-		go func(path string) {
-			defer wg.Done()
-			defer func() { <-sem }()
+	worker := func() {
+		defer wg.Done()
+		for path := range g.in {
 			g.grepper.grep(path)
-		}(path)
+		}
 	}
+	num := int(math.Max(float64(runtime.NumCPU()), 2.0))
+	for i := 0; i < num; i++ {
+		wg.Add(1)
+		go worker()
+	}
+
 	wg.Wait()
 	close(g.printer.in)
 	g.done <- <-g.printer.done
