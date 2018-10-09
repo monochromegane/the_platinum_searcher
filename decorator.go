@@ -1,6 +1,7 @@
 package the_platinum_searcher
 
 import (
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -65,7 +66,7 @@ func ansiEscape(code string) string {
 }
 
 func (c color) path(path string) string {
-	return c.colorPath + path + ColorReset
+	return c.colorPath + filepath.Clean(path) + ColorReset
 }
 
 func (c color) lineNumber(lineNum int) string {
@@ -90,7 +91,7 @@ type plain struct {
 }
 
 func (p plain) path(path string) string {
-	return path
+	return filepath.Clean(path)
 }
 
 func (p plain) lineNumber(lineNum int) string {
