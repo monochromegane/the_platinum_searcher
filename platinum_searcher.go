@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/jessevdk/go-flags"
 	"github.com/monochromegane/conflag"
@@ -108,19 +107,13 @@ func (p PlatinumSearcher) rootsFrom(args []string) []string {
 
 func (p PlatinumSearcher) givenStdin() bool {
 	fi, err := os.Stdin.Stat()
-	if runtime.GOOS == "windows" {
-		if err == nil {
-			return true
-		}
-	} else {
-		if err != nil {
-			return false
-		}
+	if err != nil {
+		return false
+	}
 
-		mode := fi.Mode()
-		if (mode&os.ModeNamedPipe != 0) || mode.IsRegular() {
-			return true
-		}
+	mode := fi.Mode()
+	if (mode&os.ModeNamedPipe != 0) || mode.IsRegular() {
+		return true
 	}
 	return false
 }
