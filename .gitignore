@@ -1,5 +1,7 @@
 *.test
 the_platinum_searcher
 pt
+pt.exe
 !cmd/pt
 Godeps/_workspace/
+.vscode/
