@@ -38,7 +38,7 @@ func detectEncoding(bs []byte) int {
 	}
 
 	if length >= 2 && bs[0] == 0xFE && bs[1] == 0xFF {
-		// UTF16-BE BOM. This ins't binary.
+		// UTF16-BE BOM. This isn't binary.
 		return UTF16BE
 	}
 
