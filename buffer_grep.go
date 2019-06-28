@@ -25,14 +25,16 @@ func (g bufferGrep) grep(path string, buf []byte) {
 	var encoding int
 	pattern := g.pattern.pattern
 	match := match{path: path}
-	offset, read := 0, 0
+	offset := byteCount(0)
+	read := lineCount(0)
+	newLineBytes := []byte{'\n'}
 
 loop:
 	for {
-		n, err := f.Read(buf[offset:])
+		n, err := readFile(f, buf[offset:])
 		if err == io.EOF {
 			// Scan remain (For last line without new line.)
-			scan(&match, buf[:offset], pattern, read, encoding, g.column)
+			scan(&match, buf[:offset], pattern, read, encoding, newLineBytes, g.column)
 			break
 		}
 		if err != nil {
@@ -61,81 +63,96 @@ loop:
 				// encode pattern to shift-jis or euc-jp.
 				pattern, _ = ioutil.ReadAll(r)
 			}
+
+			if r := newEncodeReader(bytes.NewReader(newLineBytes), encoding); r != nil {
+				newLineBytes, _ = ioutil.ReadAll(r)
+			}
+
 			identified = true
 		}
 
-		newLine := bytes.LastIndexByte(cbuf, '\n')
+		newLine := byteCount(bytes.LastIndex(cbuf, newLineBytes))
 		// fmt.Printf("offset: %d, newLine: %d\n", offset, newLine)
 		if newLine >= 0 {
-			c := scan(&match, cbuf[0:newLine], pattern, read, encoding, g.column)
+			c := scan(&match, cbuf[0:newLine], pattern, read, encoding, newLineBytes, g.column)
 			// matchLines = append(matchLines, m...)
-			offset = len(cbuf[newLine+1:])
-			for i, _ := range cbuf[newLine+1:] {
-				buf[0+i] = cbuf[newLine+1+i]
+			offset = lenb(cbuf[newLine+lenb(newLineBytes):])
+			for i := range cbuf[newLine+lenb(newLineBytes):] {
+				buf[0+i] = cbuf[newLine+lenb(newLineBytes)+byteCount(i)]
 			}
 			read += c
 		} else {
 			grow := make([]byte, len(cbuf)*2)
 			copy(grow, buf)
 			buf = grow
-			offset = len(cbuf)
+			offset = lenb(cbuf)
 			continue loop
 		}
 	}
 	g.printer.print(match)
 }
 
-var NewLineBytes = []byte{10}
+type byteCount int
+type lineCount int
 
-func scanNewLine(buf []byte) int {
-	return bytes.Count(buf, NewLineBytes)
-}
+func scan(match *match, buf, pattern []byte, base lineCount, encoding int, newLineBytes []byte, column bool) lineCount {
+	offset := byteCount(0)
+	newLineCount := lineCount(0)
 
-func scan(match *match, buf, pattern []byte, base, encoding int, column bool) int {
-	offset, newLineCount := 0, 0
 	for {
-		if offset > len(buf) {
+		if offset > lenb(buf) {
 			break
 		}
 		cbuf := buf[offset:]
-		idx := bytes.Index(cbuf, pattern)
+		idx := byteCount(bytes.Index(cbuf, pattern))
 		if idx == -1 {
-			newLineCount += scanNewLineCount(cbuf)
+			newLineCount += scanNewLineCount(cbuf, newLineBytes)
 			break
 		}
-		beforeNewLine := bytes.LastIndexByte(cbuf[:idx], '\n')
+		beforeNewLine := byteCount(bytes.LastIndex(cbuf[:idx], newLineBytes))
 		if beforeNewLine != -1 {
-			newLineCount += (scanNewLineCount(cbuf[:beforeNewLine]) + 1)
+			newLineCount += (scanNewLineCount(cbuf[:beforeNewLine], newLineBytes) + 1)
+		} else {
+			beforeNewLine = -lenb(newLineBytes)
 		}
 		num := base + newLineCount + 1
-		afterNewLine := bytes.IndexByte(cbuf[idx+len(pattern):], '\n')
+		afterNewLine := byteCount(bytes.Index(cbuf[idx+lenb(pattern):], newLineBytes))
 		if afterNewLine == -1 {
-			afterNewLine = len(cbuf) - (idx + len(pattern))
+			afterNewLine = lenb(cbuf) - (idx + lenb(pattern))
 		} else {
 			newLineCount++
 		}
-		mbuf := cbuf[beforeNewLine+1 : idx+len(pattern)+afterNewLine]
-		line := make([]byte, len(mbuf))
+		mbuf := cbuf[beforeNewLine+lenb(newLineBytes) : idx+lenb(pattern)+afterNewLine]
+		line := make([]byte, lenb(mbuf))
 		copy(line, mbuf)
 
 		// decode bytes from shift-jis or euc-jp.
 		if r := newDecodeReader(bytes.NewReader(line), encoding); r != nil {
 			line, _ = ioutil.ReadAll(r)
 		}
-		c := 0
+		c := byteCount(0)
 		if column {
-			if beforeNewLine == -1 {
-				c = idx + 1
+			if beforeNewLine < 0 {
+				c = idx + lenb(newLineBytes)
 			} else {
 				c = idx - beforeNewLine
 			}
 		}
-		match.add(num, c, string(line), true)
-		offset += idx + len(pattern) + afterNewLine + 1
+		match.add(int(num), int(c), string(line), true)
+		offset += idx + lenb(pattern) + afterNewLine + lenb(newLineBytes)
 	}
 	return newLineCount + 1
 }
 
-func scanNewLineCount(buf []byte) int {
-	return bytes.Count(buf, NewLineBytes)
+func scanNewLineCount(buf, newLineBytes []byte) lineCount {
+	return lineCount(bytes.Count(buf, newLineBytes))
+}
+
+func lenb(buf []byte) byteCount {
+	return byteCount(len(buf))
+}
+
+func readFile(f *os.File, buffer []byte) (byteCount, error) {
+	l, err := f.Read(buffer)
+	return byteCount(l), err
 }

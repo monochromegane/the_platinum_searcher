@@ -8,6 +8,8 @@ const (
 	UTF8
 	EUCJP
 	SHIFTJIS
+	UTF16LE
+	UTF16BE
 )
 
 func detectEncoding(bs []byte) int {
@@ -28,6 +30,21 @@ func detectEncoding(bs []byte) int {
 	if length >= 3 && bs[0] == 0xEF && bs[1] == 0xBB && bs[2] == 0xBF {
 		// UTF-8 BOM. This isn't binary.
 		return UTF8
+	}
+
+	if length >= 2 && bs[0] == 0xFF && bs[1] == 0xFE {
+		if length >= 4 && bs[2] == 0xFF && bs[3] == 0x0E {
+			// U+0EFF is not a valid unicode character.
+			return BINARY
+		}
+
+		// UTF16-LE BOM. This isn't binary.
+		return UTF16LE
+	}
+
+	if length >= 2 && bs[0] == 0xFE && bs[1] == 0xFF {
+		// UTF16-BE BOM. This isn't binary.
+		return UTF16BE
 	}
 
 	if length >= 5 && bs[0] == 0x25 && bs[1] == 0x50 && bs[2] == 0x44 && bs[3] == 0x46 && bs[4] == 0x2D {

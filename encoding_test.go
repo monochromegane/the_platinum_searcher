@@ -20,6 +20,8 @@ var Asserts = []Assert{
 	Assert{"ja/broken_euc-jp.txt", EUCJP},
 	Assert{"ja/broken_shift_jis.txt", SHIFTJIS},
 	Assert{"ja/broken_utf8.txt", UTF8},
+	Assert{"unicode/utf16-le.txt", UTF16LE},
+	Assert{"unicode/utf16-be.txt", UTF16BE},
 }
 
 func TestIdentifyType(t *testing.T) {

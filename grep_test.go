@@ -22,6 +22,8 @@ func TestFixedGrep(t *testing.T) {
 		"ja/broken_utf8.txt",
 		"ja/broken_euc-jp.txt",
 		"ja/broken_shift_jis.txt",
+		"unicode/utf16-be.txt",
+		"unicode/utf16-le.txt",
 	}
 
 	asserts := []string{
@@ -32,6 +34,8 @@ func TestFixedGrep(t *testing.T) {
 		"ja/broken_utf8.txt:2:go テスト",
 		"ja/broken_euc-jp.txt:2:go テスト",
 		"ja/broken_shift_jis.txt:2:go テスト",
+		"unicode/utf16-be.txt:1:go 🇹🇪🇸🇹",
+		"unicode/utf16-le.txt:1:go 🇹🇪🇸🇹",
 	}
 
 	if !assertGrep(pattern, opts, paths, asserts) {
@@ -75,6 +79,8 @@ func TestExtendedGrep(t *testing.T) {
 		"ja/broken_utf8.txt",
 		"ja/broken_euc-jp.txt",
 		"ja/broken_shift_jis.txt",
+		"unicode/utf16-be.txt",
+		"unicode/utf16-le.txt",
 	}
 
 	asserts := []string{
@@ -85,6 +91,8 @@ func TestExtendedGrep(t *testing.T) {
 		"ja/broken_utf8.txt:2:go テスト",
 		"ja/broken_euc-jp.txt:2:go テスト",
 		"ja/broken_shift_jis.txt:2:go テスト",
+		"unicode/utf16-be.txt:1:go 🇹🇪🇸🇹",
+		"unicode/utf16-le.txt:1:go 🇹🇪🇸🇹",
 	}
 
 	if !assertGrep(pattern, opts, paths, asserts) {
