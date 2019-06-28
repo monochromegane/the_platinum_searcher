@@ -33,6 +33,11 @@ func detectEncoding(bs []byte) int {
 	}
 
 	if length >= 2 && bs[0] == 0xFF && bs[1] == 0xFE {
+		if length >= 4 && bs[2] == 0xFF && bs[3] == 0x0E {
+			// U+0EFF is not a valid unicode character.
+			return BINARY
+		}
+
 		// UTF16-LE BOM. This isn't binary.
 		return UTF16LE
 	}
