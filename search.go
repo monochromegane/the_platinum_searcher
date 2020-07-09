@@ -2,6 +2,7 @@ package the_platinum_searcher
 
 import (
 	"io"
+	"path/filepath"
 	"regexp"
 )
 
@@ -56,6 +57,8 @@ func (s search) start(pattern string) error {
 		}
 	}
 
+	s.CleanRoots()
+
 	go find{
 		out:  grepChan,
 		opts: opts,
@@ -72,4 +75,10 @@ func (s search) start(pattern string) error {
 	<-done
 
 	return nil
+}
+
+func (s *search) CleanRoots() {
+	for i, root := range s.roots {
+		s.roots[i] = filepath.Clean(root)
+	}
 }
