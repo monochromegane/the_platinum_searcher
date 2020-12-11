@@ -4,7 +4,7 @@ import (
 	"os"
 	"runtime"
 
-	pt "github.com/monochromegane/the_platinum_searcher"
+	pt "github.com/monochromegane/the_platinum_searcher/v2"
 )
 
 func init() {

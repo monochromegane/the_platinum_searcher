@@ -74,7 +74,7 @@ You can use pt with [pt.el](https://github.com/bling/pt.el), which can be instal
 ### Developer
 
 ```sh
-$ go get -u github.com/monochromegane/the_platinum_searcher/...
+$ go get github.com/monochromegane/the_platinum_searcher/v2/...
 ```
 
 ### User
@@ -108,4 +108,3 @@ $ brew install pt
 ## Author
 
 [monochromegane](https://github.com/monochromegane)
-
