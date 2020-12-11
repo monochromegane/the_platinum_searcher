@@ -12,14 +12,14 @@ type Assert struct {
 }
 
 var Asserts = []Assert{
-	Assert{"ascii.txt", ASCII},
-	Assert{"binary/binary.bin", BINARY},
-	Assert{"ja/euc-jp.txt", EUCJP},
-	Assert{"ja/shift_jis.txt", SHIFTJIS},
-	Assert{"ja/utf8.txt", UTF8},
-	Assert{"ja/broken_euc-jp.txt", EUCJP},
-	Assert{"ja/broken_shift_jis.txt", SHIFTJIS},
-	Assert{"ja/broken_utf8.txt", UTF8},
+	{"ascii.txt", ASCII},
+	{"binary/binary.bin", BINARY},
+	{"ja/euc-jp.txt", EUCJP},
+	{"ja/shift_jis.txt", SHIFTJIS},
+	{"ja/utf8.txt", UTF8},
+	{"ja/broken_euc-jp.txt", EUCJP},
+	{"ja/broken_shift_jis.txt", SHIFTJIS},
+	{"ja/broken_utf8.txt", UTF8},
 }
 
 func TestIdentifyType(t *testing.T) {

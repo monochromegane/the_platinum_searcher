@@ -70,7 +70,7 @@ loop:
 			c := scan(&match, cbuf[0:newLine], pattern, read, encoding, g.column)
 			// matchLines = append(matchLines, m...)
 			offset = len(cbuf[newLine+1:])
-			for i, _ := range cbuf[newLine+1:] {
+			for i := range cbuf[newLine+1:] {
 				buf[0+i] = cbuf[newLine+1+i]
 			}
 			read += c
